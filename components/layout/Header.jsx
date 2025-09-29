@@ -10,6 +10,7 @@ import {
   Bars3Icon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
+import SparkleNavbar from '../ui/SparkleNavbar';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -222,7 +223,7 @@ const Header = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <motion.span 
-                      className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 leading-tight"
+                      className="text-base sm:text-xl font-bold text-black dark:text-gray-100 leading-tight"
                       whileHover={{ 
                         background: "linear-gradient(45deg, #3b82f6, #8b5cf6)",
                         WebkitBackgroundClip: "text",
@@ -232,74 +233,19 @@ const Header = () => {
                     >
                       Grap Deal
                     </motion.span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-none hidden sm:block">
-                      E-Commerce
-                    </span>
                   </motion.div>
                 </div>
               </Link>
             </div>
 
-            {/* Desktop Navigation (hidden on mobile) */}
-            <nav className="hidden lg:flex items-center space-x-3 flex-1 justify-center mx-6">
-              {navigation.map((item, index) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: index * 0.1,
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 40
-                  }}
-                >
-                  <Link
-                    href={item.href}
-                    className="group relative block"
-                  >
-                    <motion.div
-                      className="relative px-6 py-2.5 text-base font-semibold text-gray-700 dark:text-gray-300 rounded-2xl"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                    >
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100"
-                        initial={{ scale: 0, rotate: 0 }}
-                        whileHover={{ scale: 1, rotate: 1 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                      
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full opacity-0 group-hover:opacity-100"
-                        animate={{ x: ['-100%', '100%'] }}
-                        transition={{ 
-                          duration: 0.6,
-                          ease: "easeInOut",
-                          repeat: 0
-                        }}
-                      />
-                      
-                      <motion.span 
-                        className="relative z-10 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 whitespace-nowrap"
-                        whileHover={{ y: -1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      >
-                        {item.name}
-                      </motion.span>
-                      
-                      <motion.div
-                        className="absolute bottom-1 left-1/2 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600"
-                        initial={{ width: 0, x: '-50%' }}
-                        whileHover={{ width: '80%' }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </motion.div>
-                  </Link>
-                </motion.div>
-              ))}
-            </nav>
+            {/* Desktop Navigation with Sparkle Effect */}
+            <div className="hidden lg:flex flex-1 justify-center mx-6">
+              <SparkleNavbar 
+                items={navigation}
+                color="#3b82f6"
+                className="flex items-center"
+              />
+            </div>
 
             {/* Desktop Search Bar */}
             <div className="hidden md:flex flex-1 max-w-xl mx-6">
@@ -357,13 +303,19 @@ const Header = () => {
                           key={i}
                           className="w-1.5 h-1.5 bg-blue-400 rounded-full"
                           animate={{ 
-                            scale: [1, 1.3, 1],
-                            opacity: [0.3, 1, 0.3]
+                            scale: 1.3,
+                            opacity: 1
+                          }}
+                          initial={{
+                            scale: 1,
+                            opacity: 0.3
                           }}
                           transition={{
-                            duration: 2,
+                            duration: 1,
                             repeat: Infinity,
-                            delay: i * 0.2
+                            repeatType: "reverse",
+                            delay: i * 0.2,
+                            ease: "easeInOut"
                           }}
                         />
                       ))}
@@ -402,20 +354,30 @@ const Header = () => {
                 }}
                 whileTap={{ scale: 0.98 }}
                 animate={showCartAnimation ? { 
-                  rotate: [0, -8, 8, -6, 6, 0],
-                  scale: [1, 1.12, 1]
-                } : {}}
+                  rotate: 8,
+                  scale: 1.05
+                } : {
+                  rotate: 0,
+                  scale: 1
+                }}
                 transition={{ 
-                  type: "spring",   
-                  stiffness: 500, 
-                  damping: 18,
-                  duration: showCartAnimation ? 0.8 : 0.2
+                  duration: showCartAnimation ? 0.8 : 0.3,
+                  ease: "easeOut"
                 }}
               >
                 <motion.div
                   className="relative z-10 flex items-center gap-1 sm:gap-2"
-                  animate={showCartAnimation ? { scale: [1, 1.15, 1], rotate: [0, -6, 6, 0] } : {}}
-                  transition={{ duration: 0.75, type: 'spring', stiffness: 700, damping: 18 }}
+                  animate={showCartAnimation ? { 
+                    scale: 1.1,
+                    rotate: 5
+                  } : { 
+                    scale: 1,
+                    rotate: 0 
+                  }}
+                  transition={{ 
+                    duration: 0.3, 
+                    ease: "easeOut"
+                  }}
                 >
                   <ShoppingCartIcon className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200" />
                   {/* Hide cart text on mobile, show on sm screens */}
@@ -430,7 +392,7 @@ const Header = () => {
                     className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 bg-gradient-to-br from-red-500 to-pink-600 text-white text-[10px] sm:text-xs rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white dark:border-gray-800 z-20" 
                     style={{ transformOrigin: 'center' }}
                     initial={{ scale: 0, rotate: -10 }}
-                    animate={{ scale: [1.3, 1], rotate: [0, 0] }}
+                    animate={{ scale: 1, rotate: 0 }}
                     exit={{ scale: 0 }}
                     whileHover={{ scale: 1.15 }}
                     transition={{ type: "spring", stiffness: 700, damping: 25 }}
@@ -502,7 +464,7 @@ const Header = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <motion.div
-                      className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300"
+                      className="px-4 py-3 text-base font-medium text-gray-900 dark:text-gray-100"
                       whileHover={{ x: 8 }}
                       whileTap={{ scale: 0.98 }}
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -541,7 +503,7 @@ const Header = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <motion.div
-                    className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 flex items-center gap-3"
+                    className="px-4 py-3 text-base font-medium text-gray-900 dark:text-gray-100 flex items-center gap-3"
                     whileHover={{ x: 8 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
