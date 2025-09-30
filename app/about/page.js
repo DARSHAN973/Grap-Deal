@@ -4,11 +4,11 @@ export const metadata = {
 
 const AboutPage = () => {
   return (
-    <main className="min-h-screen bg-gray-50 py-24 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <main className="min-h-screen py-24 text-gray-100 relative z-10">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 space-y-8">
         <div>
-          <h1 className="text-3xl font-bold sm:text-4xl">About Grap Deal</h1>
-          <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
+          <h1 className="text-3xl font-bold sm:text-4xl text-white">About Grap Deal</h1>
+          <p className="mt-4 max-w-2xl text-sm text-gray-300">
             Grap Deal is shaping the next generation of marketplace storytelling. We&apos;re crafting immersive storefront experiences that blend compelling design with plug-and-play commerce infrastructure.
           </p>
         </div>

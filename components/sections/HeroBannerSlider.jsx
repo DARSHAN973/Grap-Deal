@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import ParticlesBackground from '../ui/ParticlesBackground';
 
 const heroSlides = [
   {
@@ -95,32 +94,9 @@ const HeroBannerSlider = () => {
   const currentSlide = useMemo(() => heroSlides[activeIndex], [activeIndex]);
 
   return (
-    <section className="relative w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
-      <ParticlesBackground
-        colors={['#60a5fa', '#a855f7', '#f97316']}
-        size={2.5}
-        countDesktop={80}
-        countTablet={60}
-        countMobile={45}
-        height="100%"
-        zIndex={0}
-      />
-
-      <div className="pointer-events-none absolute inset-0">
-        <motion.div
-          className="absolute -top-52 left-[8%] h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-blue-500/15 via-purple-500/10 to-pink-500/15 blur-3xl"
-          animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.85, 0.5] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute -bottom-64 right-[10%] h-[30rem] w-[30rem] rounded-full bg-gradient-to-br from-cyan-400/12 to-indigo-500/15 blur-3xl"
-          animate={{ scale: [1, 1.06, 1], opacity: [0.4, 0.65, 0.4] }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </div>
-
-  <div className="relative z-10 mx-auto flex min-h-[94vh] w-full max-w-[min(98vw,1800px)] flex-col items-center justify-center px-4 pb-14 pt-0 sm:min-h-[100vh] sm:px-6 lg:min-h-[110vh] lg:px-10 xl:px-14">
-    <div className="relative mt-8 w-full max-w-[min(96vw,1850px)]">
+    <section className="relative w-full overflow-hidden bg-transparent">
+  <div className="relative z-10 mx-auto flex min-h-[88vh] w-full max-w-[min(98vw,1800px)] flex-col items-center justify-center px-4 pb-0 pt-4 sm:min-h-[92vh] sm:px-6 lg:min-h-[96vh] lg:px-10 xl:px-14">
+    <div className="relative mt-2 w-full max-w-[min(96vw,1850px)]">
           <div className="relative overflow-hidden rounded-[2.75rem] border border-white/30 bg-white/70 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.06]">
             <motion.div
               aria-hidden

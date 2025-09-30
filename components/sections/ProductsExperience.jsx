@@ -150,7 +150,7 @@ const marketingPlaybooks = [
 
 const ProductsExperience = () => {
   return (
-    <main className="relative overflow-hidden bg-gray-50 text-gray-900 transition-colors duration-500 dark:bg-gray-950 dark:text-gray-100">
+    <main className="relative overflow-hidden bg-transparent text-gray-100 transition-colors duration-500">
       <section className="relative isolate overflow-hidden pb-24 pt-28">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-[-20%] h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/25 via-purple-500/20 to-indigo-500/25 blur-3xl" />

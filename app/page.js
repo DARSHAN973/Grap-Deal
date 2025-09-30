@@ -4,7 +4,7 @@ import AnimatedHeroHeading from '@/components/sections/AnimatedHeroHeading';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <main className="min-h-screen">
       <AnimatedHeroHeading />
       <HeroBannerSlider />
       <TrendingSlider />

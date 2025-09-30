@@ -128,16 +128,16 @@ const Header = () => {
 
       <motion.header 
         className={`sticky top-0 z-50 transition-all duration-300 ${scrolled 
-          ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-xl' 
-          : 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm'
-        } border-b border-gray-200/30 dark:border-gray-700/30`}
+          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-xl border-b border-gray-200/50 dark:border-gray-700/50' 
+          : 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg shadow-lg border-b border-gray-200/40 dark:border-gray-700/40'
+        }`}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 40 }}
       >
         {/* Animated background gradient */}
         <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5"
+          className="absolute inset-0 bg-gradient-to-r from-blue-500/8 via-purple-500/8 to-pink-500/8 dark:from-blue-500/5 dark:via-purple-500/5 dark:to-pink-500/5"
           animate={{ 
             background: [
               'linear-gradient(90deg, rgba(59,130,246,0.05) 0%, rgba(147,51,234,0.05) 50%, rgba(236,72,153,0.05) 100%)',
@@ -148,9 +148,9 @@ const Header = () => {
           transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
         />
         
-        {/* Adjusted padding for mobile - removed excessive padding */}
-        <div className="relative w-full px-3 sm:px-6 lg:px-12">
-          <div className="flex items-center justify-between h-14 lg:h-16">
+        {/* Adjusted padding for mobile - reduced padding */}
+        <div className="relative w-full px-3 py-1 sm:px-5 sm:py-2 lg:px-10 lg:py-2">
+          <div className="flex items-center justify-between h-12 lg:h-14">
             
             {/* Left side: Mobile menu button and Logo */}
             <div className="flex items-center gap-2">

@@ -2,9 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Flame, Eye, ShoppingCart } from 'lucide-react';
+import { ArrowRight, Sparkles, Flame, Eye, ShoppingCart, Star } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
-import ParticlesBackground from '../ui/ParticlesBackground';
 
 const trendingItems = [
   {
@@ -17,7 +16,8 @@ const trendingItems = [
     accent: 'from-sky-500/25 via-blue-500/20 to-indigo-500/25',
     tagline: 'Hyperknit upper · MotionSense midsole',
     price: '₹6,499',
-    discount: 'Save 25%'
+    discount: 'Save 25%',
+    rating: 4.8
   },
   {
     id: 'trend-2',
@@ -29,7 +29,8 @@ const trendingItems = [
     accent: 'from-amber-500/25 via-orange-500/20 to-rose-500/25',
     tagline: 'Solar index dial · Titanium finishing',
     price: '₹19,299',
-    discount: 'Launch deal 15%'
+    discount: 'Launch deal 15%',
+    rating: 4.9
   },
   {
     id: 'trend-3',
@@ -41,7 +42,8 @@ const trendingItems = [
     accent: 'from-fuchsia-500/25 via-purple-500/20 to-violet-500/25',
     tagline: 'Spatial audio · Adaptive noise layers',
     price: '₹14,499',
-    discount: 'Bundle & save'
+    discount: 'Bundle & save',
+    rating: 4.7
   },
   {
     id: 'trend-4',
@@ -53,7 +55,8 @@ const trendingItems = [
     accent: 'from-emerald-500/25 via-teal-400/20 to-cyan-500/25',
     tagline: 'Graphene self-clean · Thermal core',
     price: '₹2,899',
-    discount: 'Save ₹400'
+    discount: 'Save ₹400',
+    rating: 4.6
   },
   {
     id: 'trend-5',
@@ -65,30 +68,26 @@ const trendingItems = [
     accent: 'from-rose-500/25 via-pink-500/20 to-purple-500/25',
     tagline: 'Mood-reactive lighting · Sleep AI core',
     price: '₹7,199',
-    discount: '10% launch credit'
+    discount: '10% launch credit',
+    rating: 4.5
   }
 ];
-
-const trendFilters = ['All lanes', 'Footwear', 'Accessories', 'Gadgets', 'Lifestyle'];
 
 const highlightMetrics = [
   {
     id: 'metric-1',
-    label: 'Sell-through rate',
-    value: '78%',
-    delta: '+9.2%'
+    label: 'Top Discount',
+    value: '50%',
   },
   {
     id: 'metric-2',
-    label: 'Average basket',
-    value: '₹3.8K',
-    delta: '+₹420'
+    label: 'Hot Sellers',
+    value: '120+',
   },
   {
     id: 'metric-3',
-    label: 'Daily runway views',
-    value: '1.3M',
-    delta: '+18.4%'
+    label: 'Top Rated',
+    value: '4.8★',
   }
 ];
 
@@ -96,6 +95,33 @@ const TrendingSlider = () => {
   const scrollContainerRef = useRef(null);
   const isPausedRef = useRef(false);
   const resumeTimeoutRef = useRef(null);
+
+  // Star rating component
+  const StarRating = ({ rating }) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    return (
+      <div className="flex items-center gap-1">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+        ))}
+        {hasHalfStar && (
+          <div className="relative">
+            <Star className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+            <div className="absolute inset-0 overflow-hidden" style={{ width: `${(rating % 1) * 100}%` }}>
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            </div>
+          </div>
+        )}
+        {[...Array(emptyStars)].map((_, i) => (
+          <Star key={`empty-${i}`} className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+        ))}
+        <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">({rating})</span>
+      </div>
+    );
+  };
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -175,30 +201,7 @@ const TrendingSlider = () => {
   }, []);
 
   return (
-  <section className="relative w-full overflow-hidden bg-gray-50 pt-10 dark:bg-gray-950 sm:pt-12 lg:pt-14">
-      <ParticlesBackground
-        colors={['#60a5fa', '#a855f7', '#f97316']}
-        size={2}
-        countDesktop={70}
-        countTablet={50}
-        countMobile={40}
-        height="100%"
-        zIndex={0}
-      />
-
-      <div className="pointer-events-none absolute inset-0">
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white dark:from-gray-950 dark:via-gray-950/40 dark:to-gray-950"
-          animate={{ opacity: [0.75, 0.95, 0.75] }}
-          transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute left-1/2 top-20 h-48 w-48 -translate-x-1/2 rounded-full bg-gradient-to-br from-violet-500/15 to-blue-500/15 blur-3xl"
-          animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.65, 0.4] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </div>
-
+  <section className="relative w-full overflow-hidden bg-transparent pt-0 sm:pt-0 lg:pt-0">
       <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-20 sm:px-6 lg:px-10 xl:px-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
@@ -219,7 +222,7 @@ const TrendingSlider = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.1, duration: 0.5 }}
             >
-              Live runway modules orchestrated for your next drop
+              Fresh drops and hot deals — shop what’s trending now
             </motion.h2>
             <motion.div
               className="mt-4 flex flex-wrap items-center gap-2 text-lg sm:text-xl lg:text-2xl font-semibold"
@@ -276,28 +279,6 @@ const TrendingSlider = () => {
                 </motion.span>
               </motion.span>
             </motion.div>
-
-            <motion.div
-              className="mt-6 flex flex-wrap gap-3"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.24, duration: 0.5, ease: 'easeOut' }}
-            >
-              {trendFilters.map((filter, idx) => (
-                <button
-                  key={filter}
-                  type="button"
-                  className={`rounded-full border px-4 py-2 text-xs font-semibold tracking-[0.2em] uppercase transition-all backdrop-blur ${
-                    idx === 0
-                      ? 'border-gray-900/70 bg-gray-900 text-white shadow-md dark:border-white/30 dark:bg-white/10 dark:text-white'
-                      : 'border-gray-200/60 bg-white/60 text-gray-600 hover:border-gray-400/80 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:border-white/30 dark:hover:text-white'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </motion.div>
           </div>
 
           <motion.div
@@ -315,10 +296,10 @@ const TrendingSlider = () => {
                 <span className="text-2xl font-semibold text-gray-900 dark:text-white">
                   {metric.value}
                 </span>
-                <span className="flex items-center justify-center gap-1 text-xs text-emerald-500 dark:text-emerald-300">
+                {/* <span className="flex items-center justify-center gap-1 text-xs text-emerald-500 dark:text-emerald-300">
                   <Flame className="h-3.5 w-3.5" />
                   {metric.delta}
-                </span>
+                </span> */}
               </div>
             ))}
           </motion.div>
@@ -330,13 +311,13 @@ const TrendingSlider = () => {
 
           <div
             ref={scrollContainerRef}
-            className="no-scrollbar flex snap-x snap-mandatory gap-10 overflow-x-auto pb-8"
+            className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8"
             tabIndex={0}
           >
             {trendingItems.map((item, idx) => (
               <motion.article
                 key={item.id}
-                className="group relative flex h-full min-h-[32rem] w-[19rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] sm:w-[22rem] lg:w-[24rem]"
+                className="group relative flex h-full min-h-[32rem] w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] sm:w-[calc(25%-18px)] lg:w-[calc(25%-18px)]"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -380,7 +361,7 @@ const TrendingSlider = () => {
                 <div className="relative flex flex-1 flex-col justify-between gap-6 p-6 text-gray-700 dark:text-gray-300">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm uppercase tracking-[0.28em] text-gray-500 dark:text-gray-400">#{String(idx + 1).padStart(2, '0')}</span>
+                      <StarRating rating={item.rating} />
                       {item.discount && (
                         <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
                           {item.discount}
@@ -405,29 +386,11 @@ const TrendingSlider = () => {
                     <MagneticButton
                       variant="secondary"
                       size="md"
-                      className="w-full justify-center gap-3 overflow-hidden rounded-2xl px-6 py-3 whitespace-nowrap sm:w-auto"
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12"
                       whileTap={{ scale: 0.94 }}
+                      aria-label="Add to cart"
                     >
-                      <motion.span
-                        className="absolute inset-0 bg-gradient-to-r from-emerald-400/0 via-emerald-400/30 to-emerald-400/0"
-                        initial={{ x: '-120%' }}
-                        whileHover={{ x: '120%' }}
-                        transition={{ duration: 0.85, ease: 'easeOut' }}
-                      />
-                      <motion.span
-                        className="relative flex min-w-[11rem] items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold tracking-wide text-white"
-                        whileHover={{ gap: '0.9rem' }}
-                        transition={{ duration: 0.35, ease: 'easeOut' }}
-                      >
-                        <motion.span
-                          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300"
-                          whileHover={{ scale: 1.05, rotate: [0, -6, 0] }}
-                          transition={{ duration: 0.3, ease: 'easeOut' }}
-                        >
-                          <ShoppingCart className="h-4 w-4" />
-                        </motion.span>
-                        <span>Add to Cart</span>
-                      </motion.span>
+                      <ShoppingCart className="h-5 w-5" />
                     </MagneticButton>
                   </div>
                 </div>

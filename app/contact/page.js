@@ -4,11 +4,11 @@ export const metadata = {
 
 const ContactPage = () => {
   return (
-    <main className="min-h-screen bg-gray-50 py-24 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <main className="min-h-screen py-24 text-gray-100 relative z-10">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 space-y-10">
         <div>
-          <h1 className="text-3xl font-bold sm:text-4xl">Contact Us</h1>
-          <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
+          <h1 className="text-3xl font-bold sm:text-4xl text-white">Contact Us</h1>
+          <p className="mt-4 max-w-2xl text-sm text-gray-300">
             We&apos;d love to hear from you. Drop a line and we&apos;ll get back as we keep the marketplace experience evolving.
           </p>
         </div>
