@@ -1,9 +1,11 @@
 import HeroBannerSlider from '@/components/sections/HeroBannerSlider';
 import TrendingSlider from '@/components/sections/TrendingSlider';
+import AnimatedHeroHeading from '@/components/sections/AnimatedHeroHeading';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <AnimatedHeroHeading />
       <HeroBannerSlider />
       <TrendingSlider />
     </main>

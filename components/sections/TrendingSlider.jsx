@@ -221,15 +221,61 @@ const TrendingSlider = () => {
             >
               Live runway modules orchestrated for your next drop
             </motion.h2>
-            <motion.p
-              className="mt-3 text-sm text-gray-600 dark:text-gray-400 sm:text-base"
+            <motion.div
+              className="mt-4 flex flex-wrap items-center gap-2 text-lg sm:text-xl lg:text-2xl font-semibold"
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.18, duration: 0.45 }}
             >
-              Combine hero drops, product spotlights, and editorial moments inside a single motion-rich surface. Every card is prepped for personalization hooks and conversion metrics.
-            </motion.p>
+              <motion.span
+                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+              >
+                Fresh Drops.
+              </motion.span>
+              <motion.span
+                className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-teal-600"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+              >
+                Daily Deals.
+              </motion.span>
+              <motion.span
+                className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.7, duration: 0.6 }}
+              >
+                Endless Finds
+              </motion.span>
+              <motion.span
+                className="inline-block text-orange-500"
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.9, duration: 0.4, type: "spring", stiffness: 300 }}
+              >
+                <motion.span
+                  animate={{ 
+                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    rotate: { duration: 2, repeat: Infinity, repeatType: "reverse" },
+                    scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" }
+                  }}
+                >
+                  ✨
+                </motion.span>
+              </motion.span>
+            </motion.div>
 
             <motion.div
               className="mt-6 flex flex-wrap gap-3"
