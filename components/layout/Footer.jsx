@@ -1,263 +1,336 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Youtube, 
-  Mail, 
-  Phone, 
+import { motion } from 'framer-motion';
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Mail,
+  Phone,
   MapPin,
   Heart,
   ArrowUp,
-  Send
+  Send,
+  Sparkles,
+  ShieldCheck,
+  Globe2
 } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
-import AnimatedInput from '../ui/AnimatedInput';
 
-const AnimatedFooter = () => {
+const dropSignals = [
+  {
+    id: 'signal-1',
+    title: 'Drop cadence',
+    value: 'Fridays · 21:00 IST',
+    description: 'Sync hero banners and trending rails with one publish.',
+    Icon: Sparkles,
+    accent: 'from-blue-500/25 via-indigo-500/15 to-purple-500/25'
+  },
+  {
+    id: 'signal-2',
+    title: 'Quality gate',
+    value: '42-point review',
+    description: 'Every showcase passes marketplace & compliance filters.',
+    Icon: ShieldCheck,
+    accent: 'from-emerald-500/25 via-teal-500/15 to-cyan-500/25'
+  },
+  {
+    id: 'signal-3',
+    title: 'Global sellers',
+    value: '42 countries',
+    description: 'Localized copy & currency modes ready out of the box.',
+    Icon: Globe2,
+    accent: 'from-orange-500/25 via-amber-500/15 to-rose-500/25'
+  }
+];
+
+const footerNav = [
+  {
+    title: 'Platform',
+    links: [
+      { label: 'Hero composer', href: '/products' },
+      { label: 'Trending rail', href: '/products' },
+      { label: 'Dynamic widgets', href: '/products' },
+      { label: 'Automation API', href: '/products' }
+    ]
+  },
+  {
+    title: 'Resources',
+    links: [
+      { label: 'Documentation', href: '/docs' },
+      { label: 'Marketplace playbook', href: '/playbook' },
+      { label: 'Design tokens', href: '/tokens' },
+      { label: 'Status page', href: '/status' }
+    ]
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'About Grap Deal', href: '/about' },
+      { label: 'Careers', href: '/careers' },
+      { label: 'Press kit', href: '/press' },
+      { label: 'Contact', href: '/contact' }
+    ]
+  }
+];
+
+const socialLinks = [
+  { icon: Instagram, label: 'Instagram', href: '#' },
+  { icon: Twitter, label: 'X', href: '#' },
+  { icon: Linkedin, label: 'LinkedIn', href: '#' },
+  { icon: Youtube, label: 'YouTube', href: '#' },
+  { icon: Facebook, label: 'Facebook', href: '#' }
+];
+
+const Footer = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   const handleSubscribe = (e) => {
     e.preventDefault();
-    if (email) {
-      setIsSubscribed(true);
-      setTimeout(() => {
-        setIsSubscribed(false);
-        setEmail('');
-      }, 3000);
-    }
+    if (!email) return;
+
+    setIsSubscribed(true);
+    setTimeout(() => {
+      setIsSubscribed(false);
+      setEmail('');
+    }, 2800);
   };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const footerLinks = {
-    'Shop': [
-      { name: 'All Products', href: '/products' },
-      { name: 'New Arrivals', href: '/new' },
-      { name: 'Best Sellers', href: '/bestsellers' },
-      { name: 'Sale', href: '/sale' },
-    ],
-    'Support': [
-      { name: 'Help Center', href: '/help' },
-      { name: 'Contact Us', href: '/contact' },
-      { name: 'Shipping Info', href: '/shipping' },
-      { name: 'Returns', href: '/returns' },
-    ],
-    'Company': [
-      { name: 'About Us', href: '/about' },
-      { name: 'Careers', href: '/careers' },
-      { name: 'Press', href: '/press' },
-      { name: 'Blog', href: '/blog' },
-    ],
-  };
-
-  const socialLinks = [
-    { icon: Facebook, href: '#', color: 'hover:text-blue-600', bg: 'hover:bg-blue-100' },
-    { icon: Twitter, href: '#', color: 'hover:text-sky-500', bg: 'hover:bg-sky-100' },
-    { icon: Instagram, href: '#', color: 'hover:text-pink-600', bg: 'hover:bg-pink-100' },
-    { icon: Youtube, href: '#', color: 'hover:text-red-600', bg: 'hover:bg-red-100' },
-  ];
-
   return (
-    <footer className="relative bg-gray-900 text-white overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-900/20 to-purple-900/20" />
-      
-      {/* Wave Animation */}
-      <div className="absolute top-0 left-0 w-full overflow-hidden">
-        <svg 
-          className="relative block w-full h-20" 
-          viewBox="0 0 1200 120" 
-          preserveAspectRatio="none"
-        >
-          <motion.path
-            d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
-            className="fill-gray-50 dark:fill-gray-800"
-            animate={{
-              d: [
-                "M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z",
-                "M985.66,112.83C906.67,92,823.78,51,743.84,34.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,47.35V120H1200V115.8C1132.19,138.92,1055.71,131.31,985.66,112.83Z",
-                "M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
-              ]
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 8,
-              ease: "easeInOut"
-            }}
-          />
-        </svg>
+    <footer className="relative overflow-hidden bg-gray-950 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl" />
+        <div className="absolute -bottom-48 left-[8%] h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-sky-500/10 to-cyan-400/10 blur-3xl" />
+        <div className="absolute -bottom-32 right-[10%] h-[24rem] w-[24rem] rounded-full bg-gradient-to-br from-orange-500/10 to-rose-500/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-        {/* Newsletter Section */}
+      <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-24 sm:px-6 lg:px-10 xl:px-16">
         <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 50 }}
+          className="flex flex-col gap-10 rounded-[3rem] border border-white/10 bg-white/[0.04] p-10 shadow-[0_40px_120px_rgba(15,23,42,0.45)] backdrop-blur-3xl lg:flex-row lg:items-center lg:justify-between"
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
         >
-          <h3 className="text-3xl font-bold mb-4">Stay in the Loop</h3>
-          <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-            Get the latest updates on new products, exclusive deals, and special offers.
-          </p>
-          
-          <form onSubmit={handleSubscribe} className="max-w-md mx-auto">
-            <div className="flex space-x-4">
-              <div className="flex-1">
-                <AnimatedInput
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  variant="filled"
-                  icon={Mail}
-                />
+          <div className="max-w-xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-white/80">
+              <Sparkles className="h-4 w-4" />
+              Beta collective
+            </span>
+            <h3 className="mt-6 text-3xl font-semibold leading-tight sm:text-4xl">
+              Join the Grap Deal Collective and get weekly drop frameworks.
+            </h3>
+            <p className="mt-3 text-sm text-white/70 sm:text-base">
+              Templates, launch rituals, and performance benchmarks delivered every Friday. Cancel anytime.
+            </p>
+          </div>
+
+          <form
+            onSubmit={handleSubscribe}
+            className="w-full max-w-xl rounded-[2rem] border border-white/10 bg-white/10 p-6 shadow-inner"
+          >
+            <div className="flex flex-col gap-4">
+              <span className="text-[0.7rem] uppercase tracking-[0.4em] text-white/60">
+                Stay ahead of every drop
+              </span>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="group relative flex w-full items-center gap-3 rounded-[1.8rem] border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all focus-within:border-white/35 focus-within:bg-white/10 focus-within:shadow-[0_0_28px_rgba(96,165,250,0.25)]">
+                  <Mail className="h-5 w-5 text-emerald-200/90" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="yourname@brand.com"
+                    className="w-full bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
+                    required
+                  />
+                </div>
+                <MagneticButton
+                  type="submit"
+                  variant="gradient"
+                  className="w-full justify-center px-6 py-3 text-sm font-semibold sm:w-auto"
+                  disabled={isSubscribed}
+                >
+                  {isSubscribed ? (
+                    <motion.span
+                      className="flex items-center gap-2"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                    >
+                      <Heart className="h-4 w-4 text-rose-400" />
+                      Added to the runway list
+                    </motion.span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Send className="h-4 w-4" />
+                      Request access
+                    </span>
+                  )}
+                </MagneticButton>
               </div>
-              <MagneticButton
-                type="submit"
-                variant="gradient"
-                className="px-6 py-3"
-                disabled={isSubscribed}
-              >
-                {isSubscribed ? (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="flex items-center space-x-2"
-                  >
-                    <Heart size={20} className="text-red-400" />
-                    <span>Subscribed!</span>
-                  </motion.div>
-                ) : (
-                  <>
-                    <Send size={20} />
-                    <span>Subscribe</span>
-                  </>
-                )}
-              </MagneticButton>
+              <p className="text-xs text-white/50">
+                No spam, just launch signals and frameworks. Unsubscribe anytime.
+              </p>
             </div>
           </form>
         </motion.div>
 
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          {/* Company Info */}
-          <motion.div
-            className="lg:col-span-2"
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex items-center space-x-3 mb-6">
+        <div className="mt-16 grid gap-10 lg:grid-cols-[1.6fr,1fr]">
+          <div className="grid gap-6 rounded-[2.5rem] border border-white/10 bg-white/[0.03] p-8 backdrop-blur-2xl md:grid-cols-2">
+            {dropSignals.map(({ id, title, value, description, Icon, accent }) => (
               <motion.div
-                className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center"
-                whileHover={{ rotate: 360, scale: 1.1 }}
-                transition={{ duration: 0.5 }}
+                key={id}
+                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 text-left shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
               >
-                <span className="text-white font-bold text-xl">E</span>
+                <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${accent} opacity-40`} />
+                <div className="relative flex flex-col gap-3 text-white">
+                  <Icon className="h-5 w-5" />
+                  <div>
+                    <span className="text-xs uppercase tracking-[0.3em] text-white/60">{title}</span>
+                    <h4 className="mt-2 text-xl font-semibold">{value}</h4>
+                  </div>
+                  <p className="text-sm text-white/70">{description}</p>
+                </div>
               </motion.div>
-              <span className="text-2xl font-bold">EcoShop</span>
+            ))}
+          </div>
+
+          <motion.div
+            className="flex h-full flex-col justify-between gap-6 rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/10 via-transparent to-white/5 p-8 backdrop-blur-2xl"
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+          >
+            <div>
+              <span className="text-xs uppercase tracking-[0.3em] text-white/60">Talk to us</span>
+              <h4 className="mt-3 text-2xl font-semibold">We partner with teams shipping bold marketplace journeys.</h4>
+              <p className="mt-3 text-sm text-white/70">
+                Drop a note and we will align demos, data integrations, and pricing to your rollout timeline.
+              </p>
             </div>
-            
-            <p className="text-gray-300 mb-6 leading-relaxed">
-              Your premium destination for quality products and exceptional shopping experiences. 
-              We're committed to bringing you the best with style and convenience.
-            </p>
-            
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-gray-300">
-                <MapPin size={18} />
-                <span>123 Commerce Street, Digital City, DC 12345</span>
+            <div className="space-y-3 text-sm text-white/75">
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <MapPin className="h-4 w-4" />
+                <span>Bengaluru · Remote first</span>
               </div>
-              <div className="flex items-center space-x-3 text-gray-300">
-                <Phone size={18} />
-                <span>+1 (555) 123-4567</span>
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <Phone className="h-4 w-4" />
+                <span>+91 99887 6655</span>
               </div>
-              <div className="flex items-center space-x-3 text-gray-300">
-                <Mail size={18} />
-                <span>hello@ecoshop.com</span>
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <Mail className="h-4 w-4" />
+                <span>team@grapdeal.dev</span>
               </div>
             </div>
           </motion.div>
-
-          {/* Footer Links */}
-          {Object.entries(footerLinks).map(([category, links], index) => (
-            <motion.div
-              key={category}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 * (index + 2) }}
-              viewport={{ once: true }}
-            >
-              <h4 className="text-lg font-semibold mb-4">{category}</h4>
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.name}>
-                    <motion.a
-                      href={link.href}
-                      className="text-gray-300 hover:text-white transition-colors duration-300 block"
-                      whileHover={{ x: 5 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    >
-                      {link.name}
-                    </motion.a>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
         </div>
 
-        {/* Social Links & Copyright */}
-        <div className="border-t border-gray-700 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-4">
-              {socialLinks.map((social, index) => {
-                const Icon = social.icon;
-                return (
-                  <motion.a
-                    key={index}
-                    href={social.href}
-                    className={`w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 transition-all duration-300 ${social.color} ${social.bg}`}
-                    whileHover={{ scale: 1.2, rotate: 15 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Icon size={20} />
-                  </motion.a>
-                );
-              })}
+  <div className="mt-16 grid gap-12 lg:grid-cols-[2fr,3fr]">
+          <motion.div
+            className="flex flex-col gap-6"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg">
+                <span className="text-2xl font-bold">GD</span>
+              </div>
+              <div>
+                <p className="text-xl font-semibold">Grap Deal</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-white/60">Marketplace Studio</p>
+              </div>
             </div>
-            
-            <div className="text-gray-400 text-center md:text-left">
-              <p>© 2025 EcoShop. Made with <Heart size={16} className="inline text-red-500" /> for amazing shopping experiences.</p>
+            <p className="max-w-lg text-sm text-white/70">
+              We orchestrate cinematic commerce surfaces that connect catalog intelligence with storytelling. Build once, localize everywhere, and keep every drop feeling fresh.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              {socialLinks.map(({ icon: Icon, label, href }) => (
+                <motion.a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="group flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-all hover:border-white/40 hover:bg-white/15 hover:text-white"
+                  whileHover={{ scale: 1.1, rotate: 4 }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  <Icon className="h-[18px] w-[18px]" />
+                </motion.a>
+              ))}
             </div>
+          </motion.div>
+
+          <motion.div
+            className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+          >
+            {footerNav.map(({ title, links }) => (
+              <div key={title} className="space-y-4">
+                <h4 className="text-sm font-semibold uppercase tracking-[0.28em] text-white/70">{title}</h4>
+                <ul className="space-y-3 text-sm text-white/70">
+                  {links.map((link) => (
+                    <li key={link.label}>
+                      <motion.a
+                        href={link.href}
+                        className="group flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 transition-all hover:border-white/30 hover:bg-white/10 hover:text-white"
+                        whileHover={{ x: 6 }}
+                        transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                      >
+                        <span>{link.label}</span>
+                        <ArrowUp className="h-3.5 w-3.5 text-white/40 group-hover:text-white" />
+                      </motion.a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        <div className="mt-16 flex flex-col gap-6 border-t border-white/10 pt-8 text-xs uppercase tracking-[0.28em] text-white/50 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-full border border-white/10 px-4 py-1">Launch kits</span>
+            <span className="rounded-full border border-white/10 px-4 py-1">No-code ready</span>
+            <span className="rounded-full border border-white/10 px-4 py-1">24/5 support</span>
           </div>
+          <p className="text-center text-[0.7rem] uppercase tracking-[0.35em] text-white/40">
+            © {new Date().getFullYear()} Grap Deal Studio — Crafted with intuition & data.
+          </p>
         </div>
       </div>
 
-      {/* Scroll to Top Button */}
       <motion.button
+        type="button"
         onClick={scrollToTop}
-        className="fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg z-50"
-        whileHover={{ scale: 1.1, y: -2 }}
+        className="fixed bottom-8 right-8 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-xl backdrop-blur-lg"
+        whileHover={{ scale: 1.08, y: -3 }}
         whileTap={{ scale: 0.9 }}
-        initial={{ opacity: 0, y: 100 }}
+        initial={{ opacity: 0, y: 80 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1 }}
+        transition={{ delay: 0.6, duration: 0.4 }}
+        aria-label="Scroll to top"
       >
-        <ArrowUp size={20} />
+        <ArrowUp className="h-4 w-4" />
       </motion.button>
     </footer>
   );
 };
 
-export default AnimatedFooter;
+export default Footer;

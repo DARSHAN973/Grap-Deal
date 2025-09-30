@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { ShoppingBag, Sparkles, Zap, Star } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
 import FloatingParticles from '../ui/FloatingParticles';
+import GlitchText from '../ui/GlitchText';
 
 const HeroSection = () => {
   const containerRef = useRef(null);
@@ -120,32 +121,32 @@ const HeroSection = () => {
 
           {/* Main heading */}
           <motion.h1
-            className="text-6xl md:text-8xl font-bold text-white mb-6 leading-tight"
+            className="mb-8 flex flex-col items-center justify-center gap-4 text-center"
             style={{ y: y1 }}
           >
-            <motion.span
-              className="inline-block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              style={{
-                backgroundSize: '200% 200%',
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="w-full"
             >
-              EcoShop
-            </motion.span>
-            <br />
+              <GlitchText
+                speed={0.45}
+                className="max-w-[14ch] text-balance"
+                enableShadows
+              >
+                EcoShop Capsule
+              </GlitchText>
+            </motion.div>
+
             <motion.span
-              initial={{ opacity: 0, x: -100 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
+              className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold uppercase tracking-[0.4em] text-white/80 backdrop-blur"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.7, ease: "easeOut" }}
             >
-              Premium
+              <Sparkles className="h-5 w-5 text-emerald-300" />
+              Future Ready Drop
             </motion.span>
           </motion.h1>
 
