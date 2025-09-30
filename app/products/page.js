@@ -1,12 +1,12 @@
-import ProductsExperience from '../../components/sections/ProductsExperience';
+import ProductsPage from '../../components/sections/ProductsPage';
 
 export const metadata = {
   title: 'Products | Grap Deal',
-  description: 'Explore Grap Deal product canvases, modular drops, and growth-ready merchandising experiments.',
+  description: 'Shop everything you love - from trending drops to daily essentials. Explore our curated collection of products.',
 };
 
-const ProductsPage = () => {
-  return <ProductsExperience />;
+const Products = () => {
+  return <ProductsPage />;
 };
 
-export default ProductsPage;
+export default Products;
