@@ -11,10 +11,12 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import SparkleNavbar from '../ui/SparkleNavbar';
+import AuthModal from '../ui/AuthModal';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [cartCount, setCartCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -404,6 +406,7 @@ const Header = () => {
 
               {/* Login Button - Mobile optimized with icon only on small screens */}
               <motion.button 
+                onClick={() => setIsAuthModalOpen(true)}
                 className="group relative p-2 sm:px-3 sm:py-2 lg:px-6 lg:py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
                 whileHover={{ 
                   scale: 1.05,
@@ -570,6 +573,12 @@ const Header = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </>
   );
 };
