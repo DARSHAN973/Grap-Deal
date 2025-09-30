@@ -358,20 +358,30 @@ const CategoriesPage = () => {
     if (heroRef.current) {
       const tl = gsap.timeline();
       
-      tl.fromTo(
-        '.hero-content > *',
-        {
-          opacity: 0,
-          y: 30,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: 'power3.out',
-        }
-      );
+      tl.from('.hero-badge', {
+        duration: 0.8,
+        y: 30,
+        opacity: 0,
+        ease: 'power2.out'
+      })
+      .from('.hero-title', {
+        duration: 1,
+        y: 50,
+        opacity: 0,
+        ease: 'power2.out'
+      }, '-=0.4')
+      .from('.hero-subtitle', {
+        duration: 0.8,
+        y: 30,
+        opacity: 0,
+        ease: 'power2.out'
+      }, '-=0.6')
+      .from('.hero-stats', {
+        duration: 0.6,
+        y: 20,
+        opacity: 0,
+        ease: 'power2.out'
+      }, '-=0.4');
     }
   }, []);
 
@@ -400,38 +410,44 @@ const CategoriesPage = () => {
   }, [selectedFilter]);
 
   return (
-    <main className="relative min-h-screen bg-gray-50 dark:bg-gray-950">
+    <main className="relative min-h-screen bg-transparent">
       {/* 1️⃣ Hero / Header */}
-      <section ref={heroRef} className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 pb-16 pt-28">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-white/20 blur-3xl" />
-          <div className="absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-white/20 blur-2xl" />
+      <section ref={heroRef} className="relative overflow-hidden pb-16 pt-28">
+        {/* Background Elements */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-gradient-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1400px)] px-4 sm:px-6 lg:px-10 xl:px-16">
-          <div className="hero-content space-y-6 text-center text-white">
-            <h1 className="text-4xl font-bold sm:text-5xl lg:text-6xl">
+        <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1400px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
+          <div className="space-y-6">
+            <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-gray-200/60 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+              <Package className="h-4 w-4 text-violet-500" />
+              Shop by Category
+            </span>
+            
+            <h1 className="hero-title text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
               Shop by Category
             </h1>
             
-            <p className="mx-auto max-w-2xl text-lg opacity-90 lg:text-xl">
+            <p className="hero-subtitle mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300 lg:text-xl">
               Explore trending collections across Fashion, Electronics, Beauty & more
             </p>
 
             {/* Quick Stats */}
-            <div className="flex items-center justify-center gap-8 pt-4">
+            <div className="hero-stats flex items-center justify-center gap-8 pt-4">
               <div className="text-center">
-                <div className="text-2xl font-bold">{categories.length}</div>
-                <div className="text-sm opacity-80">Categories</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{categories.length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Categories</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">1000+</div>
-                <div className="text-sm opacity-80">Products</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">1000+</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Products</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">4.8★</div>
-                <div className="text-sm opacity-80">Rating</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">4.8★</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Rating</div>
               </div>
             </div>
           </div>
@@ -449,7 +465,7 @@ const CategoriesPage = () => {
                 className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
                   selectedFilter === filter.id
                     ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    : 'bg-white/90 text-gray-700 hover:bg-gray-100 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:bg-gray-700'
                 }`}
               >
                 {filter.label}

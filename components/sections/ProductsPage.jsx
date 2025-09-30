@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 import {
   Search,
   Grid3X3,
@@ -20,112 +22,256 @@ import {
 } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
 
-// Generate 24+ products
+// Generate 24+ products organized by categories
 const generateProducts = () => {
-  const baseProducts = [
-    {
-      name: 'Velocity Hero Stack',
-      price: 249,
-      originalPrice: 349,
-      rating: 4.9,
-      reviews: 182,
-      tag: 'Launch Ready',
-      category: 'Templates',
-      brand: 'GrapDeal',
-      image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=600&q=80',
-      hoverImage: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=600&q=80',
-      isNew: true,
-      isTrending: true,
-      description: 'Complete hero section with modern animations.',
-    },
-    {
-      name: 'Trending Rail OS',
-      price: 199,
-      originalPrice: 259,
-      rating: 4.8,
-      reviews: 136,
-      tag: 'New',
-      category: 'Components',
-      brand: 'GrapDeal',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80',
-      hoverImage: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=600&q=80',
-      isNew: true,
-      description: 'Advanced trending slider with auto-scroll.',
-    },
-    {
-      name: 'Creator Partner Kit',
-      price: 289,
-      originalPrice: 329,
-      rating: 4.7,
-      reviews: 98,
-      tag: 'Collab',
-      category: 'Kits',
-      brand: 'GrapDeal',
-      image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=600&q=80',
-      hoverImage: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=600&q=80',
-      isTrending: true,
-      description: 'Collaborative toolkit for creator partnerships.',
-    },
-    {
-      name: 'Localization Toolkit',
-      price: 159,
-      originalPrice: 219,
-      rating: 4.8,
-      reviews: 154,
-      tag: 'Global',
-      category: 'Tools',
-      brand: 'GrapDeal',
-      image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=600&q=80',
-      hoverImage: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=600&q=80',
-      description: 'Multi-language support and currency tools.',
-    },
-    {
-      name: 'Merch Automation Web',
-      price: 329,
-      originalPrice: 399,
-      rating: 5.0,
-      reviews: 211,
-      tag: 'Bestseller',
-      category: 'Automation',
-      brand: 'GrapDeal',
-      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
-      hoverImage: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=600&q=80',
-      isTrending: true,
-      description: 'Automated merchandise management system.',
-    },
-    {
-      name: 'Analytics Dashboard',
-      price: 189,
-      originalPrice: 0,
-      rating: 4.6,
-      reviews: 76,
-      tag: 'Limited',
-      category: 'Analytics',
-      brand: 'GrapDeal',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
-      hoverImage: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?auto=format&fit=crop&w=600&q=80',
-      description: 'Advanced analytics for customer retention.',
-    },
-  ];
+  const categoryProducts = {
+    'Fashion': [
+      {
+        name: 'Trendy Summer Dress',
+        price: 299,
+        originalPrice: 399,
+        rating: 4.8,
+        reviews: 145,
+        tag: 'New Arrival',
+        category: 'Fashion',
+        brand: 'StyleHub',
+        image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80',
+        isNew: true,
+        description: 'Comfortable summer dress with floral patterns.',
+      },
+      {
+        name: 'Designer Handbag',
+        price: 199,
+        originalPrice: 259,
+        rating: 4.9,
+        reviews: 203,
+        tag: 'Trending',
+        category: 'Fashion',
+        brand: 'LuxeBags',
+        image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+        isTrending: true,
+        description: 'Elegant designer handbag for every occasion.',
+      },
+      {
+        name: 'Casual Sneakers',
+        price: 149,
+        originalPrice: 199,
+        rating: 4.7,
+        reviews: 189,
+        tag: 'Hot Deal',
+        category: 'Fashion',
+        brand: 'ComfortWalk',
+        image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=600&q=80',
+        description: 'Comfortable sneakers for daily wear.',
+      },
+      {
+        name: 'Denim Jacket',
+        price: 179,
+        originalPrice: 229,
+        rating: 4.6,
+        reviews: 167,
+        tag: 'Trending',
+        category: 'Fashion',
+        brand: 'DenimCo',
+        image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=600&q=80',
+        isTrending: true,
+        description: 'Classic denim jacket with modern fit.',
+      },
+    ],
+    'Electronics': [
+      {
+        name: 'Wireless Earbuds Pro',
+        price: 249,
+        originalPrice: 329,
+        rating: 4.9,
+        reviews: 312,
+        tag: 'Bestseller',
+        category: 'Electronics',
+        brand: 'AudioTech',
+        image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=600&q=80',
+        isTrending: true,
+        description: 'Premium wireless earbuds with noise cancellation.',
+      },
+      {
+        name: 'Smart Watch Series 5',
+        price: 399,
+        originalPrice: 499,
+        rating: 4.8,
+        reviews: 234,
+        tag: 'Hot Deal',
+        category: 'Electronics',
+        brand: 'TechTime',
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1434493907317-a46b5bbe7834?auto=format&fit=crop&w=600&q=80',
+        description: 'Advanced smartwatch with health monitoring.',
+      },
+      {
+        name: 'Portable Speaker',
+        price: 89,
+        originalPrice: 129,
+        rating: 4.7,
+        reviews: 156,
+        tag: 'New',
+        category: 'Electronics',
+        brand: 'SoundWave',
+        image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=600&q=80',
+        isNew: true,
+        description: 'Compact portable speaker with rich bass.',
+      },
+      {
+        name: 'Gaming Mouse RGB',
+        price: 69,
+        originalPrice: 99,
+        rating: 4.8,
+        reviews: 145,
+        tag: 'Gaming',
+        category: 'Electronics',
+        brand: 'GameGear',
+        image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=600&q=80',
+        description: 'High-precision gaming mouse with RGB lighting.',
+      },
+    ],
+    'Beauty & Personal Care': [
+      {
+        name: 'Vitamin C Serum',
+        price: 59,
+        originalPrice: 79,
+        rating: 4.9,
+        reviews: 278,
+        tag: 'Bestseller',
+        category: 'Beauty & Personal Care',
+        brand: 'GlowUp',
+        image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=600&q=80',
+        isTrending: true,
+        description: 'Anti-aging vitamin C serum for glowing skin.',
+      },
+      {
+        name: 'Hair Styling Kit',
+        price: 129,
+        originalPrice: 169,
+        rating: 4.7,
+        reviews: 189,
+        tag: 'New',
+        category: 'Beauty & Personal Care',
+        brand: 'HairCraft',
+        image: 'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=600&q=80',
+        isNew: true,
+        description: 'Complete hair styling kit with premium tools.',
+      },
+      {
+        name: 'Natural Face Mask',
+        price: 39,
+        originalPrice: 49,
+        rating: 4.6,
+        reviews: 167,
+        tag: 'Organic',
+        category: 'Beauty & Personal Care',
+        brand: 'PureSkin',
+        image: 'https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=600&q=80',
+        description: 'Hydrating face mask with natural ingredients.',
+      },
+      {
+        name: 'Premium Makeup Brush Set',
+        price: 89,
+        originalPrice: 119,
+        rating: 4.8,
+        reviews: 234,
+        tag: 'Professional',
+        category: 'Beauty & Personal Care',
+        brand: 'MakeupPro',
+        image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1583241800057-28a48c8da556?auto=format&fit=crop&w=600&q=80',
+        description: 'Professional makeup brush set for flawless application.',
+      },
+    ],
+    'Mobile & Gadgets': [
+      {
+        name: 'iPhone 15 Pro',
+        price: 999,
+        originalPrice: 1099,
+        rating: 4.9,
+        reviews: 567,
+        tag: 'Latest',
+        category: 'Mobile & Gadgets',
+        brand: 'Apple',
+        image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=600&q=80',
+        isNew: true,
+        description: 'Latest iPhone with advanced camera system.',
+      },
+      {
+        name: 'Wireless Charger',
+        price: 49,
+        originalPrice: 69,
+        rating: 4.7,
+        reviews: 145,
+        tag: 'Fast Charging',
+        category: 'Mobile & Gadgets',
+        brand: 'ChargeTech',
+        image: 'https://images.unsplash.com/photo-1609712325389-79e4810e9706?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1558618047-e8e5ca8c3299?auto=format&fit=crop&w=600&q=80',
+        description: 'Fast wireless charger for all devices.',
+      },
+      {
+        name: 'Phone Case Premium',
+        price: 29,
+        originalPrice: 39,
+        rating: 4.6,
+        reviews: 189,
+        tag: 'Protection',
+        category: 'Mobile & Gadgets',
+        brand: 'ShieldCase',
+        image: 'https://images.unsplash.com/photo-1601593346740-925612772716?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1560326183-52a1b56e6334?auto=format&fit=crop&w=600&q=80',
+        description: 'Premium protection case with style.',
+      },
+      {
+        name: 'Power Bank 20000mAh',
+        price: 79,
+        originalPrice: 99,
+        rating: 4.8,
+        reviews: 267,
+        tag: 'High Capacity',
+        category: 'Mobile & Gadgets',
+        brand: 'PowerUp',
+        image: 'https://images.unsplash.com/photo-1609592002720-de2da851b8f8?auto=format&fit=crop&w=600&q=80',
+        hoverImage: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=600&q=80',
+        isTrending: true,
+        description: 'High-capacity power bank for extended use.',
+      },
+    ],
+  };
 
   const allProducts = [];
-  for (let i = 0; i < 4; i++) {
-    baseProducts.forEach((product, index) => {
-      allProducts.push({
-        ...product,
-        id: i * baseProducts.length + index + 1,
-        name: `${product.name} ${i > 0 ? `Pro ${i + 1}` : ''}`,
-        price: product.price + (i * 20),
-        originalPrice: product.originalPrice > 0 ? product.originalPrice + (i * 25) : 0,
-      });
-    });
-  }
+  let id = 1;
   
-  return allProducts;
+  Object.entries(categoryProducts).forEach(([category, products]) => {
+    products.forEach(product => {
+      allProducts.push({ ...product, id: id++ });
+    });
+  });
+  
+  return { allProducts, categoryProducts };
 };
 
-const allProducts = generateProducts();
-const categories = ['All', 'Templates', 'Components', 'Kits', 'Tools', 'Automation', 'Analytics'];
+const { allProducts, categoryProducts } = generateProducts();
+const categories = ['All', 'Fashion', 'Electronics', 'Beauty & Personal Care', 'Mobile & Gadgets'];
+
+// Create trending products from all categories
+const getTrendingProducts = () => {
+  return allProducts.filter(product => product.isTrending || product.isNew).slice(0, 6);
+};
+
 const sortOptions = [
   { value: 'popularity', label: 'Popularity' },
   { value: 'price-low', label: 'Price: Low to High' },
@@ -133,6 +279,119 @@ const sortOptions = [
   { value: 'rating', label: 'Customer Rating' },
   { value: 'newest', label: 'New Arrivals' },
 ];
+
+// Category Section Component
+const CategorySection = ({ title, products, badge, showAll = false }) => {
+  const [visibleProducts, setVisibleProducts] = useState(showAll ? products : products.slice(0, 4));
+  const [showMore, setShowMore] = useState(!showAll && products.length > 4);
+
+  const loadMore = () => {
+    setVisibleProducts(products);
+    setShowMore(false);
+  };
+
+  return (
+    <section className="relative py-12">
+      <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
+        {/* Section Header */}
+        <motion.div
+          className="mb-8 flex items-center justify-between"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+              {title}
+            </h2>
+            {badge && (
+              <span className="rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 text-xs font-semibold text-white">
+                {badge}
+              </span>
+            )}
+          </div>
+          
+          {showMore && (
+            <button
+              onClick={loadMore}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              View All →
+            </button>
+          )}
+        </motion.div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {visibleProducts.map((product, index) => (
+            <ProductCard key={product.id} product={product} index={index} viewMode="grid" />
+          ))}
+        </div>
+
+        {/* Load More Button */}
+        {showMore && (
+          <motion.div
+            className="mt-8 text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <MagneticButton
+              onClick={loadMore}
+              variant="outline"
+              size="lg"
+              className="border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 dark:border-gray-600 dark:text-gray-300 dark:hover:border-blue-400 dark:hover:text-blue-400"
+            >
+              Load More Products
+            </MagneticButton>
+          </motion.div>
+        )}
+      </div>
+    </section>
+  );
+};
+
+// Marketing Banner Component
+const MarketingBanner = ({ title, subtitle, description, ctaText, gradient, delay = 0 }) => {
+  return (
+    <motion.section
+      className="relative py-8"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+    >
+      <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
+        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-r ${gradient} p-8 text-center text-white lg:p-12`}>
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute left-1/4 top-1/4 h-32 w-32 rounded-full bg-white/30 blur-2xl" />
+            <div className="absolute right-1/4 bottom-1/4 h-24 w-24 rounded-full bg-white/20 blur-xl" />
+          </div>
+          
+          <div className="relative z-10 space-y-4">
+            <span className="inline-block rounded-full bg-white/20 px-4 py-1 text-sm font-semibold">
+              {subtitle}
+            </span>
+            <h3 className="text-2xl font-bold lg:text-3xl">{title}</h3>
+            <p className="mx-auto max-w-2xl text-white/90">{description}</p>
+            <div className="pt-2">
+              <MagneticButton
+                variant="secondary"
+                size="lg"
+                className="bg-white/95 text-gray-900 hover:bg-white"
+              >
+                {ctaText}
+              </MagneticButton>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.section>
+  );
+};
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -419,69 +678,48 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 const ProductsPage = () => {
-  const [filteredProducts, setFilteredProducts] = useState(allProducts);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortBy, setSortBy] = useState('popularity');
-  const [priceRange, setPriceRange] = useState([0, 500]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('grid');
-  const [currentPage, setCurrentPage] = useState(1);
+  const heroRef = useRef();
 
-  // Filter and sort logic
-  useEffect(() => {
-    let filtered = allProducts;
-
-    // Filter by category
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter(product => product.category === selectedCategory);
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Filter by price range
-    filtered = filtered.filter(product => 
-      product.price >= priceRange[0] && product.price <= priceRange[1]
-    );
-
-    // Sort products
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'newest':
-        filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        break;
-      default:
-        filtered.sort((a, b) => b.reviews - a.reviews);
-    }
-
-    setFilteredProducts(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [selectedCategory, sortBy, priceRange, searchQuery]);
-
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const endIndex = startIndex + PRODUCTS_PER_PAGE;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+  useGSAP(() => {
+    const tl = gsap.timeline();
+    
+    tl.from('.hero-badge', {
+      duration: 0.8,
+      y: 30,
+      opacity: 0,
+      ease: 'power2.out'
+    })
+    .from('.hero-title', {
+      duration: 1,
+      y: 50,
+      opacity: 0,
+      ease: 'power2.out'
+    }, '-=0.4')
+    .from('.hero-subtitle', {
+      duration: 0.8,
+      y: 30,
+      opacity: 0,
+      ease: 'power2.out'
+    }, '-=0.6')
+    .from('.hero-filters', {
+      duration: 0.6,
+      y: 20,
+      opacity: 0,
+      ease: 'power2.out'
+    }, '-=0.4')
+    .from('.hero-stats', {
+      duration: 0.6,
+      y: 20,
+      opacity: 0,
+      ease: 'power2.out'
+    }, '-=0.3');
+  }, { scope: heroRef });
 
   return (
     <main className="relative min-h-screen bg-transparent">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pb-16 pt-28">
+      <section ref={heroRef} className="relative overflow-hidden pb-16 pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
@@ -490,27 +728,34 @@ const ProductsPage = () => {
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
-            className="space-y-6"
-          >
-            <span className="inline-flex items-center gap-2 rounded-full border border-gray-200/60 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+          <div className="space-y-6">
+            <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-gray-200/60 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
               <Sparkles className="h-4 w-4 text-violet-500" />
               Products Collection
             </span>
             
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-              Shop Everything You Love
+            <h1 className="hero-title text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+              Explore Our Collections
             </h1>
             
-            <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
-              From trending drops to daily essentials — grab them while they last.
+            <p className="hero-subtitle mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+              Find trending products, hot deals, and new arrivals in every category
             </p>
+            
+            {/* Quick Filter Buttons */}
+            <div className="hero-filters flex flex-wrap items-center justify-center gap-3 pt-4">
+              {['Trending', 'New Arrivals', 'Hot Deals', 'Top Rated'].map((filter) => (
+                <button
+                  key={filter}
+                  className="rounded-full border border-gray-300/50 bg-white/80 px-6 py-2 text-sm font-medium text-gray-700 backdrop-blur transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 dark:border-white/20 dark:bg-white/10 dark:text-gray-300 dark:hover:border-blue-400 dark:hover:bg-blue-950/30 dark:hover:text-blue-300"
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
 
             {/* Quick Stats */}
-            <div className="flex items-center justify-center gap-8 pt-6">
+            <div className="hero-stats flex items-center justify-center gap-8 pt-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">{allProducts.length}+</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Products</div>
@@ -524,240 +769,112 @@ const ProductsPage = () => {
                 <div className="text-sm text-gray-600 dark:text-gray-400">Happy Customers</div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Optional Search Bar */}
+      <section className="relative py-8">
+        <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
+          <motion.div
+            className="mx-auto max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search all products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border border-gray-300/50 bg-white/90 py-4 pl-12 pr-6 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 dark:border-white/20 dark:bg-gray-900/90 dark:text-white"
+              />
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Filters & Search Section */}
-      <section className="sticky top-0 z-40 border-b border-gray-200/50 bg-white/80 backdrop-blur-lg dark:border-white/10 dark:bg-gray-950/80">
-        <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-4 sm:px-6 lg:px-10 xl:px-16">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            {/* Search Bar */}
-            <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-gray-300/50 bg-white/90 py-2 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-white/20 dark:bg-gray-900/90 dark:text-white"
-              />
-            </div>
+      {/* Category-Based Product Sections */}
+      
+      {/* Trending Products Section */}
+      <CategorySection 
+        title="Trending Now" 
+        products={getTrendingProducts()} 
+        badge="Hot" 
+        showAll={true}
+      />
 
-            {/* Controls */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Filter Toggle */}
-              <button
-                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
-                  isFiltersOpen
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
-                    : 'border-gray-300/50 bg-white/90 text-gray-700 hover:bg-gray-50 dark:border-white/20 dark:bg-gray-900/90 dark:text-gray-300 dark:hover:bg-gray-800/90'
-                }`}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                Filters
-              </button>
+      {/* Marketing Banner 1 */}
+      <MarketingBanner
+        title="Up to 50% Off on Hot Deals"
+        subtitle="Limited Time"
+        description="Don't miss out on amazing discounts across all categories"
+        ctaText="Shop Hot Deals"
+        gradient="from-red-500 to-pink-600"
+      />
 
-              {/* Sort Dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="rounded-xl border border-gray-300/50 bg-white/90 px-4 py-2 text-sm font-medium text-gray-700 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-white/20 dark:bg-gray-900/90 dark:text-gray-300"
-              >
-                {sortOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+      {/* Fashion Section */}
+      <CategorySection 
+        title="Fashion & Style" 
+        products={categoryProducts['Fashion']} 
+        badge="New Arrivals"
+      />
 
-              {/* View Mode Toggle */}
-              <div className="flex rounded-xl border border-gray-300/50 bg-white/90 dark:border-white/20 dark:bg-gray-900/90">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`rounded-l-xl p-2 transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-blue-500 text-white'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-                  }`}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`rounded-r-xl p-2 transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-blue-500 text-white'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-                  }`}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+      {/* Electronics Section */}
+      <CategorySection 
+        title="Electronics & Gadgets" 
+        products={categoryProducts['Electronics']} 
+        badge="Trending"
+      />
+
+      {/* Marketing Banner 2 */}
+      <MarketingBanner
+        title="New Fashion Arrivals"
+        subtitle="Spring Collection"
+        description="Grab them before they sell out — fresh styles just dropped"
+        ctaText="Explore Fashion"
+        gradient="from-purple-500 to-indigo-600"
+        delay={0.2}
+      />
+
+      {/* Beauty Section */}
+      <CategorySection 
+        title="Beauty & Personal Care" 
+        products={categoryProducts['Beauty & Personal Care']} 
+        badge="Best Sellers"
+      />
+
+      {/* Mobile & Gadgets Section */}
+      <CategorySection 
+        title="Mobile & Gadgets" 
+        products={categoryProducts['Mobile & Gadgets']} 
+        badge="Latest Tech"
+      />
+
+      {/* Final Marketing Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="my-16 rounded-3xl border border-blue-200/50 bg-gradient-to-br from-blue-50 to-purple-50 p-8 text-center dark:border-blue-800/50 dark:from-blue-950/20 dark:to-purple-950/20"
+      >
+        <div className="mx-auto max-w-2xl space-y-4">
+          <div className="flex items-center justify-center gap-2">
+            <Truck className="h-5 w-5 text-blue-500" />
+            <Shield className="h-5 w-5 text-green-500" />
+            <Zap className="h-5 w-5 text-yellow-500" />
           </div>
-
-          {/* Collapsible Filters */}
-          <AnimatePresence>
-            {isFiltersOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden border-t border-gray-200/50 pt-6 dark:border-white/10"
-              >
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                  {/* Categories */}
-                  <div className="space-y-4 rounded-xl border border-gray-200/50 bg-white/50 p-4 dark:border-white/10 dark:bg-white/5">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Categories</h3>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
-                      {categories.map(category => (
-                        <button
-                          key={category}
-                          onClick={() => setSelectedCategory(category)}
-                          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                            selectedCategory === category
-                              ? 'bg-blue-500 text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                          }`}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Price Range */}
-                  <div className="space-y-4 rounded-xl border border-gray-200/50 bg-white/50 p-4 dark:border-white/10 dark:bg-white/5">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Price Range</h3>
-                    <div className="space-y-3">
-                      <input
-                        type="range"
-                        min="0"
-                        max="500"
-                        value={priceRange[1]}
-                        onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                        className="w-full accent-blue-500"
-                      />
-                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                        <span>₹0</span>
-                        <span className="font-medium">₹{priceRange[1]}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick Filters */}
-                  <div className="space-y-4 rounded-xl border border-gray-200/50 bg-white/50 p-4 dark:border-white/10 dark:bg-white/5">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Quick Filters</h3>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" className="rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">New Arrivals</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" className="rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">On Sale</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" className="rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">Top Rated</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Rating Filter */}
-                  <div className="space-y-4 rounded-xl border border-gray-200/50 bg-white/50 p-4 dark:border-white/10 dark:bg-white/5">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Rating</h3>
-                    <div className="space-y-2">
-                      {[4, 3, 2, 1].map(rating => (
-                        <label key={rating} className="flex items-center gap-2">
-                          <input type="checkbox" className="rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-3 w-3 ${
-                                  i < rating
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-300 dark:text-gray-600'
-                                }`}
-                              />
-                            ))}
-                            <span className="text-sm text-gray-700 dark:text-gray-300">& up</span>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            Free shipping on orders above ₹999
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300">
+            Weekly drops: check out trending deals • Top-rated by thousands of happy customers
+          </p>
         </div>
-      </section>
-
-      {/* Products Grid/List */}
-      <section className="relative py-16">
-        <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
-          {/* Results Count */}
-          <div className="mb-8 flex items-center justify-between">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Page {currentPage} of {totalPages}
-            </p>
-          </div>
-
-          {/* Products Grid/List */}
-          <div className={viewMode === 'grid' 
-            ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-            : "space-y-4"
-          }>
-            {currentProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} viewMode={viewMode} />
-            ))}
-          </div>
-
-          {/* Marketing Banner */}
-          {currentPage === 1 && filteredProducts.length >= 8 && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="my-16 rounded-3xl border border-blue-200/50 bg-gradient-to-br from-blue-50 to-purple-50 p-8 text-center dark:border-blue-800/50 dark:from-blue-950/20 dark:to-purple-950/20"
-            >
-              <div className="mx-auto max-w-2xl space-y-4">
-                <div className="flex items-center justify-center gap-2">
-                  <Truck className="h-5 w-5 text-blue-500" />
-                  <Shield className="h-5 w-5 text-green-500" />
-                  <Zap className="h-5 w-5 text-yellow-500" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Free shipping on orders above ₹999
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Weekly drops: check out trending deals • Top-rated by thousands of happy customers
-                </p>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-16">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          )}
-        </div>
-      </section>
+      </motion.div>
 
       {/* Scroll to Top Button */}
       <motion.button
