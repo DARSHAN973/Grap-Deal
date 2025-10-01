@@ -1,4 +1,4 @@
-import CategoriesPage from '../../components/sections/CategoriesPage';
+import CategoriesPage from '../../../components/sections/CategoriesPage';
 
 export const metadata = {
   title: 'Categories | Grap Deal'

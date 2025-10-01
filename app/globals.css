@@ -287,3 +287,42 @@ body {
   background-color: rgb(17 24 39);
   color: rgb(243 244 246);
 }
+
+/* Large monitor optimization - only affects screens 1920px+ */
+@media (min-width: 1920px) {
+  /* Global content constraint for very large screens */
+  main {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Header constraint for large screens */
+  header > div {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Footer constraint for large screens */
+  footer > div:first-child {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Ultra-wide monitor optimization - only affects screens 2560px+ */
+@media (min-width: 2560px) {
+  main {
+    max-width: 1800px;
+  }
+  
+  header > div {
+    max-width: 1800px;
+  }
+  
+  footer > div:first-child {
+    max-width: 1800px;
+  }
+}
