@@ -1,4 +1,4 @@
-import ProductsPage from '../../../components/sections/ProductsPage';
+import ProductsPage from '../../components/sections/ProductsPage';
 
 export const metadata = {
   title: 'Products | Grap Deal',
