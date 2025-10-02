@@ -99,7 +99,7 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     try {
       // Choose endpoint and payload depending on mode
-      if (!isLogin) {
+        if (!isLogin) {
         const payload = {
           name: formData.name || undefined,
           email: formData.email,
@@ -107,7 +107,7 @@ const AuthModal = ({ isOpen, onClose }) => {
           password: formData.password,
         };
 
-        const res = await fetch("/api/user", {
+        const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
