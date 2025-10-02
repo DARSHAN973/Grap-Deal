@@ -183,7 +183,8 @@ const AnimatedHeroHeading = () => {
                 Live deals below
               </span>
               <motion.div
-                className="ml-2"
+                className="ml-2 text-gray-700 dark:text-gray-200 text-lg sm:text-base lg:text-lg"
+                aria-hidden="true"
                 animate={{ y: [0, 5, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
