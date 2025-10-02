@@ -122,8 +122,8 @@ const ContactPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
+
+  if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -147,15 +147,47 @@ const ContactPage = () => {
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: '', email: '', subject: '', category: '', message: '' });
-    
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+    setIsSubmitting(true);
+    setErrors((prev) => ({ ...prev, api: undefined }));
+
+    try {
+      const res = await fetch('/api/contactUs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          category: formData.category,
+          message: formData.message,
+        }),
+      });
+
+      let payload = null;
+      try { payload = await res.json(); } catch (err) { payload = null; }
+
+      if (!res.ok) {
+        if (payload && payload.errors && typeof payload.errors === 'object') {
+          setErrors((prev) => ({ ...prev, ...payload.errors }));
+        } else if (payload && payload.message) {
+          setErrors((prev) => ({ ...prev, api: payload.message }));
+        } else {
+          setErrors((prev) => ({ ...prev, api: `Submission failed (${res.status})` }));
+        }
+        return;
+      }
+
+      // success
+      setIsSubmitted(true);
+      setErrors({});
+      setFormData({ name: '', email: '', subject: '', category: '', message: '' });
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (err) {
+      console.error('Error submitting form:', err);
+      setErrors((prev) => ({ ...prev, api: 'Network error. Please try again.' }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -383,6 +415,8 @@ const ContactPage = () => {
                             checked={formData.category === category.value}
                             onChange={handleInputChange}
                             className="sr-only"
+                            required
+                            aria-required="true"
                           />
                           <div className="flex items-center gap-2">
                             <category.icon className="h-4 w-4" />
@@ -419,6 +453,9 @@ const ContactPage = () => {
                   </div>
 
                   {/* Submit Button */}
+                    {errors.api && (
+                      <div className="text-sm text-red-600 dark:text-red-400">{errors.api}</div>
+                    )}
                   <MagneticButton
                     type="submit"
                     disabled={isSubmitting}
