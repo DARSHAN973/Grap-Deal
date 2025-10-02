@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  VENDOR
+  BUSINESS
+  ADMIN
+}
+enum KYCStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phoneNo   String   @unique
+  password  String
+  role      UserRole  @default(CUSTOMER)
+  kycstatus KYCStatus @default(NONE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
