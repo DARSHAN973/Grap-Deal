@@ -8,12 +8,16 @@ import {
   MagnifyingGlassIcon, 
   UserIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowRightOnRectangleIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 import SparkleNavbar from '../ui/SparkleNavbar';
 import AuthModal from '../ui/AuthModal';
+import { useUser } from '../providers/UserProvider';
 
 const Header = () => {
+  const { user, isAuthenticated, logout, loading } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -23,6 +27,8 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showCartAnimation, setShowCartAnimation] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState('success');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
   const logoRef = useRef(null);
@@ -100,6 +106,14 @@ const Header = () => {
     setTimeout(() => setShowCartAnimation(false), 600);
   };
 
+  const handleLogout = async () => {
+    await logout();
+    setNotificationMessage('Logged out successfully!');
+    setNotificationType('success');
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+  };
+
   // Trigger small cart pop when cartCount changes
   useEffect(() => {
     if (cartCount > 0) {
@@ -119,12 +133,22 @@ const Header = () => {
 
   return (
     <>
-      {/* Cart notification */}
+      {/* Notification */}
       {showNotification && (
         <div className="fixed top-20 right-4 z-50">
-          <div className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce">
-            <span>Added to cart!</span>
-          </div>
+          <motion.div 
+            className={`px-4 py-2 rounded-lg shadow-lg ${
+              notificationType === 'success' 
+                ? 'bg-green-500 text-white' 
+                : 'bg-blue-500 text-white'
+            }`}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            <span>{notificationMessage || 'Added to cart!'}</span>
+          </motion.div>
         </div>
       )}
 
@@ -404,33 +428,84 @@ const Header = () => {
                 )}
               </motion.button>
 
-              {/* Login Button - Mobile optimized with icon only on small screens */}
-              <motion.button 
-                onClick={() => setIsAuthModalOpen(true)}
-                className="group relative p-2 sm:px-3 sm:py-2 lg:px-6 lg:py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                style={{
-                  background: 'linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899)',
-                  backgroundSize: '200% 200%'
-                }}
-              >
-                <motion.span 
-                  className="relative z-10 flex items-center justify-center gap-1"
-                  whileHover={{ y: -1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <UserIcon className="h-5 w-5" />
-                  {/* Show text only on larger screens */}
-                  <span className="hidden sm:inline text-sm lg:text-base">Login</span>
-                </motion.span>
-              </motion.button>
+              {/* Auth Buttons - Conditional rendering based on authentication */}
+              {!loading && (
+                isAuthenticated ? (
+                  // Authenticated state: Account icon and Logout button
+                  <div className="flex items-center gap-2">
+                    {/* Account Icon */}
+                    <Link href="/account">
+                      <motion.button 
+                        className="group relative p-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium overflow-hidden"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        title="My Account"
+                      >
+                        <motion.span 
+                          className="relative z-10 flex items-center justify-center"
+                          whileHover={{ y: -1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                        >
+                          <UserIcon className="h-5 w-5" />
+                        </motion.span>
+                      </motion.button>
+                    </Link>
+
+                    {/* Logout Icon */}
+                    <motion.button 
+                      onClick={handleLogout}
+                      className="group relative p-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
+                      whileHover={{ 
+                        scale: 1.05,
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      title="Logout"
+                    >
+                      <motion.span 
+                        className="relative z-10 flex items-center justify-center"
+                        whileHover={{ y: -1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      >
+                        <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                      </motion.span>
+                    </motion.button>
+                  </div>
+                ) : (
+                  // Non-authenticated state: Login button
+                  <motion.button 
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="group relative p-2 sm:px-3 sm:py-2 lg:px-6 lg:py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    style={{
+                      background: 'linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899)',
+                      backgroundSize: '200% 200%'
+                    }}
+                  >
+                    <motion.span 
+                      className="relative z-10 flex items-center justify-center gap-1"
+                      whileHover={{ y: -1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <UserIcon className="h-5 w-5" />
+                      {/* Show text only on larger screens */}
+                      <span className="hidden sm:inline text-sm lg:text-base">Login</span>
+                    </motion.span>
+                  </motion.button>
+                )
+              )}
             </div>
           </div>
         </div>

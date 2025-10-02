@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 export async function POST(request) {
   try {
@@ -37,7 +40,28 @@ export async function POST(request) {
 
     // Return a safe user object (omit password)
     const { id, name, role, phoneNo } = user;
-    return NextResponse.json({ user: { id, name, email: user.email, phoneNo, role } });
+    const safeUser = { id, name, email: user.email, phoneNo, role };
+
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Create response with user data
+    const response = NextResponse.json({ user: safeUser });
+
+    // Set httpOnly cookie
+    response.cookies.set("auth-token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: "/"
+    });
+
+    return response;
   } catch (err) {
     console.error("Auth login error:", err);
     return NextResponse.json({ error: "Login failed" }, { status: 500 });

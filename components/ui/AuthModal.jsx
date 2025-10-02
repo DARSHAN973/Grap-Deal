@@ -12,8 +12,10 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import { useUser } from "../providers/UserProvider";
 
 const AuthModal = ({ isOpen, onClose }) => {
+  const { login } = useUser();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -163,8 +165,11 @@ const AuthModal = ({ isOpen, onClose }) => {
         setIsLoading(false);
         return;
       }
-      // handle login success (token/cookie handling depends on your API)
+      
+      // Update user context with login data
+      login(data.user);
       setIsSuccess(true);
+      setToast({ message: 'Signed in successfully', type: 'success' });
       setIsLoading(false);
 
       setTimeout(() => {
