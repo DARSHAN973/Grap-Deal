@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,30 +10,706 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  CUSTOMER
-  VENDOR
-  BUSINESS
-  ADMIN
-}
-enum KYCStatus {
-  NONE
-  PENDING
-  VERIFIED
-  REJECTED
-}
+// ========================= CORE USER MODELS =========================
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
+  id        String   @id @default(cuid())
   email     String   @unique
-  phoneNo   String   @unique
   password  String
-  role      UserRole  @default(CUSTOMER)
+  name      String
+  role      Role     @default(USER)
+  phone     String    @unique
+  avatar    String?
+  isActive  Boolean  @default(true)
   kycstatus KYCStatus @default(NONE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Profile information
+  profile UserProfile?
+
+  // E-commerce relations
+  cart          Cart?
+  orders        Order[]
+  wishlist      WishlistItem[]
+  reviews       Review[]
+  addresses     Address[]
+
+  // Vendor/Business relations
+  vendorProfile    VendorProfile?
+  vendorApplication VendorApplication?
+  userKYC          UserKYC?
+
+  // C2C relations (user-to-user marketplace)
+  c2cListings    C2CListing[]
+  c2cPurchases   C2COrder[]   @relation("C2CBuyer")
+
+  // Social features
+  followers  Follow[] @relation("UserFollowers")
+  following  Follow[] @relation("UserFollowing")
+
+  @@map("users")
 }
+
+model UserProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  dateOfBirth DateTime?
+  gender      Gender?
+  bio         String?
+  website     String?
+  location    String?
+  
+  // Preferences
+  preferredLanguage String  @default("en")
+  currency         String  @default("USD")
+  notifications    Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+// ========================= VENDOR/BUSINESS MODELS =========================
+
+model VendorProfile {
+  id          String      @id @default(cuid())
+  userId      String      @unique
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  businessName    String
+  businessType    BusinessType
+  description     String?
+  website         String?
+  logo            String?
+  banner          String?
+  
+  // Business details
+  taxId           String?
+  registrationNo  String?
+  establishedYear Int?
+  
+  // Contact
+  businessEmail   String
+  businessPhone   String
+  
+  // Status
+  isVerified      Boolean @default(false)
+  isActive        Boolean @default(true)
+  
+  // Ratings
+  rating          Float   @default(0)
+  totalRatings    Int     @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  products        Product[]
+  vendorCategories VendorCategory[]
+  orders          Order[]
+  
+  @@map("vendor_profiles")
+}
+
+model VendorApplication {
+  id        String            @id @default(cuid())
+  userId    String            @unique
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Business Information
+  businessName    String
+  businessType    BusinessType
+  description     String
+  phoneNumber     String
+  website         String?
+  
+  // Business Address
+  businessAddress Json // {street, city, state, country, zipCode}
+  
+  // Business Registration Details
+  businessRegNumber String?   // Company registration number
+  taxId             String?   // Tax identification number
+  gstNumber         String?   // GST number (for Indian businesses)
+  
+  // KYC Status and Documents
+  kycStatus         KYCStatus @default(PENDING)
+  kycDocuments      KYCDocument[]
+  
+  // Application Status
+  status    ApplicationStatus @default(PENDING)
+  reason    String? // Rejection reason if any
+  adminNotes String? // Admin notes during review
+  
+  // Timestamps
+  appliedAt DateTime @default(now())
+  reviewedAt DateTime?
+  reviewedBy String? // Admin ID who reviewed
+  
+  @@map("vendor_applications")
+}
+
+model KYCDocument {
+  id           String @id @default(cuid())
+  
+  // Relation to vendor application
+  applicationId String
+  application   VendorApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  // Document Details
+  documentType DocumentType
+  documentName String       // Original filename
+  documentUrl  String       // Storage path/URL
+  fileSize     Int          // File size in bytes
+  mimeType     String       // File MIME type
+  
+  // Verification Status
+  verificationStatus DocumentVerificationStatus @default(PENDING)
+  verificationNotes  String? // Admin notes about verification
+  
+  // Timestamps
+  uploadedAt DateTime @default(now())
+  verifiedAt DateTime?
+  verifiedBy String? // Admin ID who verified
+  
+  @@map("kyc_documents")
+}
+
+model UserKYC {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Personal Information
+  fullName        String
+  dateOfBirth     DateTime
+  nationality     String
+  occupation      String?
+  
+  // Identity Verification
+  identityType    IdentityDocumentType // PASSPORT, DRIVING_LICENSE, NATIONAL_ID, etc.
+  identityNumber  String
+  identityDocument String // Document URL
+  
+  // Address Verification
+  addressDocument String? // Utility bill, bank statement, etc.
+  permanentAddress Json   // {street, city, state, country, zipCode}
+  
+  // Additional Documents
+  photoUrl        String? // User photo for verification
+  signatureUrl    String? // Digital signature
+  
+  // Verification Status
+  status          KYCStatus @default(PENDING)
+  verificationNotes String?
+  
+  // Risk Assessment
+  riskLevel       RiskLevel @default(LOW)
+  
+  // Timestamps
+  submittedAt DateTime @default(now())
+  verifiedAt  DateTime?
+  verifiedBy  String? // Admin ID who verified
+  expiresAt   DateTime? // When KYC expires and needs renewal
+  
+  @@map("user_kyc")
+}
+
+// ========================= PRODUCT CATALOG MODELS =========================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  image       String?
+  icon        String?
+  
+  // Hierarchy
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  // Status
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  products         Product[]
+  vendorCategories VendorCategory[]
+  c2cListings      C2CListing[]
+  
+  @@index([slug])
+  @@index([parentId])
+  @@index([isActive, sortOrder])
+  @@map("categories")
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  shortDesc   String?
+  
+  // Vendor information
+  vendorId    String
+  vendor      VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  
+  // Category
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  
+  // Product details
+  sku         String?     @unique
+  brand       String?
+  model       String?
+  
+  // Pricing (base price - variants can override)
+  basePrice   Decimal     @db.Decimal(10, 2)
+  comparePrice Decimal?   @db.Decimal(10, 2) // Original price for discount calculation
+  
+  // Physical properties
+  weight      Float?
+  dimensions  Json? // {length, width, height, unit}
+  
+  // Product status
+  status      ProductStatus @default(DRAFT)
+  isActive    Boolean       @default(true)
+  isFeatured  Boolean       @default(false)
+  
+  // Inventory tracking
+  trackInventory Boolean @default(true)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  // Analytics
+  viewCount   Int @default(0)
+  orderCount  Int @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  images      ProductImage[]
+  variants    ProductVariant[]
+  inventory   Inventory[]
+  tags        ProductTag[]
+  reviews     Review[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  wishlistItems WishlistItem[]
+  
+  @@index([slug])
+  @@index([vendorId])
+  @@index([categoryId])
+  @@index([status, isActive])
+  @@index([isFeatured])
+  @@index([basePrice])
+  @@index([createdAt])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+
+  @@index([productId, sortOrder])
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  name      String // e.g., "Red - Large", "128GB"
+  sku       String? @unique
+  
+  // Variant-specific pricing
+  price     Decimal? @db.Decimal(10, 2) // If null, uses product basePrice
+  comparePrice Decimal? @db.Decimal(10, 2)
+  
+  // Variant attributes (flexible JSON structure)
+  attributes Json // e.g., {"color": "red", "size": "large", "storage": "128GB"}
+  
+  // Status
+  isActive  Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  inventory  Inventory[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  
+  @@index([productId])
+  @@index([sku])
+  @@map("product_variants")
+}
+
+model Inventory {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  
+  quantity     Int
+  reservedQty  Int     @default(0) // Items in pending orders
+  minStockLevel Int?   // Reorder point
+  maxStockLevel Int?   // Maximum stock to maintain
+  
+  // Tracking
+  lastUpdated  DateTime @default(now())
+  updatedBy    String? // User ID who last updated
+  
+  @@unique([productId, variantId])
+  @@index([quantity])
+  @@index([minStockLevel])
+  @@map("inventory")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  color     String?  @default("#6366f1")
+  
+  createdAt DateTime @default(now())
+
+  // Relations
+  products  ProductTag[]
+  
+  @@map("tags")
+}
+
+model ProductTag {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  tagId     String
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([productId, tagId])
+  @@map("product_tags")
+}
+
+// ========================= E-COMMERCE MODELS =========================
+
+model Cart {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  items CartItem[]
+  
+  @@map("carts")
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2) // Price at time of adding to cart
+  
+  addedAt   DateTime @default(now())
+
+  @@unique([cartId, productId, variantId])
+  @@map("cart_items")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // Human-readable order number
+  
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  
+  vendorId    String?
+  vendor      VendorProfile? @relation(fields: [vendorId], references: [id])
+  
+  // Order totals
+  subtotal    Decimal     @db.Decimal(10, 2)
+  shipping    Decimal     @db.Decimal(10, 2) @default(0)
+  tax         Decimal     @db.Decimal(10, 2) @default(0)
+  discount    Decimal     @db.Decimal(10, 2) @default(0)
+  total       Decimal     @db.Decimal(10, 2)
+  
+  // Status
+  status      OrderStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  
+  // Addresses
+  shippingAddress Json
+  billingAddress  Json?
+  
+  // Tracking
+  trackingNumber String?
+  
+  // Timestamps
+  orderDate     DateTime @default(now())
+  shippedAt     DateTime?
+  deliveredAt   DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  items    OrderItem[]
+  payments Payment[]
+  
+  @@index([userId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([orderDate])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2) // Price at time of order
+  
+  @@map("order_items")
+}
+
+model WishlistItem {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  addedAt   DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+model Review {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  rating    Int     // 1-5 stars
+  title     String?
+  comment   String?
+  images    Json? // Array of image URLs
+  
+  isVerified Boolean @default(false) // Verified purchase
+  isActive   Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId]) // One review per user per product
+  @@index([productId, rating])
+  @@map("reviews")
+}
+
+// ========================= C2C MARKETPLACE MODELS =========================
+
+model C2CListing {
+  id          String   @id @default(cuid())
+  sellerId    String
+  seller      User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String
+  price       Decimal  @db.Decimal(10, 2)
+  condition   ItemCondition
+  
+  // Location
+  location    String
+  
+  // Category (reuse existing categories)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  
+  // Images
+  images      Json? // Array of image URLs
+  
+  // Status
+  status      C2CStatus @default(ACTIVE)
+  isSold      Boolean   @default(false)
+  
+  // Negotiation
+  isNegotiable Boolean @default(true)
+  
+  // Views and interest
+  viewCount   Int @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  orders    C2COrder[]
+  
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([status, isSold])
+  @@index([price])
+  @@index([location])
+  @@index([createdAt])
+  @@map("c2c_listings")
+}
+
+model C2COrder {
+  id          String     @id @default(cuid())
+  listingId   String
+  listing     C2CListing @relation(fields: [listingId], references: [id])
+  
+  buyerId     String
+  buyer       User       @relation("C2CBuyer", fields: [buyerId], references: [id])
+  
+  agreedPrice Decimal    @db.Decimal(10, 2)
+  status      C2COrderStatus @default(PENDING)
+  
+  // Communication
+  buyerMessage String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("c2c_orders")
+}
+
+// ========================= PAYMENT MODELS =========================
+
+model Payment {
+  id            String        @id @default(cuid())
+  orderId       String
+  order         Order         @relation(fields: [orderId], references: [id])
+  
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD")
+  
+  paymentMethod PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  
+  // Payment gateway data
+  gatewayId     String? // Stripe, PayPal, etc. transaction ID
+  gatewayData   Json?   // Additional gateway-specific data
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ========================= ADDRESS MODELS =========================
+
+model Address {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      AddressType @default(HOME)
+  
+  firstName String
+  lastName  String
+  company   String?
+  
+  address1  String
+  address2  String?
+  city      String
+  state     String
+  country   String
+  zipCode   String
+  
+  phone     String?
+  
+  isDefault Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ========================= VENDOR CATEGORY MAPPING =========================
+
+model VendorCategory {
+  id         String        @id @default(cuid())
+  vendorId   String
+  vendor     VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  
+  categoryId String
+  category   Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([vendorId, categoryId])
+  @@map("vendor_categories")
+}
+
+// ========================= SOCIAL FEATURES =========================
+
+model Follow {
+  id          String @id @default(cuid())
+  followerId  String
+  follower    User   @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  
+  followingId String
+  following   User   @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// ========================= EXISTING MODELS =========================
 
 model Banner {
   id        Int      @id @default(autoincrement())
@@ -50,4 +729,148 @@ model ContactMessage {
   category  String
   message   String
   createdAt DateTime @default(now())
+}
+
+// ========================= ENUMS =========================
+
+enum Role {
+  USER
+  VENDOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum KYCStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum BusinessType {
+  INDIVIDUAL
+  PARTNERSHIP
+  CORPORATION
+  LLC
+  NONPROFIT
+  OTHER
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  UNDER_REVIEW
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  STRIPE
+  BANK_TRANSFER
+  CASH_ON_DELIVERY
+  WALLET
+}
+
+enum AddressType {
+  HOME
+  WORK
+  BILLING
+  SHIPPING
+  OTHER
+}
+
+enum ItemCondition {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+  POOR
+}
+
+enum C2CStatus {
+  ACTIVE
+  INACTIVE
+  SOLD
+  EXPIRED
+}
+
+enum C2COrderStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentType {
+  BUSINESS_REGISTRATION
+  TAX_CERTIFICATE
+  GST_CERTIFICATE
+  TRADE_LICENSE
+  BANK_STATEMENT
+  IDENTITY_PROOF
+  ADDRESS_PROOF
+  PARTNERSHIP_DEED
+  MOA_AOA // Memorandum and Articles of Association
+  FINANCIAL_STATEMENT
+  OTHER
+}
+
+enum DocumentVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+  REQUIRES_RESUBMISSION
+}
+
+enum IdentityDocumentType {
+  PASSPORT
+  DRIVING_LICENSE
+  NATIONAL_ID
+  VOTER_ID
+  AADHAAR_CARD
+  PAN_CARD
+  OTHER
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }

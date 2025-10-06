@@ -122,7 +122,7 @@ const AuthModal = ({ isOpen, onClose }) => {
             if (resData.field === 'email') {
               setErrors({ ...errors, email: resData.message });
               setToast({ message: resData.message, type: 'error' });
-            } else if (resData.field === 'phoneNo') {
+            } else if (resData.field === 'phone') {
               setErrors({ ...errors, phone: resData.message });
               setToast({ message: resData.message, type: 'error' });
             } else {

@@ -21,7 +21,7 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
-        phoneNo: true,
+        phone: true,
         role: true
       }
     });

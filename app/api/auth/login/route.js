@@ -26,7 +26,7 @@ export async function POST(request) {
       user = await prisma.user.findUnique({ where: { email } });
     }
     if (!user && phone) {
-      user = await prisma.user.findUnique({ where: { phoneNo: phone } });
+      user = await prisma.user.findUnique({ where: { phone: phone } });
     }
 
     if (!user) {
@@ -38,13 +38,14 @@ export async function POST(request) {
       return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
-    // Return a safe user object (omit password)
-    const { id, name, role, phoneNo } = user;
-    const safeUser = { id, name, email: user.email, phoneNo, role };
+  // Return a safe user object (omit password)
+  const { id, name, role, phone: userPhone } = user;
+  const safeUser = { id, name, email: user.email, phone: userPhone, role };
 
     // Create JWT token
+    // Ensure userId is stored as a string in the token (Prisma expects string ids)
     const token = jwt.sign(
-      { userId: id, email: user.email },
+      { userId: String(id), email: user.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );

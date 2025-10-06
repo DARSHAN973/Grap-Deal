@@ -11,7 +11,7 @@ export async function POST(request) {
     if (!email || !password) {
       return NextResponse.json({ message: "Email and password are required" }, { status: 400 });
     }
-    // Schema expects `name` and `phoneNo` as required fields — ensure we have them (or set defaults)
+    // Schema expects `name` and `phone` as required fields — ensure we have them (or set defaults)
     if (!name || !phone) {
       return NextResponse.json({ message: "Name and phone number are required" }, { status: 400 });
     }
@@ -24,28 +24,28 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Email already registered', field: 'email' }, { status: 409 });
     }
 
-    // Check by phone number (phoneNo in schema)
-    const existingByPhone = await prisma.user.findUnique({ where: { phoneNo: phone } });
+    // Check by phone number (phone in schema)
+    const existingByPhone = await prisma.user.findUnique({ where: { phone: phone } });
     if (existingByPhone) {
-      return NextResponse.json({ message: 'Phone number already registered', field: 'phoneNo' }, { status: 409 });
+      return NextResponse.json({ message: 'Phone number already registered', field: 'phone' }, { status: 409 });
     }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user - map `phone` from client to `phoneNo` in the schema
+    // Create new user - map `phone` from client to `phone` in the schema
     const newUser = await prisma.user.create({
       data: {
         name,
         email: normalizedEmail,
-        phoneNo: phone,
+        phone,
         password: hashedPassword,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        phoneNo: true,
+        phone: true,
         role: true,
         createdAt: true,
       },
@@ -61,7 +61,7 @@ export async function POST(request) {
       const field = Array.isArray(target) ? target[0] : target;
       let message = 'A user with that value already exists';
       if (field === 'email') message = 'Email already registered';
-      if (field === 'phoneNo') message = 'Phone number already registered';
+      if (field === 'phone') message = 'Phone number already registered';
       return NextResponse.json({ message, field }, { status: 409 });
     }
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });

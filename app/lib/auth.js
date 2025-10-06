@@ -13,6 +13,16 @@ export async function verifyAuth() {
     }
 
     const decoded = jwt.verify(token.value, JWT_SECRET);
+
+    // Normalize userId to string to match Prisma schema (User.id is String)
+    if (decoded && typeof decoded.userId !== 'undefined') {
+      try {
+        decoded.userId = String(decoded.userId);
+      } catch (e) {
+        // ignore coercion errors, keep original
+      }
+    }
+
     return { user: decoded, error: null };
   } catch (error) {
     return { user: null, error: "Invalid token" };
