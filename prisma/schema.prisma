@@ -227,6 +227,8 @@ model Category {
   description String?
   image       String?
   icon        String?
+  badge       String?
+  badgeColor  String?
   
   // Hierarchy
   parentId    String?

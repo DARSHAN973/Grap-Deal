@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import CategoryManagement from "./CategoryManagement";
 import {
   HomeIcon,
   UsersIcon,
@@ -28,6 +29,7 @@ const AdminPanel = () => {
     { id: "users", name: "User Management", icon: UsersIcon },
     { id: "vendors", name: "Vendor Management", icon: BuildingStorefrontIcon },
     { id: "products", name: "Product Management", icon: CubeIcon },
+    { id: "categories", name: "Category Management", icon: CubeIcon },
     { id: "orders", name: "Order Management", icon: TruckIcon },
     { id: "b2b", name: "B2B Management", icon: MegaphoneIcon },
     { id: "c2c", name: "C2C Management", icon: ArrowsRightLeftIcon },
@@ -46,6 +48,8 @@ const AdminPanel = () => {
         return <VendorManagementContent />;
       case "products":
         return <ProductManagementContent />;
+      case "categories":
+        return <CategoryManagementContent />;
       case "orders":
         return <OrderManagementContent />;
       case "b2b":
@@ -460,6 +464,13 @@ const ProductManagementContent = () => (
         </div>
       </div>
     </div>
+  </div>
+);
+
+// Category Management Content
+const CategoryManagementContent = () => (
+  <div>
+    <CategoryManagement />
   </div>
 );
 
