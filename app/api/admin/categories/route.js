@@ -39,16 +39,23 @@ export async function GET(request) {
 // POST - Create new category (Admin only)
 export async function POST(request) {
   try {
-    const { userId, role } = await verifyAuth(request);
+    const { user, error } = await verifyAuth();
     
-    if (role !== 'ADMIN') {
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    if (user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }
       );
     }
 
-    const { name, slug, description, image, icon, badge, badgeColor } = await request.json();
+    const { name, slug, image } = await request.json();
 
     // Validate required fields
     if (!name || !slug) {
@@ -79,11 +86,7 @@ export async function POST(request) {
       data: {
         name,
         slug,
-        description: description || '',
-        image: image || '',
-        icon: icon || 'Package',
-        badge: badge || null,
-        badgeColor: badgeColor || null,
+        image: image || null,
         isActive: true
       }
     });
@@ -105,16 +108,23 @@ export async function POST(request) {
 // PUT - Update category (Admin only)
 export async function PUT(request) {
   try {
-    const { userId, role } = await verifyAuth(request);
+    const { user, error } = await verifyAuth();
     
-    if (role !== 'ADMIN') {
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    if (user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }
       );
     }
 
-    const { id, name, slug, description, image, icon, badge, badgeColor, isActive } = await request.json();
+    const { id, name, slug, image, isActive } = await request.json();
 
     if (!id) {
       return NextResponse.json(
@@ -164,11 +174,7 @@ export async function PUT(request) {
       data: {
         ...(name && { name }),
         ...(slug && { slug }),
-        ...(description !== undefined && { description }),
         ...(image !== undefined && { image }),
-        ...(icon && { icon }),
-        ...(badge !== undefined && { badge }),
-        ...(badgeColor !== undefined && { badgeColor }),
         ...(isActive !== undefined && { isActive })
       }
     });
@@ -190,9 +196,16 @@ export async function PUT(request) {
 // DELETE - Delete category (Admin only)
 export async function DELETE(request) {
   try {
-    const { userId, role } = await verifyAuth(request);
+    const { user, error } = await verifyAuth();
     
-    if (role !== 'ADMIN') {
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    if (user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }

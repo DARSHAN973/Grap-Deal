@@ -58,7 +58,7 @@ export async function POST(request) {
         }, { status: 400 });
       }
 
-      // TODO: Upload file to cloud storage (AWS S3, Cloudinary, etc.)
+      // TODO: Implement actual file upload to local storage
       // For now, we'll simulate the upload
       const simulatedFileUrl = `/uploads/kyc/${Date.now()}-${file.name}`;
 

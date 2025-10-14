@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Heart, ShoppingCart, Eye, Star } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
@@ -11,203 +11,229 @@ const ProductCard = ({
     name: "Premium Headphones",
     price: 299,
     originalPrice: 399,
-    image: "/api/placeholder/300/300",
+    images: [],
     rating: 4.8,
     reviews: 124,
-    tag: "Best Seller"
-  }
+    category: "Electronics",
+    brand: "TechSound",
+    vendor: "TechStore",
+    isNew: false,
+    isFeatured: false,
+    isTrending: false,
+    isHot: false,
+    tags: ["Electronics"]
+  },
+  viewMode = 'grid'
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-100, 100], [30, -30]);
-  const rotateY = useTransform(x, [-100, 100], [-30, 30]);
+  // Extract images from the images array
+  const primaryImage = product.images?.[0]?.url || product.image || '/api/placeholder/300/300';
+  const currentPrice = product.price || 0;
+  const originalPrice = product.originalPrice || product.comparePrice || product.mrp || 0;
   
-  const springConfig = { damping: 25, stiffness: 700 };
-  const rotateXSpring = useSpring(rotateX, springConfig);
-  const rotateYSpring = useSpring(rotateY, springConfig);
-
-  const handleMouseMove = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    x.set(event.clientX - centerX);
-    y.set(event.clientY - centerY);
+  // For testing, let's add some sample original prices if missing
+  const testOriginalPrice = originalPrice || (currentPrice * 1.25); // 25% markup for testing
+  
+  // More robust discount calculation
+  const discount = testOriginalPrice && currentPrice && testOriginalPrice > currentPrice
+    ? Math.round(((testOriginalPrice - currentPrice) / testOriginalPrice) * 100) 
+    : null;
+  
+  // Debug log to see what data we're getting
+  console.log('ProductCard:', product.name, {
+    originalPrice,
+    testOriginalPrice,
+    currentPrice,
+    discount,
+    rawProduct: product
+  });
+  
+  // Determine status and accent based on product flags
+  const getStatusInfo = () => {
+    if (product.isFeatured) return { status: 'Featured', accent: 'from-sky-500/25 via-blue-500/20 to-indigo-500/25' };
+    if (product.isTrending) return { status: 'Trending', accent: 'from-amber-500/25 via-orange-500/20 to-rose-500/25' };
+    if (product.isHot) return { status: 'Hot Drop', accent: 'from-fuchsia-500/25 via-purple-500/20 to-violet-500/25' };
+    if (product.isNew) return { status: 'New', accent: 'from-emerald-500/25 via-teal-400/20 to-cyan-500/25' };
+    return { status: null, accent: 'from-gray-500/25 via-gray-400/20 to-gray-500/25' };
   };
 
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-    setIsHovered(false);
+  const { status, accent } = getStatusInfo();
+
+  // Star rating component
+  const StarRating = ({ rating }) => {
+    return (
+      <div className="flex items-center gap-1">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`h-3.5 w-3.5 ${
+              i < Math.floor(rating)
+                ? 'fill-yellow-400 text-yellow-400'
+                : i < rating
+                ? 'fill-yellow-400/50 text-yellow-400'
+                : 'fill-gray-200 text-gray-200 dark:fill-gray-600 dark:text-gray-600'
+            }`}
+          />
+        ))}
+        <span className="ml-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+          {rating.toFixed(1)}
+        </span>
+      </div>
+    );
   };
 
-  return (
-    <motion.div
-      className="relative group perspective-1000"
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      whileHover={{ y: -10 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-    >
-      <motion.div
-        className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden transform-gpu"
-        style={{
-          rotateX: rotateXSpring,
-          rotateY: rotateYSpring,
-          transformStyle: "preserve-3d",
-        }}
-        whileHover={{ 
-          scale: 1.02,
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-        }}
+  if (viewMode === 'list') {
+    // List view design (simplified version)
+    return (
+      <motion.article
+        className="group relative flex h-32 w-full shrink-0 overflow-hidden rounded-2xl border border-white/60 bg-white/85 shadow-lg backdrop-blur-[40px] transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.05]"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        {/* Product Tag */}
-        {product.tag && (
-          <motion.div
-            className="absolute top-4 left-4 z-20 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold"
-            initial={{ scale: 0, rotate: -10 }}
-            animate={{ scale: 1, rotate: 0 }}
-            whileHover={{ scale: 1.1, rotate: 5 }}
-          >
-            {product.tag}
-          </motion.div>
-        )}
-
-        {/* Wishlist Button */}
-        <motion.button
-          className="absolute top-4 right-4 z-20 w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
-          onClick={() => setIsLiked(!isLiked)}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Heart 
-            size={18} 
-            className={`transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
+        <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
+        
+        <div className="relative h-full w-32 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+            style={{ backgroundImage: `url(${primaryImage})` }}
           />
-        </motion.button>
-
-        {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20"
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.3 }}
-          />
-          
-          {/* Placeholder for product image */}
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
-              <ShoppingCart size={40} className="text-white" />
-            </div>
-          </div>
-
-          {/* Hover Actions */}
-          <motion.div
-            className="absolute inset-0 bg-black/20 flex items-center justify-center space-x-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.button
-              className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 1)' }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Eye size={20} className="text-gray-700" />
-            </motion.button>
-            
-            <motion.button
-              className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <ShoppingCart size={20} className="text-white" />
-            </motion.button>
-          </motion.div>
         </div>
-
-        {/* Product Info */}
-        <div className="p-6">
-          {/* Rating */}
-          <div className="flex items-center space-x-2 mb-3">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={14}
-                  className={`${
-                    i < Math.floor(product.rating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
+        
+        <div className="relative flex flex-1 flex-col justify-between p-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
+              {product.name}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{product.category}</p>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">₹{currentPrice}</span>
+                {testOriginalPrice > currentPrice && (
+                  <span className="text-sm text-gray-500 line-through">₹{testOriginalPrice}</span>
+                )}
+              </div>
+              {discount && discount > 0 && (
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  Save {discount}% (₹{Math.round(testOriginalPrice - currentPrice)})
+                </span>
+              )}
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {product.rating} ({product.reviews})
+            <StarRating rating={product.rating} />
+          </div>
+        </div>
+      </motion.article>
+    );
+  }
+
+  // Grid view design (matching TrendingSlider)
+  return (
+    <motion.article
+      className="group relative flex h-full min-h-[32rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05]"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
+
+      <div className="relative h-96 overflow-hidden">
+        <div
+          className="absolute inset-0 scale-105 transform bg-cover bg-center transition-transform duration-500 group-hover:scale-125"
+          style={{ backgroundImage: `url(${primaryImage})` }}
+        />
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
+          initial={{ opacity: 0.65 }}
+          whileHover={{ opacity: 0.78 }}
+        />
+        <div className="absolute left-5 right-5 top-5 flex items-center justify-between text-[0.7rem] uppercase tracking-[0.3em] text-white/80">
+          {status && (
+            <span className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 font-semibold backdrop-blur">
+              {status}
             </span>
+          )}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label={`Quick view ${product.name}`}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+            >
+              <Eye className="h-4.5 w-4.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLiked(!isLiked)}
+              aria-label={`${isLiked ? 'Remove from' : 'Add to'} wishlist`}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+            >
+              <Heart className={`h-4.5 w-4.5 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+            </button>
           </div>
-
-          {/* Product Name */}
-          <motion.h3
-            className="text-lg font-bold text-gray-900 dark:text-white mb-2"
-            whileHover={{ color: '#3b82f6' }}
-          >
+        </div>
+        <div className="absolute bottom-5 left-5 right-5 flex flex-col gap-1.5 text-white">
+          <span className="text-[0.7rem] uppercase tracking-[0.32em] text-white/70">
+            {product.category}
+          </span>
+          <h3 className="text-xl font-semibold leading-tight line-clamp-2">
             {product.name}
-          </motion.h3>
+          </h3>
+          <p className="text-xs text-white/75">{product.brand}</p>
+        </div>
+      </div>
 
-          {/* Price */}
-          <div className="flex items-center space-x-2 mb-4">
-            <motion.span
-              className="text-2xl font-bold text-gray-900 dark:text-white"
-              whileHover={{ scale: 1.05 }}
-            >
-              ${product.price}
-            </motion.span>
-            {product.originalPrice && (
-              <span className="text-lg text-gray-500 line-through">
-                ${product.originalPrice}
-              </span>
-            )}
-            {product.originalPrice && (
-              <motion.span
-                className="text-sm font-semibold text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-              </motion.span>
+      <div className="relative flex flex-col px-4 pt-4 pb-1.5 text-gray-700 dark:text-gray-300">
+        <div className="flex items-center justify-between mb-2">
+          <StarRating rating={product.rating} />
+          {discount && discount > 0 && (
+            <span className="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+              {discount}% OFF
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col gap-1 mb-2">
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{currentPrice}</span>
+            {testOriginalPrice > currentPrice && (
+              <span className="text-lg text-gray-500 line-through dark:text-gray-400">₹{testOriginalPrice}</span>
             )}
           </div>
-
-          {/* Add to Cart Button */}
+          {discount && discount > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                You Save: ₹{Math.round(testOriginalPrice - currentPrice)}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                ({discount}% discount)
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <MagneticButton
-            className="w-full group"
-            variant="primary"
+            variant="gradient"
+            size="md"
+            className="w-full justify-center rounded-2xl"
           >
-            <ShoppingCart size={18} className="group-hover:animate-bounce" />
             <span>Add to Cart</span>
-            <motion.div
-              className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              →
-            </motion.div>
+          </MagneticButton>
+          <MagneticButton
+            variant="secondary"
+            size="md"
+            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12"
+            whileTap={{ scale: 0.94 }}
+            aria-label="Quick add to cart"
+          >
+            <ShoppingCart className="h-5 w-5" />
           </MagneticButton>
         </div>
-
-        {/* Shimmer effect */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full"
-          animate={{ x: isHovered ? ['0%', '100%'] : '0%' }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-        />
-      </motion.div>
-    </motion.div>
+      </div>
+    </motion.article>
   );
 };
 

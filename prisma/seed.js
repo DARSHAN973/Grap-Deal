@@ -5,8 +5,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   const banners = [
-    { title: 'image 1', imageUrl: 'https://res.cloudinary.com/dhzk2xuvt/image/upload/v1758177810/banners/banner-1758177810396.png', sortOrder: 0 },
-    { title: 'image 2', imageUrl: 'https://res.cloudinary.com/dhzk2xuvt/image/upload/v1758177585/banners/banner-1758177584675.png', sortOrder: 1 },
+    { title: 'image 1', imageUrl: '/uploads/banners/banner-1.png', sortOrder: 0 },
+    { title: 'image 2', imageUrl: '/uploads/banners/banner-2.png', sortOrder: 1 },
   ];
 
   for (const b of banners) {

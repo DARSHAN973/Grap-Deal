@@ -19,7 +19,8 @@ import {
   Gamepad2,
   Dumbbell,
   Baby,
-  Heart
+  Heart,
+  Loader2
 } from 'lucide-react';
 import ProductCard from '../ui/ProductCard';
 
@@ -31,127 +32,6 @@ const sortOptions = [
   { value: 'rating', label: 'Highest Rated' },
   { value: 'newest', label: 'Newest First' },
 ];
-
-// Sample products data
-const allProducts = [
-  {
-    id: 1,
-    name: 'Wireless Bluetooth Headphones',
-    price: 129,
-    originalPrice: 199,
-    rating: 4.8,
-    reviews: 342,
-    category: 'Electronics',
-    brand: 'TechSound',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=600&q=80',
-    isNew: true,
-    description: 'Premium wireless headphones with noise cancellation technology.',
-    tags: ['Electronics', 'Audio', 'Wireless']
-  },
-  {
-    id: 2,
-    name: 'Classic Cotton T-Shirt',
-    price: 29,
-    originalPrice: 39,
-    rating: 4.6,
-    reviews: 156,
-    category: 'Fashion',
-    brand: 'StyleWear',
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1503341338985-b9c88fc3d0a6?auto=format&fit=crop&w=600&q=80',
-    isTrending: true,
-    description: 'Comfortable cotton t-shirt perfect for everyday wear.',
-    tags: ['Fashion', 'Casual', 'Cotton']
-  },
-  {
-    id: 3,
-    name: 'Smart Home LED Bulb',
-    price: 24,
-    originalPrice: 34,
-    rating: 4.7,
-    reviews: 89,
-    category: 'Home & Garden',
-    brand: 'SmartLife',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
-    description: 'WiFi-enabled smart LED bulb with color changing capabilities.',
-    tags: ['Home', 'Smart', 'LED']
-  },
-  {
-    id: 4,
-    name: 'Gaming Mechanical Keyboard',
-    price: 89,
-    originalPrice: 129,
-    rating: 4.9,
-    reviews: 267,
-    category: 'Gaming',
-    brand: 'GamePro',
-    image: 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1595044426077-d36d9236d54a?auto=format&fit=crop&w=600&q=80',
-    isHot: true,
-    description: 'RGB mechanical gaming keyboard with tactile switches.',
-    tags: ['Gaming', 'Keyboard', 'RGB']
-  },
-  {
-    id: 5,
-    name: 'Yoga Mat Premium',
-    price: 45,
-    originalPrice: 65,
-    rating: 4.5,
-    reviews: 123,
-    category: 'Sports & Fitness',
-    brand: 'FitLife',
-    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1506629905607-5fe45ac8d90a?auto=format&fit=crop&w=600&q=80',
-    description: 'Non-slip premium yoga mat for all fitness levels.',
-    tags: ['Fitness', 'Yoga', 'Exercise']
-  },
-  {
-    id: 6,
-    name: 'Baby Stroller Compact',
-    price: 199,
-    originalPrice: 299,
-    rating: 4.8,
-    reviews: 78,
-    category: 'Baby & Kids',
-    brand: 'BabyJoy',
-    image: 'https://images.unsplash.com/photo-1544961618-da5e4eaec432?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=600&q=80',
-    description: 'Lightweight and compact stroller for easy travel.',
-    tags: ['Baby', 'Stroller', 'Travel']
-  },
-  {
-    id: 7,
-    name: 'Natural Face Serum',
-    price: 35,
-    originalPrice: 49,
-    rating: 4.7,
-    reviews: 234,
-    category: 'Beauty & Care',
-    brand: 'GlowNaturals',
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=600&q=80',
-    isNew: true,
-    description: 'Organic face serum with vitamin C and hyaluronic acid.',
-    tags: ['Beauty', 'Skincare', 'Natural']
-  },
-  {
-    id: 8,
-    name: 'Smartphone Stand Adjustable',
-    price: 19,
-    originalPrice: 29,
-    rating: 4.4,
-    reviews: 98,
-    category: 'Electronics',
-    brand: 'TechAccessory',
-    image: 'https://images.unsplash.com/photo-1551816230-ef5deaed4a26?auto=format&fit=crop&w=600&q=80',
-    hoverImage: 'https://images.unsplash.com/photo-1535303311164-664fc9ec6532?auto=format&fit=crop&w=600&q=80',
-    description: 'Adjustable phone stand for desk and bedside use.',
-    tags: ['Electronics', 'Accessory', 'Stand']
-  }
-];
-
 const ProductsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -159,29 +39,72 @@ const ProductsPage = () => {
   const [sortBy, setSortBy] = useState('popularity');
   const [currentPage, setCurrentPage] = useState(1);
   const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [pagination, setPagination] = useState({});
+  const [totalProducts, setTotalProducts] = useState(0);
   const heroRef = useRef(null);
+
+  // Fetch products from API
+  const fetchProducts = async (page = 1, category = selectedCategory, search = searchQuery, sort = sortBy) => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '12',
+        sortBy: sort,
+        status: 'ACTIVE'
+      });
+      
+      if (category && category !== 'all') {
+        params.append('category', category);
+      }
+      
+      if (search) {
+        params.append('search', search);
+      }
+
+      const response = await fetch(`/api/products?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data.products);
+        setPagination(data.pagination);
+        setTotalProducts(data.pagination.totalCount);
+      } else {
+        console.error('Failed to fetch products');
+        setProducts([]);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch categories from API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/admin/categories');
-        const data = await response.json();
-        
-        if (data.success) {
+        if (response.ok) {
+          const data = await response.json();
+          
           // Add "All Products" as first option
           const allOption = {
             id: 'all',
             name: 'All Products',
             slug: 'all',
             icon: 'Sparkles',
-            productCount: allProducts.length,
+            productCount: 0, // Will be updated after products are fetched
             image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=400&q=80',
             description: 'Browse all our products'
           };
           
-          setCategories([allOption, ...data.categories.filter(cat => cat.isActive)]);
+          // Only show active categories with productCount
+          const activeCategories = data.categories.filter(cat => cat.isActive);
+          setCategories([allOption, ...activeCategories]);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -192,7 +115,7 @@ const ProductsPage = () => {
             name: 'All Products', 
             slug: 'all', 
             icon: 'Sparkles', 
-            productCount: allProducts.length,
+            productCount: 0,
             image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=400&q=80',
             description: 'Browse all our products'
           }
@@ -204,6 +127,11 @@ const ProductsPage = () => {
 
     fetchCategories();
   }, []);
+
+  // Fetch products when dependencies change
+  useEffect(() => {
+    fetchProducts(currentPage, selectedCategory, searchQuery, sortBy);
+  }, [currentPage, selectedCategory, searchQuery, sortBy]);
 
   // Get icon component from string name
   const getIconComponent = (iconName) => {
@@ -219,42 +147,6 @@ const ProductsPage = () => {
     };
     return iconMap[iconName] || Sparkles;
   };
-
-  // Filter products based on selected category and search
-  const filteredProducts = allProducts.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.category.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '') === selectedCategory.replace(/-/g, '');
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return b.rating - a.rating;
-      case 'newest':
-        return b.id - a.id;
-      default:
-        return b.reviews - a.reviews; // popularity
-    }
-  });
-
-  // Pagination
-  const productsPerPage = 12;
-  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
-  const startIndex = (currentPage - 1) * productsPerPage;
-  const paginatedProducts = sortedProducts.slice(startIndex, startIndex + productsPerPage);
-
-  // Reset page when category changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory, searchQuery]);
 
   // GSAP Animations
   useGSAP(() => {
@@ -344,12 +236,12 @@ const ProductsPage = () => {
             ) : (
               categories.map((category, index) => {
                 const IconComponent = getIconComponent(category.icon);
-                const isActive = selectedCategory === category.slug;
+                const isActive = selectedCategory === category.id;
                 
                 return (
                   <motion.button
                     key={category.id}
-                    onClick={() => setSelectedCategory(category.slug)}
+                    onClick={() => setSelectedCategory(category.id)}
                     className={`group relative overflow-hidden rounded-2xl border-2 text-center transition-all duration-300 ${
                       isActive
                         ? 'border-blue-500 bg-blue-50 shadow-lg scale-105 dark:border-blue-400 dark:bg-blue-950/30'
@@ -494,7 +386,7 @@ const ProductsPage = () => {
 
               {/* Results Count */}
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                {filteredProducts.length} results
+                {loading ? 'Loading...' : `${pagination.totalCount || 0} results`}
               </div>
             </motion.div>
           </div>
@@ -515,33 +407,62 @@ const ProductsPage = () => {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {selectedCategory === 'all' 
                 ? 'All Products' 
-                : categories.find(cat => cat.slug === selectedCategory)?.name
+                : categories.find(cat => cat.id === selectedCategory)?.name || 'Products'
               }
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Showing {filteredProducts.length} products
-              {searchQuery && ` for "${searchQuery}"`}
+              {loading ? 'Loading products...' : (
+                <>
+                  Showing {pagination.totalCount || 0} products
+                  {searchQuery && ` for "${searchQuery}"`}
+                </>
+              )}
             </p>
           </motion.div>
 
           {/* Products Grid/List */}
-          <motion.div
-            className={`${
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                : 'space-y-4'
-            }`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {paginatedProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} viewMode={viewMode} />
-            ))}
-          </motion.div>
+          {loading ? (
+            // Loading State
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                <span className="text-gray-600 dark:text-gray-400">Loading products...</span>
+              </div>
+            </div>
+          ) : products.length === 0 ? (
+            // No Results
+            <motion.div
+              className="text-center py-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="text-gray-500 dark:text-gray-400">
+                <Search className="h-12 w-12 mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No products found</h3>
+                <p>Try adjusting your search or browse different categories</p>
+              </div>
+            </motion.div>
+          ) : (
+            // Products Grid
+            <motion.div
+              className={`${
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                  : 'space-y-4'
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              {products.map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} viewMode={viewMode} />
+              ))}
+            </motion.div>
+          )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {!loading && pagination.totalPages > 1 && (
             <motion.div
               className="mt-12 flex items-center justify-center gap-2"
               initial={{ opacity: 0, y: 20 }}
@@ -558,45 +479,42 @@ const ProductsPage = () => {
               </button>
               
               <div className="flex gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`h-10 w-10 rounded-lg text-sm font-medium transition-all ${
-                      currentPage === page
-                        ? 'bg-blue-500 text-white'
-                        : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                  let pageNum;
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`h-10 w-10 rounded-lg text-sm font-medium transition-all ${
+                        currentPage === pageNum
+                          ? 'bg-blue-500 text-white'
+                          : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
               </div>
 
               <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
+                disabled={currentPage === pagination.totalPages}
                 className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
               </button>
-            </motion.div>
-          )}
-
-          {/* No Results */}
-          {filteredProducts.length === 0 && (
-            <motion.div
-              className="text-center py-12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="text-gray-500 dark:text-gray-400">
-                <Search className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No products found</h3>
-                <p>Try adjusting your search or browse different categories</p>
-              </div>
             </motion.div>
           )}
 

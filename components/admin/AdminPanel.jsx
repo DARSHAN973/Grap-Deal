@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import CategoryManagement from "./CategoryManagement";
+import ProductManagement from "./ProductManagement";
+import AdminHeader from "./AdminHeader";
 import {
   HomeIcon,
   UsersIcon,
@@ -13,10 +15,6 @@ import {
   CreditCardIcon,
   ChartBarIcon,
   Cog6ToothIcon,
-  BellIcon,
-  UserCircleIcon,
-  MagnifyingGlassIcon,
-  Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 
@@ -47,7 +45,7 @@ const AdminPanel = () => {
       case "vendors":
         return <VendorManagementContent />;
       case "products":
-        return <ProductManagementContent />;
+        return <ProductManagement />;
       case "categories":
         return <CategoryManagementContent />;
       case "orders":
@@ -68,12 +66,12 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0`}>
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Grap Deal Admin</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Grap Deal</h1>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-500"
@@ -83,7 +81,7 @@ const AdminPanel = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-5 px-2">
+        <nav className="mt-5 px-2 overflow-y-auto h-[calc(100vh-4rem)]">
           <div className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -107,46 +105,19 @@ const AdminPanel = () => {
       </div>
 
       {/* Main Content */}
-      <div className={`${sidebarOpen ? 'lg:pl-64' : ''} transition-all duration-300`}>
-        {/* Top Bar */}
-        <div className="bg-white dark:bg-gray-800 shadow px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-500"
-              >
-                <Bars3Icon className="h-6 w-6" />
-              </button>
-              <div className="ml-4 lg:ml-0">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
-                <BellIcon className="h-6 w-6" />
-              </button>
-              <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
-                <UserCircleIcon className="h-8 w-8" />
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className={`flex-1 flex flex-col ${sidebarOpen ? 'lg:pl-64' : ''} transition-all duration-300`}>
+        {/* Admin Header */}
+        <AdminHeader 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)} 
+          sidebarOpen={sidebarOpen}
+        />
 
         {/* Page Content */}
-        <main className="py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {renderContent()}
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+          <div className="py-6">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {renderContent()}
+            </div>
           </div>
         </main>
       </div>
@@ -401,67 +372,6 @@ const VendorManagementContent = () => (
             </tr>
           </tbody>
         </table>
-      </div>
-    </div>
-  </div>
-);
-
-// Product Management Content
-const ProductManagementContent = () => (
-  <div>
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Product Management</h1>
-      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-        Approve products, manage categories, and monitor inventory.
-      </p>
-    </div>
-
-    {/* Filter Bar */}
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <select className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-          <option>All Categories</option>
-          <option>Electronics</option>
-          <option>Fashion</option>
-          <option>Home & Garden</option>
-        </select>
-        <select className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-          <option>All Status</option>
-          <option>Pending Approval</option>
-          <option>Approved</option>
-          <option>Rejected</option>
-        </select>
-        <select className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-          <option>All Vendors</option>
-          <option>Tech Store</option>
-          <option>Fashion Hub</option>
-        </select>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
-          Apply Filters
-        </button>
-      </div>
-    </div>
-
-    {/* Product Grid */}
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-        <div className="h-48 bg-gray-300"></div>
-        <div className="p-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">iPhone 15 Pro</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-300">by Tech Store</p>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-lg font-bold text-gray-900 dark:text-white">₹1,29,000</span>
-            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>
-          </div>
-          <div className="mt-4 flex space-x-2">
-            <button className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm">
-              Approve
-            </button>
-            <button className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm">
-              Reject
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </div>

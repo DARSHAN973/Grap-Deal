@@ -11,41 +11,8 @@ import {
   Save, 
   X, 
   Upload,
-  Package,
-  Smartphone,
-  Shirt,
-  Home,
-  Gamepad2,
-  Dumbbell,
-  Baby,
-  Heart,
-  Sparkles
+  Image as ImageIcon
 } from 'lucide-react';
-
-// Available icons for categories
-const iconOptions = [
-  { name: 'Package', icon: Package },
-  { name: 'Smartphone', icon: Smartphone },
-  { name: 'Shirt', icon: Shirt },
-  { name: 'Home', icon: Home },
-  { name: 'Gamepad2', icon: Gamepad2 },
-  { name: 'Dumbbell', icon: Dumbbell },
-  { name: 'Baby', icon: Baby },
-  { name: 'Heart', icon: Heart },
-  { name: 'Sparkles', icon: Sparkles }
-];
-
-// Badge color options
-const badgeColorOptions = [
-  { name: 'Red', value: 'bg-red-500' },
-  { name: 'Blue', value: 'bg-blue-500' },
-  { name: 'Green', value: 'bg-green-500' },
-  { name: 'Purple', value: 'bg-purple-500' },
-  { name: 'Orange', value: 'bg-orange-500' },
-  { name: 'Pink', value: 'bg-pink-500' },
-  { name: 'Indigo', value: 'bg-indigo-500' },
-  { name: 'Yellow', value: 'bg-yellow-500' }
-];
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -54,17 +21,42 @@ const CategoryManagement = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
-    slug: '',
-    description: '',
     image: '',
-    icon: 'Package',
-    badge: '',
-    badgeColor: '',
     isActive: true
   });
+
+  // Handle image upload
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const uploadData = new FormData();
+      uploadData.append('image', file);
+
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: uploadData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setFormData(prev => ({ ...prev, image: result.imageUrl }));
+      } else {
+        alert('Failed to upload image: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -92,35 +84,46 @@ const CategoryManagement = () => {
     setSubmitting(true);
 
     try {
-      const url = editingCategory 
-        ? `/api/admin/categories` 
-        : '/api/admin/categories';
-      
-      const method = editingCategory ? 'PUT' : 'POST';
-      
-      const payload = editingCategory 
-        ? { ...formData, id: editingCategory.id }
-        : formData;
+      // Generate slug from name
+      const slug = formData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
 
-      const response = await fetch(url, {
-        method,
+      const submitData = {
+        ...formData,
+        slug,
+        description: '',
+        icon: 'Package',
+        badge: null,
+        badgeColor: null
+      };
+
+      if (editingCategory) {
+        submitData.id = editingCategory.id;
+      }
+
+      const response = await fetch('/api/admin/categories', {
+        method: editingCategory ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(submitData),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.success) {
+      if (result.success) {
         await fetchCategories();
         closeModal();
       } else {
-        alert(data.error || 'Operation failed');
+        alert('Error: ' + result.error);
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Operation failed');
+      console.error('Form submission error:', error);
+      alert('Failed to save category');
     } finally {
       setSubmitting(false);
     }
@@ -153,12 +156,7 @@ const CategoryManagement = () => {
     setEditingCategory(category);
     setFormData({
       name: category.name,
-      slug: category.slug,
-      description: category.description || '',
       image: category.image || '',
-      icon: category.icon || 'Package',
-      badge: category.badge || '',
-      badgeColor: category.badgeColor || '',
       isActive: category.isActive
     });
     setShowModal(true);
@@ -169,12 +167,7 @@ const CategoryManagement = () => {
     setEditingCategory(null);
     setFormData({
       name: '',
-      slug: '',
-      description: '',
       image: '',
-      icon: 'Package',
-      badge: '',
-      badgeColor: '',
       isActive: true
     });
     setShowModal(true);
@@ -186,39 +179,14 @@ const CategoryManagement = () => {
     setEditingCategory(null);
     setFormData({
       name: '',
-      slug: '',
-      description: '',
       image: '',
-      icon: 'Package',
-      badge: '',
-      badgeColor: '',
       isActive: true
     });
   };
 
-  // Generate slug from name
-  const generateSlug = (name) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim('-');
-  };
-
-  // Handle name change and auto-generate slug
-  const handleNameChange = (name) => {
-    setFormData(prev => ({
-      ...prev,
-      name,
-      slug: generateSlug(name)
-    }));
-  };
-
   // Filter categories
   const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -265,86 +233,68 @@ const CategoryManagement = () => {
 
       {/* Categories Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredCategories.map((category) => {
-          const IconComponent = iconOptions.find(opt => opt.name === category.icon)?.icon || Package;
-          
-          return (
-            <motion.div
-              key={category.id}
-              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Category Image */}
-              {category.image && (
-                <div className="relative mb-3 h-32 w-full overflow-hidden rounded-lg">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    className="object-cover"
-                  />
-                  {category.badge && (
-                    <div className={`absolute top-2 right-2 rounded-full px-2 py-1 text-xs font-semibold text-white ${category.badgeColor}`}>
-                      {category.badge}
-                    </div>
-                  )}
+        {filteredCategories.map((category) => (
+          <motion.div
+            key={category.id}
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Category Image */}
+            <div className="relative mb-4 h-32 w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
+              {category.image ? (
+                <Image
+                  src={category.image}
+                  alt={category.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <Package className="h-12 w-12 text-gray-400" />
                 </div>
               )}
+            </div>
 
-              {/* Category Info */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700">
-                    <IconComponent className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {category.productCount} products
-                    </p>
-                  </div>
-                </div>
+            {/* Category Info */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {category.name}
+                </h3>
+                <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                  category.isActive
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                }`}>
+                  {category.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </div>
 
-                {category.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                    {category.description}
-                  </p>
-                )}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-500">
+                  {category.productCount || 0} products
+                </p>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                      category.isActive
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }`}>
-                      {category.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openEditModal(category)}
-                      className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(category.id)}
-                      className="rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => openEditModal(category)}
+                    className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(category.id)}
+                    className="rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
-            </motion.div>
-          );
-        })}
+            </div>
+          </motion.div>
+        ))}
       </div>
 
       {/* Modal */}
@@ -368,124 +318,100 @@ const CategoryManagement = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Category Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Slug *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
-
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Category Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  rows={3}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Image URL
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Category Name *
                 </label>
                 <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="Enter category name"
+                  required
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Icon
-                  </label>
-                  <select
-                    value={formData.icon}
-                    onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    {iconOptions.map((option) => (
-                      <option key={option.name} value={option.name}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Category Image
+                </label>
+                
+                <div className="space-y-4">
+                  {/* Current Image Preview */}
+                  {formData.image && (
+                    <div className="flex items-center gap-4">
+                      <Image
+                        src={formData.image}
+                        alt="Category preview"
+                        width={100}
+                        height={100}
+                        className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                        className="text-red-600 hover:text-red-700 text-sm"
+                      >
+                        Remove Image
+                      </button>
+                    </div>
+                  )}
 
+                  {/* Upload Input */}
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="file"
+                      id="imageUpload"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          handleImageUpload(file);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="imageUpload"
+                      className={`flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <Upload className="h-4 w-4" />
+                      {uploading ? 'Uploading...' : 'Upload Image'}
+                    </label>
+                    <span className="text-xs text-gray-500">
+                      JPG, PNG up to 5MB
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Active Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Badge Text
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Active Category
                   </label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Category will be visible to users when active
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input
-                    type="text"
-                    value={formData.badge}
-                    onChange={(e) => setFormData(prev => ({ ...prev, badge: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    placeholder="Hot, New, etc."
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                    className="sr-only peer"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Badge Color
-                  </label>
-                  <select
-                    value={formData.badgeColor}
-                    onChange={(e) => setFormData(prev => ({ ...prev, badgeColor: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">No color</option>
-                    {badgeColorOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="isActive" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Active category
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              {/* Form Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
                 <button
                   type="button"
                   onClick={closeModal}
@@ -495,8 +421,8 @@ const CategoryManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                  disabled={submitting || uploading}
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="h-4 w-4" />
                   {submitting ? 'Saving...' : 'Save Category'}

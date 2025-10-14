@@ -45,7 +45,7 @@ export async function POST(request) {
     // Create JWT token
     // Ensure userId is stored as a string in the token (Prisma expects string ids)
     const token = jwt.sign(
-      { userId: String(id), email: user.email },
+      { userId: String(id), email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
