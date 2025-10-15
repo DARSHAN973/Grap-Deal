@@ -29,13 +29,23 @@ const ProductManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  // Loading states for different operations
+  const [operationLoading, setOperationLoading] = useState({
+    create: false,
+    update: false,
+    delete: false,
+    fetch: false,
+    upload: false
+  });
+
   // Form state - E-Commerce products only (simplified)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     categoryId: '',
     brand: '',
-    price: '',
+    originalPrice: '', // MRP/Original Price (before discount)
+    price: '', // Selling Price (after discount) - calculated automatically
     rating: '', // Product rating (0-5)
     discount: '', // Discount percentage
     productType: 'REGULAR', // REGULAR, TRENDING, BESTSELLER, HOT_DROP, NEW_ARRIVAL, FEATURED
@@ -51,9 +61,34 @@ const ProductManagement = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
 
+  // Calculate selling price based on original price and discount
+  const calculateSellingPrice = (originalPrice, discount) => {
+    if (!originalPrice || !discount) return originalPrice || '';
+    const discountAmount = (parseFloat(originalPrice) * parseFloat(discount)) / 100;
+    const sellingPrice = parseFloat(originalPrice) - discountAmount;
+    return sellingPrice.toFixed(2);
+  };
+
+  // Auto-calculate selling price when original price or discount changes
+  useEffect(() => {
+    if (formData.originalPrice && formData.discount) {
+      const originalPrice = parseFloat(formData.originalPrice);
+      const discount = parseFloat(formData.discount);
+      const calculatedPrice = originalPrice - (originalPrice * discount / 100);
+      setFormData(prev => ({ ...prev, price: calculatedPrice.toFixed(2) }));
+    } else if (formData.originalPrice && !formData.discount) {
+      // If no discount, selling price = original price
+      setFormData(prev => ({ ...prev, price: formData.originalPrice }));
+    } else if (!formData.originalPrice) {
+      // If no original price, clear selling price
+      setFormData(prev => ({ ...prev, price: '' }));
+    }
+  }, [formData.originalPrice, formData.discount]);
+
   // Fetch products
   const fetchProducts = async (page = 1) => {
     try {
+      setOperationLoading(prev => ({ ...prev, fetch: true }));
       setLoading(true);
       const params = new URLSearchParams({
         page: page.toString(),
@@ -74,6 +109,7 @@ const ProductManagement = () => {
       console.error('Error fetching products:', error);
     } finally {
       setLoading(false);
+      setOperationLoading(prev => ({ ...prev, fetch: false }));
     }
   };
 
@@ -108,15 +144,23 @@ const ProductManagement = () => {
   // Handle form submission - Simplified with Image Upload
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const isUpdate = !!editingProduct;
+    const loadingKey = isUpdate ? 'update' : 'create';
+    
     try {
+      setOperationLoading(prev => ({ ...prev, [loadingKey]: true }));
+      
       // Upload new images if any
       let uploadedImageUrls = [...formData.images]; // Keep existing images for edit
       
       if (imageFiles.length > 0) {
+        setOperationLoading(prev => ({ ...prev, upload: true }));
         setUploadingImages(true);
         const newUploadedUrls = await uploadImages(imageFiles);
         uploadedImageUrls = [...uploadedImageUrls, ...newUploadedUrls];
         setUploadingImages(false);
+        setOperationLoading(prev => ({ ...prev, upload: false }));
       }
       
       // Auto-generate slug from name
@@ -128,6 +172,20 @@ const ProductManagement = () => {
       // Auto-generate or keep existing SKU
       const sku = editingProduct?.sku || `EC-${Date.now()}`;
       
+      // Auto-calculate selling price and ensure discount is stored
+      const originalPriceFloat = parseFloat(formData.originalPrice);
+      const sellingPriceFloat = parseFloat(formData.price);
+      const discountFloat = parseFloat(formData.discount);
+      
+      // Calculate actual discount percentage for storage
+      let actualDiscount = null;
+      if (formData.discount && originalPriceFloat > 0) {
+        actualDiscount = discountFloat;
+      } else if (originalPriceFloat > 0 && sellingPriceFloat > 0 && originalPriceFloat > sellingPriceFloat) {
+        // Calculate discount from price difference
+        actualDiscount = ((originalPriceFloat - sellingPriceFloat) / originalPriceFloat) * 100;
+      }
+      
       // Prepare payload
       const payload = {
         name: formData.name,
@@ -135,9 +193,10 @@ const ProductManagement = () => {
         description: formData.description,
         categoryId: formData.categoryId,
         brand: formData.brand || 'Generic',
-        price: parseFloat(formData.price),
+        originalPrice: originalPriceFloat || null,
+        price: sellingPriceFloat, // This will be the calculated selling price
         rating: formData.rating ? parseFloat(formData.rating) : 0,
-        discount: formData.discount ? parseFloat(formData.discount) : null,
+        discount: actualDiscount ? parseFloat(actualDiscount.toFixed(2)) : null, // Store calculated discount
         productType: formData.productType || 'REGULAR',
         weight: formData.weight ? parseFloat(formData.weight) : 1.0,
         dimensions: (formData.length && formData.width && formData.height) ? {
@@ -179,12 +238,16 @@ const ProductManagement = () => {
     } catch (error) {
       console.error('Error saving product:', error);
       alert('Failed to save product');
+    } finally {
+      setOperationLoading(prev => ({ ...prev, [loadingKey]: false }));
     }
   };
 
   // Handle delete
   const handleDelete = async (id) => {
     try {
+      setOperationLoading(prev => ({ ...prev, delete: true }));
+      
       const response = await fetch(`/api/admin/products?id=${id}`, {
         method: 'DELETE'
       });
@@ -199,6 +262,8 @@ const ProductManagement = () => {
     } catch (error) {
       console.error('Error deleting product:', error);
       alert('Failed to delete product');
+    } finally {
+      setOperationLoading(prev => ({ ...prev, delete: false }));
     }
   };
 
@@ -209,6 +274,7 @@ const ProductManagement = () => {
       description: '',
       categoryId: '',
       brand: '',
+      originalPrice: '',
       price: '',
       rating: '',
       discount: '',
@@ -280,6 +346,7 @@ const ProductManagement = () => {
       description: product.description || '',
       categoryId: product.category?.id || '',
       brand: product.brand || '',
+      originalPrice: product.originalPrice?.toString() || '',
       price: product.price?.toString() || '',
       rating: product.rating?.toString() || '',
       discount: product.discount?.toString() || '',
@@ -318,7 +385,8 @@ const ProductManagement = () => {
               setEditingProduct(null);
               setShowForm(true);
             }}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={operationLoading.create || operationLoading.update}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <PlusIcon className="h-5 w-5" />
             Add Product
@@ -383,7 +451,17 @@ const ProductManagement = () => {
       </div>
 
       {/* Products Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden relative">
+        {/* Operation Loading Overlay */}
+        {operationLoading.fetch && !loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 dark:bg-gray-800 dark:bg-opacity-75 flex items-center justify-center z-10">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Refreshing products...</p>
+            </div>
+          </div>
+        )}
+        
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -450,9 +528,14 @@ const ProductManagement = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          ₹{product.price || product.basePrice}
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-semibold">₹{product.price}</span>
+                            {product.originalPrice && product.originalPrice > product.price && (
+                              <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                            )}
+                          </div>
                           {product.discount && (
-                            <span className="text-green-600 text-xs ml-2">
+                            <span className="text-green-600 text-xs">
                               -{product.discount}% OFF
                             </span>
                           )}
@@ -502,13 +585,17 @@ const ProductManagement = () => {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleEdit(product)}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                            disabled={operationLoading.update || operationLoading.delete}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Edit Product"
                           >
                             <PencilIcon className="h-5 w-5" />
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(product)}
-                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                            disabled={operationLoading.update || operationLoading.delete}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Delete Product"
                           >
                             <TrashIcon className="h-5 w-5" />
                           </button>
@@ -530,7 +617,7 @@ const ProductManagement = () => {
                   <div className="flex space-x-2">
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
+                      disabled={currentPage === 1 || operationLoading.fetch}
                       className="px-3 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
@@ -540,7 +627,7 @@ const ProductManagement = () => {
                     </span>
                     <button
                       onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
-                      disabled={currentPage === pagination.totalPages}
+                      disabled={currentPage === pagination.totalPages || operationLoading.fetch}
                       className="px-3 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
@@ -640,17 +727,70 @@ const ProductManagement = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Selling Price * (₹)
+                        Original Price (MRP) * (₹)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        required
+                        value={formData.originalPrice}
+                        onChange={(e) => setFormData(prev => ({ ...prev, originalPrice: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="3999"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Maximum Retail Price (before discount)
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Discount (%) - Optional
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={formData.discount}
+                        onChange={(e) => setFormData(prev => ({ ...prev, discount: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="10.5"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formData.originalPrice && formData.discount ? (
+                          <>
+                            Discount will be ₹{(parseFloat(formData.originalPrice) * parseFloat(formData.discount) / 100).toFixed(2)} 
+                            <br />
+                            Final price: ₹{calculateSellingPrice(formData.originalPrice, formData.discount)}
+                          </>
+                        ) : (
+                          'Discount percentage for sale price calculation'
+                        )}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Selling Price (₹) - Auto-calculated
                       </label>
                       <input
                         type="number"
                         step="0.01"
                         required
                         value={formData.price}
-                        onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        placeholder="2999"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-600 dark:border-gray-600 dark:text-white cursor-not-allowed"
+                        placeholder="Auto-calculated from original price and discount"
+                        readOnly
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formData.originalPrice && formData.discount 
+                          ? `Automatically calculated: ₹${formData.originalPrice} - ${formData.discount}% = ₹${formData.price}`
+                          : formData.originalPrice && !formData.discount
+                          ? `Same as original price: ₹${formData.originalPrice}`
+                          : 'Enter original price and discount to calculate'
+                        }
+                      </p>
                     </div>
 
                     <div>
@@ -672,13 +812,13 @@ const ProductManagement = () => {
                     </div>
                   </div>
 
-                  {/* Product Rating, Discount & Type */}
+                  {/* Product Rating & Type */}
                   <div className="bg-purple-50 dark:bg-gray-900 p-4 rounded-lg border-l-4 border-purple-500">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                       ⭐ Product Features
                     </h3>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Rating (0-5) - Optional
@@ -695,25 +835,6 @@ const ProductManagement = () => {
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           Product quality rating (stars)
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Discount (%) - Optional
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.01"
-                          value={formData.discount}
-                          onChange={(e) => setFormData(prev => ({ ...prev, discount: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                          placeholder="10.5"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Discount percentage for sale
                         </p>
                       </div>
 
@@ -951,10 +1072,21 @@ const ProductManagement = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      disabled={operationLoading.create || operationLoading.update || operationLoading.upload}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <CheckIcon className="h-5 w-5" />
-                      {editingProduct ? 'Update Product' : 'Add Product'}
+                      {(operationLoading.create || operationLoading.update || operationLoading.upload) ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          {operationLoading.upload ? 'Uploading Images...' : 
+                           editingProduct ? 'Updating...' : 'Creating...'}
+                        </>
+                      ) : (
+                        <>
+                          <CheckIcon className="h-5 w-5" />
+                          {editingProduct ? 'Update Product' : 'Add Product'}
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
@@ -991,15 +1123,24 @@ const ProductManagement = () => {
               <div className="flex items-center justify-end space-x-4">
                 <button
                   onClick={() => setDeleteConfirm(null)}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  disabled={operationLoading.delete}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleDelete(deleteConfirm.id)}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  disabled={operationLoading.delete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Delete
+                  {operationLoading.delete ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
                 </button>
               </div>
             </motion.div>

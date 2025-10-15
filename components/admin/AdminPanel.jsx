@@ -7,10 +7,8 @@ import AdminHeader from "./AdminHeader";
 import {
   HomeIcon,
   UsersIcon,
-  BuildingStorefrontIcon,
   CubeIcon,
   TruckIcon,
-  MegaphoneIcon,
   ArrowsRightLeftIcon,
   CreditCardIcon,
   ChartBarIcon,
@@ -25,11 +23,9 @@ const AdminPanel = () => {
   const navigation = [
     { id: "dashboard", name: "Dashboard", icon: HomeIcon },
     { id: "users", name: "User Management", icon: UsersIcon },
-    { id: "vendors", name: "Vendor Management", icon: BuildingStorefrontIcon },
     { id: "products", name: "Product Management", icon: CubeIcon },
     { id: "categories", name: "Category Management", icon: CubeIcon },
     { id: "orders", name: "Order Management", icon: TruckIcon },
-    { id: "b2b", name: "B2B Management", icon: MegaphoneIcon },
     { id: "c2c", name: "C2C Management", icon: ArrowsRightLeftIcon },
     { id: "payments", name: "Payment Management", icon: CreditCardIcon },
     { id: "analytics", name: "Analytics & Reports", icon: ChartBarIcon },
@@ -42,16 +38,12 @@ const AdminPanel = () => {
         return <DashboardContent />;
       case "users":
         return <UserManagementContent />;
-      case "vendors":
-        return <VendorManagementContent />;
       case "products":
         return <ProductManagement />;
       case "categories":
         return <CategoryManagementContent />;
       case "orders":
         return <OrderManagementContent />;
-      case "b2b":
-        return <B2BManagementContent />;
       case "c2c":
         return <C2CManagementContent />;
       case "payments":
@@ -164,7 +156,7 @@ const DashboardContent = () => (
         <div className="p-5">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <BuildingStorefrontIcon className="h-6 w-6 text-gray-400" />
+              <UsersIcon className="h-6 w-6 text-gray-400" />
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
@@ -307,76 +299,6 @@ const UserManagementContent = () => (
   </div>
 );
 
-// Vendor Management Content
-const VendorManagementContent = () => (
-  <div>
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Vendor Management</h1>
-      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-        Approve, manage, and monitor vendor activities.
-      </p>
-    </div>
-
-    {/* Quick Stats */}
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-6">
-      <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-5">
-        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Approvals</div>
-        <div className="text-2xl font-semibold text-gray-900 dark:text-white">12</div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-5">
-        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Vendors</div>
-        <div className="text-2xl font-semibold text-gray-900 dark:text-white">89</div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-5">
-        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</div>
-        <div className="text-2xl font-semibold text-gray-900 dark:text-white">₹2,34,567</div>
-      </div>
-    </div>
-
-    {/* Vendor List */}
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Vendor Applications</h3>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
-            Export List
-          </button>
-        </div>
-        
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead>
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Vendor</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Business Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Applied</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900 dark:text-white">Tech Store</div>
-                <div className="text-sm text-gray-500">tech@store.com</div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Electronics</td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Oct 1, 2024</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <button className="text-green-600 hover:text-green-800 mr-3">Approve</button>
-                <button className="text-red-600 hover:text-red-800 mr-3">Reject</button>
-                <button className="text-blue-600 hover:text-blue-800">View Details</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-);
-
 // Category Management Content
 const CategoryManagementContent = () => (
   <div>
@@ -450,95 +372,6 @@ const OrderManagementContent = () => (
           </tr>
         </tbody>
       </table>
-    </div>
-  </div>
-);
-
-// B2B Management Content
-const B2BManagementContent = () => (
-  <div>
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">B2B Management</h1>
-      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-        Manage banner advertisements and business service listings.
-      </p>
-    </div>
-
-    {/* Tabs for B2B sections */}
-    <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-      <nav className="-mb-px flex space-x-8">
-        <button className="border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-          Banner Ads
-        </button>
-        <button className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-          Service Listings
-        </button>
-        <button className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-          Business Verification
-        </button>
-      </nav>
-    </div>
-
-    {/* Banner Management */}
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Active Banner Campaigns</h3>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
-            Create New Campaign
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            <div className="h-24 bg-gray-300 rounded mb-3"></div>
-            <h4 className="font-medium text-gray-900 dark:text-white">Tech Store - Premium Banner</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Homepage Top Banner</p>
-            <div className="mt-2 flex justify-between items-center">
-              <span className="text-sm text-green-600">Active</span>
-              <span className="text-sm text-gray-500">₹50,000/month</span>
-            </div>
-            <div className="mt-3 flex space-x-2">
-              <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
-              <button className="text-red-600 hover:text-red-800 text-sm">Pause</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Service Listings */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Business Service Listings</h3>
-        
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead>
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Business</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Contact</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900 dark:text-white">City Hospital</div>
-                <div className="text-sm text-gray-500">Healthcare Services</div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Healthcare</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">+91 9876543210</td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <button className="text-blue-600 hover:text-blue-800 mr-2">View</button>
-                <button className="text-yellow-600 hover:text-yellow-800">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   </div>
 );

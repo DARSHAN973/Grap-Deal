@@ -190,6 +190,7 @@ export async function POST(request) {
       sku,
       brand,
       price,
+      originalPrice,
       rating,
       discount,
       productType = 'REGULAR',
@@ -253,6 +254,7 @@ export async function POST(request) {
         sku: sku || `EC-${Date.now()}`,
         brand: brand || 'Generic',
         price: parseFloat(price),
+        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
         rating: rating ? parseFloat(rating) : 0,
         discount: discount ? parseFloat(discount) : null,
         productType,
@@ -322,6 +324,7 @@ export async function PUT(request) {
       sku,
       brand,
       price,
+      originalPrice,
       rating,
       discount,
       productType,
@@ -396,6 +399,7 @@ export async function PUT(request) {
     if (sku !== undefined) updateData.sku = sku;
     if (brand !== undefined) updateData.brand = brand;
     if (price !== undefined) updateData.price = parseFloat(price);
+    if (originalPrice !== undefined) updateData.originalPrice = originalPrice ? parseFloat(originalPrice) : null;
     if (rating !== undefined) updateData.rating = rating ? parseFloat(rating) : 0;
     if (discount !== undefined) updateData.discount = discount ? parseFloat(discount) : null;
     if (productType !== undefined) updateData.productType = productType;
@@ -416,8 +420,9 @@ export async function PUT(request) {
       updateData.images = {
         create: images.map((url, index) => ({
           url,
-          alt: name || existingProduct.name,
-          sortOrder: index
+          altText: name || existingProduct.name,
+          sortOrder: index,
+          isPrimary: index === 0
         }))
       };
     }

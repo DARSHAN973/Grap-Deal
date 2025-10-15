@@ -14,8 +14,8 @@ const VendorProductForm = ({ isOpen, onClose, onSubmit, editingProduct = null })
     sku: '',
     brand: '',
     model: '',
-    basePrice: '',
-    comparePrice: '',
+    originalPrice: '', // MRP/Original price
+    price: '', // Selling price (what customer pays)
     weight: '',
     trackInventory: true,
     images: [],
@@ -27,6 +27,19 @@ const VendorProductForm = ({ isOpen, onClose, onSubmit, editingProduct = null })
 
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState([]);
+
+  // Calculate discount percentage
+  const calculateDiscount = () => {
+    const original = parseFloat(formData.originalPrice) || 0;
+    const selling = parseFloat(formData.price) || 0;
+    
+    if (original > 0 && selling > 0 && original > selling) {
+      return Math.round(((original - selling) / original) * 100);
+    }
+    return 0;
+  };
+
+  const discountPercentage = calculateDiscount();
 
   // Handle form submission
   const handleSubmit = async (e) => {

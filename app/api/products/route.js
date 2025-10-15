@@ -115,7 +115,7 @@ export async function GET(request) {
         ? parseFloat(product.variants[0].price)
         : parseFloat(product.price);
       
-      const comparePrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
+      const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
       
       return {
         id: product.id,
@@ -123,7 +123,8 @@ export async function GET(request) {
         slug: product.slug,
         description: product.description,
         price: price,
-        originalPrice: comparePrice,
+        originalPrice: originalPrice,
+        discount: product.discount || null,
         image: product.images[0]?.url || '/api/placeholder/300/300',
         hoverImage: product.images[1]?.url || product.images[0]?.url || '/api/placeholder/300/300',
         rating: product.rating || Number(avgRating.toFixed(1)),

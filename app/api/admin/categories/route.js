@@ -135,7 +135,7 @@ export async function PUT(request) {
 
     // Check if category exists
     const existingCategory = await prisma.category.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: id }
     });
 
     if (!existingCategory) {
@@ -150,7 +150,7 @@ export async function PUT(request) {
       const duplicateCategory = await prisma.category.findFirst({
         where: {
           AND: [
-            { id: { not: parseInt(id) } },
+            { id: { not: id } },
             {
               OR: [
                 { name: name || existingCategory.name },
@@ -170,7 +170,7 @@ export async function PUT(request) {
     }
 
     const updatedCategory = await prisma.category.update({
-      where: { id: parseInt(id) },
+      where: { id: id },
       data: {
         ...(name && { name }),
         ...(slug && { slug }),
@@ -224,7 +224,7 @@ export async function DELETE(request) {
 
     // Check if category exists
     const existingCategory = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: id },
       include: {
         _count: {
           select: {
@@ -250,7 +250,7 @@ export async function DELETE(request) {
     }
 
     await prisma.category.delete({
-      where: { id: parseInt(id) }
+      where: { id: id }
     });
 
     return NextResponse.json({

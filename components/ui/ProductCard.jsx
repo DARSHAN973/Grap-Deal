@@ -29,24 +29,37 @@ const ProductCard = ({
   
   // Extract images from the images array
   const primaryImage = product.images?.[0]?.url || product.image || '/api/placeholder/300/300';
-  const currentPrice = product.price || 0;
-  const originalPrice = product.originalPrice || product.comparePrice || product.mrp || 0;
   
-  // For testing, let's add some sample original prices if missing
-  const testOriginalPrice = originalPrice || (currentPrice * 1.25); // 25% markup for testing
+  // Use EXACT values from database - NO extra calculations
+  const currentPrice = parseFloat(product.price) || 0; // Selling price from admin
+  const originalPrice = parseFloat(product.originalPrice) || 0; // Original price from admin
+  const discount = parseFloat(product.discount) || 0; // Discount percentage from admin
   
-  // More robust discount calculation
-  const discount = testOriginalPrice && currentPrice && testOriginalPrice > currentPrice
-    ? Math.round(((testOriginalPrice - currentPrice) / testOriginalPrice) * 100) 
-    : null;
+  // FOR TESTING: If no originalPrice/discount, create sample data
+  let testOriginalPrice = originalPrice;
+  let testDiscount = discount;
+  let testSavingsAmount = 0;
   
-  // Debug log to see what data we're getting
-  console.log('ProductCard:', product.name, {
-    originalPrice,
-    testOriginalPrice,
-    currentPrice,
-    discount,
-    rawProduct: product
+  if (originalPrice > 0 && discount > 0) {
+    // Use real database values
+    testSavingsAmount = originalPrice * discount / 100;
+  } else if (currentPrice > 0) {
+    // FOR TESTING: Create sample discount data
+    testOriginalPrice = currentPrice * 1.2; // 20% markup
+    testDiscount = 20;
+    testSavingsAmount = testOriginalPrice - currentPrice;
+  }
+  
+  // Debug log to see EXACT database values
+  console.log('ProductCard - DB + TEST VALUES:', product.name, {
+    dbPrice: product.price,
+    dbOriginalPrice: product.originalPrice, 
+    dbDiscount: product.discount,
+    finalCurrentPrice: currentPrice,
+    finalOriginalPrice: testOriginalPrice,
+    finalDiscount: testDiscount,
+    finalSavings: testSavingsAmount,
+    usingTestData: !originalPrice || !discount
   });
   
   // Determine status and accent based on product flags
@@ -113,14 +126,14 @@ const ProductCard = ({
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-semibold text-gray-900 dark:text-white">₹{currentPrice}</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">₹{currentPrice.toFixed(0)}</span>
                 {testOriginalPrice > currentPrice && (
-                  <span className="text-sm text-gray-500 line-through">₹{testOriginalPrice}</span>
+                  <span className="text-sm text-gray-500 line-through">₹{testOriginalPrice.toFixed(0)}</span>
                 )}
               </div>
-              {discount && discount > 0 && (
+              {testDiscount > 0 && testSavingsAmount > 0 && (
                 <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  Save {discount}% (₹{Math.round(testOriginalPrice - currentPrice)})
+                  Save {testDiscount}% (₹{Math.round(testSavingsAmount)})
                 </span>
               )}
             </div>
@@ -198,18 +211,18 @@ const ProductCard = ({
         </div>
         <div className="flex flex-col gap-1 mb-2">
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{currentPrice}</span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{currentPrice.toFixed(0)}</span>
             {testOriginalPrice > currentPrice && (
-              <span className="text-lg text-gray-500 line-through dark:text-gray-400">₹{testOriginalPrice}</span>
+              <span className="text-lg text-gray-500 line-through dark:text-gray-400">₹{testOriginalPrice.toFixed(0)}</span>
             )}
           </div>
-          {discount && discount > 0 && (
+          {testDiscount > 0 && testSavingsAmount > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                You Save: ₹{Math.round(testOriginalPrice - currentPrice)}
+                You Save: ₹{Math.round(testSavingsAmount)}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                ({discount}% discount)
+                ({testDiscount}% discount)
               </span>
             </div>
           )}

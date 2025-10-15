@@ -8,11 +8,12 @@ import {
   UserCircleIcon,
   Bars3Icon,
   ArrowRightOnRectangleIcon,
+  HomeIcon,
   BriefcaseIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
-export default function AdminHeader({ onMenuClick, sidebarOpen }) {
+export default function B2BAdminHeader({ onMenuClick, sidebarOpen }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showPanelsMenu, setShowPanelsMenu] = useState(false);
   const router = useRouter();
@@ -55,12 +56,12 @@ export default function AdminHeader({ onMenuClick, sidebarOpen }) {
             {showPanelsMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
                 <Link
-                  href="/admin/b2b"
+                  href="/admin"
                   className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                   onClick={() => setShowPanelsMenu(false)}
                 >
-                  <BriefcaseIcon className="h-5 w-5" />
-                  B2B Management
+                  <HomeIcon className="h-5 w-5" />
+                  Main Admin Panel
                 </Link>
                 <div className="border-t border-gray-100 dark:border-gray-600 my-1"></div>
                 <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
@@ -87,7 +88,7 @@ export default function AdminHeader({ onMenuClick, sidebarOpen }) {
               className="flex items-center gap-2 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
             >
               <UserCircleIcon className="h-8 w-8" />
-              <span className="hidden md:block text-sm font-medium">Admin</span>
+              <span className="hidden md:block text-sm font-medium">B2B Admin</span>
             </button>
 
             {showUserMenu && (
