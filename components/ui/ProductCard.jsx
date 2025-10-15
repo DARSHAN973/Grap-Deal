@@ -4,31 +4,56 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Heart, ShoppingCart, Eye, Star } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
+import { useCart } from '../providers/CartProvider';
 
 const ProductCard = ({ 
   product = {
     id: 1,
-    name: "Premium Headphones",
-    price: 299,
-    originalPrice: 399,
-    images: [],
-    rating: 4.8,
-    reviews: 124,
+    name: "Premium Wireless Headphones",
+    price: 2999,
+    originalPrice: 3999,
+    discount: 25,
+    images: ["/api/placeholder/400/400"],
+    rating: 4.5,
+    brand: "TechBrand",
     category: "Electronics",
-    brand: "TechSound",
-    vendor: "TechStore",
-    isNew: false,
+    isNew: true,
     isFeatured: false,
     isTrending: false,
-    isHot: false,
-    tags: ["Electronics"]
+    isHot: false
   },
   viewMode = 'grid'
 }) => {
   const [isLiked, setIsLiked] = useState(false);
+  const { addToCart, loading: cartLoading, getItemCount } = useCart();
   
   // Extract images from the images array
   const primaryImage = product.images?.[0]?.url || product.image || '/api/placeholder/300/300';
+
+  // Handle add to cart
+  const handleAddToCart = async (e) => {
+    e.stopPropagation(); // Prevent card click when clicking cart button
+    if (cartLoading) return;
+    
+    const productData = {
+      id: product.id,
+      name: product.name,
+      price: currentPrice,
+      images: product.images,
+      brand: product.brand,
+      category: product.category,
+    };
+    
+    await addToCart(productData, 1);
+  };
+
+  // Handle navigation to product details
+  const handleProductView = () => {
+    window.location.href = `/products/${product.id}`;
+  };
+
+  // Get current cart count for this product
+  const cartCount = getItemCount(product.id);
   
   // Use EXACT values from database - NO extra calculations
   const currentPrice = parseFloat(product.price) || 0; // Selling price from admin
@@ -147,11 +172,12 @@ const ProductCard = ({
   // Grid view design (matching TrendingSlider)
   return (
     <motion.article
-      className="group relative flex h-full min-h-[32rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05]"
+      className="group relative flex h-full min-h-[32rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] cursor-pointer"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
+      onClick={handleProductView}
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
 
@@ -174,6 +200,10 @@ const ProductCard = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleProductView();
+              }}
               aria-label={`Quick view ${product.name}`}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
             >
@@ -231,18 +261,32 @@ const ProductCard = ({
           <MagneticButton
             variant="gradient"
             size="md"
-            className="w-full justify-center rounded-2xl"
+            className="w-full justify-center rounded-2xl relative"
+            onClick={() => window.location.href = `/products/${product.id}`}
           >
-            <span>Add to Cart</span>
+            <div className="flex items-center gap-2">
+              <span>Buy Now</span>
+            </div>
           </MagneticButton>
           <MagneticButton
             variant="secondary"
             size="md"
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12"
+            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12 relative"
             whileTap={{ scale: 0.94 }}
+            onClick={handleAddToCart}
+            disabled={cartLoading}
             aria-label="Quick add to cart"
           >
-            <ShoppingCart className="h-5 w-5" />
+            {cartLoading ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+            ) : (
+              <ShoppingCart className="h-5 w-5" />
+            )}
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                {cartCount}
+              </span>
+            )}
           </MagneticButton>
         </div>
       </div>

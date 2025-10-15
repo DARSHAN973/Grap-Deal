@@ -52,7 +52,7 @@ const ProductsPage = () => {
       setLoading(true);
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: '12',
+        limit: '20', // Changed from 12 to 20
         sortBy: sort,
         status: 'ACTIVE'
       });
@@ -91,13 +91,21 @@ const ProductsPage = () => {
         if (response.ok) {
           const data = await response.json();
           
-          // Add "All Products" as first option
+          // Fetch total product count for "All Products"
+          const totalProductsResponse = await fetch('/api/products?limit=1&status=ACTIVE');
+          let totalCount = 0;
+          if (totalProductsResponse.ok) {
+            const totalData = await totalProductsResponse.json();
+            totalCount = totalData.pagination?.totalCount || 0;
+          }
+          
+          // Add "All Products" as first option with dynamic count
           const allOption = {
             id: 'all',
             name: 'All Products',
             slug: 'all',
             icon: 'Sparkles',
-            productCount: 0, // Will be updated after products are fetched
+            productCount: totalCount,
             image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=400&q=80',
             description: 'Browse all our products'
           };
@@ -241,7 +249,10 @@ const ProductsPage = () => {
                 return (
                   <motion.button
                     key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
+                    onClick={() => {
+                      setSelectedCategory(category.id);
+                      setCurrentPage(1); // Reset to first page when changing category
+                    }}
                     className={`group relative overflow-hidden rounded-2xl border-2 text-center transition-all duration-300 ${
                       isActive
                         ? 'border-blue-500 bg-blue-50 shadow-lg scale-105 dark:border-blue-400 dark:bg-blue-950/30'
@@ -332,7 +343,10 @@ const ProductsPage = () => {
                   type="text"
                   placeholder="Search products..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1); // Reset to first page when searching
+                  }}
                   className="w-full rounded-2xl border border-gray-300/50 bg-white/90 py-3 pl-12 pr-6 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 dark:border-white/20 dark:bg-gray-900/90 dark:text-white"
                 />
               </div>
@@ -374,7 +388,10 @@ const ProductsPage = () => {
               {/* Sort Dropdown */}
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setCurrentPage(1); // Reset to first page when changing sort
+                }}
                 className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               >
                 {sortOptions.map((option) => (
@@ -448,7 +465,7 @@ const ProductsPage = () => {
             <motion.div
               className={`${
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                  ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
                   : 'space-y-4'
               }`}
               initial={{ opacity: 0 }}
@@ -464,57 +481,67 @@ const ProductsPage = () => {
           {/* Pagination */}
           {!loading && pagination.totalPages > 1 && (
             <motion.div
-              className="mt-12 flex items-center justify-center gap-2"
+              className="mt-12"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </button>
-              
-              <div className="flex gap-1">
-                {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                  let pageNum;
-                  if (pagination.totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= pagination.totalPages - 2) {
-                    pageNum = pagination.totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`h-10 w-10 rounded-lg text-sm font-medium transition-all ${
-                        currentPage === pageNum
-                          ? 'bg-blue-500 text-white'
-                          : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
+              {/* Pagination Info */}
+              <div className="text-center mb-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Showing {((currentPage - 1) * 20) + 1} to {Math.min(currentPage * 20, pagination.totalCount)} of {pagination.totalCount} products
+                </p>
               </div>
+              
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </button>
+                
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(pagination.totalPages, 7) }, (_, i) => {
+                    let pageNum;
+                    if (pagination.totalPages <= 7) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 4) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= pagination.totalPages - 3) {
+                      pageNum = pagination.totalPages - 6 + i;
+                    } else {
+                      pageNum = currentPage - 3 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`h-10 w-10 rounded-lg text-sm font-medium transition-all ${
+                          currentPage === pageNum
+                            ? 'bg-blue-500 text-white shadow-lg'
+                            : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
 
-              <button
-                onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
-                disabled={currentPage === pagination.totalPages}
-                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-              >
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
+                  disabled={currentPage === pagination.totalPages}
+                  className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             </motion.div>
           )}
 

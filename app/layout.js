@@ -7,6 +7,9 @@ import Footer from '../components/layout/Footer'
 import WaveBackground from '../components/ui/WaveBackground'
 import InitialLoader from '../components/ui/InitialLoader'
 import { UserProvider } from '../components/providers/UserProvider'
+import { CartProvider } from '../components/providers/CartProvider'
+import CartSidebar from '../components/ui/CartSidebar'
+import CartToast from '../components/ui/CartToast'
 import { usePathname } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -19,13 +22,17 @@ export default function RootLayout({ children }) {
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.className} antialiased`}>
         <UserProvider>
-          <InitialLoader />
-          {!isAdminRoute && <WaveBackground />}
-          {!isAdminRoute && <Header />}
-          <main className={`min-h-screen relative ${!isAdminRoute ? 'z-10' : ''}`}>
-            {children}
-          </main>
-          {!isAdminRoute && <Footer />}
+          <CartProvider>
+            <InitialLoader />
+            {!isAdminRoute && <WaveBackground />}
+            {!isAdminRoute && <Header />}
+            <main className={`min-h-screen relative ${!isAdminRoute ? 'z-10' : ''}`}>
+              {children}
+            </main>
+            {!isAdminRoute && <Footer />}
+            {!isAdminRoute && <CartSidebar />}
+            <CartToast />
+          </CartProvider>
         </UserProvider>
       </body>
     </html>

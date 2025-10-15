@@ -15,17 +15,17 @@ import {
 import SparkleNavbar from '../ui/SparkleNavbar';
 import AuthModal from '../ui/AuthModal';
 import { useUser } from '../providers/UserProvider';
+import { useCart } from '../providers/CartProvider';
 
 const Header = () => {
   const { user, isAuthenticated, logout, loading } = useUser();
+  const { totalItems, toggleCart } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showCartAnimation, setShowCartAnimation] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState('success');
@@ -102,8 +102,7 @@ const Header = () => {
   };
 
   const handleCartClick = () => {
-    setShowCartAnimation(true);
-    setTimeout(() => setShowCartAnimation(false), 600);
+    toggleCart();
   };
 
   const handleLogout = async () => {
@@ -114,14 +113,17 @@ const Header = () => {
     setTimeout(() => setShowNotification(false), 3000);
   };
 
-  // Trigger small cart pop when cartCount changes
+  // Cart animation effect for totalItems changes
   useEffect(() => {
-    if (cartCount > 0) {
-      setShowCartAnimation(true);
-      const t = setTimeout(() => setShowCartAnimation(false), 800);
-      return () => clearTimeout(t);
+    if (totalItems > 0) {
+      // Simple animation effect when cart items change
+      const cartButton = document.querySelector('[data-cart-button]');
+      if (cartButton) {
+        cartButton.classList.add('animate-pulse');
+        setTimeout(() => cartButton.classList.remove('animate-pulse'), 600);
+      }
     }
-  }, [cartCount]);
+  }, [totalItems]);
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -373,33 +375,20 @@ const Header = () => {
               {/* Cart Button - Mobile optimized */}
               <motion.button 
                 onClick={handleCartClick}
+                data-cart-button
                 className="group relative p-2 sm:px-3 sm:py-2 lg:px-4 lg:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg overflow-visible transition-all duration-300 hover:border-indigo-300 dark:hover:border-indigo-600"
                 whileHover={{ 
                   scale: 1.02,
                   boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05)"
                 }}
                 whileTap={{ scale: 0.98 }}
-                animate={showCartAnimation ? { 
-                  rotate: 8,
-                  scale: 1.05
-                } : {
-                  rotate: 0,
-                  scale: 1
-                }}
                 transition={{ 
-                  duration: showCartAnimation ? 0.8 : 0.3,
+                  duration: 0.3,
                   ease: "easeOut"
                 }}
               >
                 <motion.div
                   className="relative z-10 flex items-center gap-1 sm:gap-2"
-                  animate={showCartAnimation ? { 
-                    scale: 1.1,
-                    rotate: 5
-                  } : { 
-                    scale: 1,
-                    rotate: 0 
-                  }}
                   transition={{ 
                     duration: 0.3, 
                     ease: "easeOut"
@@ -413,7 +402,7 @@ const Header = () => {
                 </motion.div>
                 
                 {/* Cart count badge */}
-                {cartCount > 0 && (
+                {totalItems > 0 && (
                   <motion.span 
                     className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 bg-gradient-to-br from-red-500 to-pink-600 text-white text-[10px] sm:text-xs rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white dark:border-gray-800 z-20" 
                     style={{ transformOrigin: 'center' }}
@@ -423,7 +412,7 @@ const Header = () => {
                     whileHover={{ scale: 1.15 }}
                     transition={{ type: "spring", stiffness: 700, damping: 25 }}
                   >
-                    {cartCount}
+                    {totalItems}
                   </motion.span>
                 )}
               </motion.button>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Flame, Eye, ShoppingCart, Star } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
+import { useCart } from '../providers/CartProvider';
 
 const TrendingSlider = () => {
   const scrollContainerRef = useRef(null);
@@ -11,6 +12,29 @@ const TrendingSlider = () => {
   const resumeTimeoutRef = useRef(null);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart, loading: cartLoading, getItemCount } = useCart();
+
+  // Handle add to cart
+  const handleAddToCart = async (product, e) => {
+    e?.stopPropagation(); // Prevent card click when clicking cart button
+    if (cartLoading) return;
+    
+    const productData = {
+      id: product.id,
+      name: product.name,
+      price: parseFloat(product.price),
+      images: product.images,
+      brand: product.brand,
+      category: product.category,
+    };
+    
+    await addToCart(productData, 1);
+  };
+
+  // Handle navigation to product details
+  const handleProductView = (productId) => {
+    window.location.href = `/products/${productId}`;
+  };
 
   // Fetch trending products from database
   useEffect(() => {
@@ -321,11 +345,12 @@ const TrendingSlider = () => {
               return (
                 <motion.article
                   key={product.id}
-                  className="group relative flex h-full min-h-[32rem] w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] sm:w-[calc(25%-18px)] lg:w-[calc(25%-18px)]"
+                  className="group relative flex h-full min-h-[32rem] w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] sm:w-[calc(25%-18px)] lg:w-[calc(25%-18px)] cursor-pointer"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.08, duration: 0.5, ease: 'easeOut' }}
+                  onClick={() => handleProductView(product.id)}
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${getAccentGradient(idx)} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
 
@@ -345,6 +370,10 @@ const TrendingSlider = () => {
                       </span>
                       <button
                         type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductView(product.id);
+                        }}
                         aria-label={`Quick view ${product.name}`}
                         className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
                       >
@@ -394,18 +423,34 @@ const TrendingSlider = () => {
                         variant="gradient"
                         size="md"
                         className="w-full justify-center rounded-2xl"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductView(product.id);
+                        }}
                       >
-                        <ArrowRight className="h-4 w-4" />
-                        <span>Shop</span>
+                        <div className="flex items-center gap-2">
+                          <span>Buy Now</span>
+                        </div>
                       </MagneticButton>
                       <MagneticButton
                         variant="secondary"
                         size="md"
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12"
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12 relative"
                         whileTap={{ scale: 0.94 }}
-                        aria-label="Add to cart"
+                        onClick={(e) => handleAddToCart(product, e)}
+                        disabled={cartLoading}
+                        aria-label="Quick add to cart"
                       >
-                        <ShoppingCart className="h-5 w-5" />
+                        {cartLoading ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                        ) : (
+                          <ShoppingCart className="h-5 w-5" />
+                        )}
+                        {getItemCount(product.id) > 0 && (
+                          <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                            {getItemCount(product.id)}
+                          </span>
+                        )}
                       </MagneticButton>
                     </div>
                   </div>
