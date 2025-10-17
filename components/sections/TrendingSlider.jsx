@@ -425,7 +425,7 @@ const TrendingSlider = () => {
                         className="w-full justify-center rounded-2xl"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleProductView(product.id);
+                          window.location.href = `/checkout?productId=${product.id}&quantity=1&type=buynow`;
                         }}
                       >
                         <div className="flex items-center gap-2">

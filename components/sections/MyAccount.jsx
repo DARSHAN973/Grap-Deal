@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -22,9 +23,16 @@ import {
   BuildingStorefrontIcon,
   PlusIcon,
   TagIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  TruckIcon,
+  XCircleIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useUser } from "../providers/UserProvider";
 import { useRouter } from "next/navigation";
+import { getImageUrl } from "@/app/lib/image-utils";
+import OrderHistoryCard from "./OrderHistoryCard";
 
 const MyAccount = () => {
   const { user, loading, isAuthenticated } = useUser();
@@ -33,12 +41,54 @@ const MyAccount = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
   const [userStats, setUserStats] = useState({
     cartItems: 0,
     totalOrders: 0,
     wishlistItems: 0,
     c2cListings: 0,
+    orderStatusCounts: {},
+    totalSpent: 0,
   });
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [newAddress, setNewAddress] = useState({
+    name: '',
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+    isDefault: false
+  });
+  const [addressForm, setAddressForm] = useState({
+    fullName: '',
+    phone: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    pincode: '',
+    isDefault: false
+  });
+
+  // Helper function to determine step status
+  const getStepStatus = (currentStatus, stepStatus) => {
+    const statusOrder = ['PENDING', 'IN_PROCESS', 'DELIVERED'];
+    const currentIndex = statusOrder.indexOf(currentStatus);
+    const stepIndex = statusOrder.indexOf(stepStatus);
+    return stepIndex <= currentIndex;
+  };
   const [vendorApplication, setVendorApplication] = useState({
     businessName: "",
     businessType: "",
@@ -54,7 +104,13 @@ const MyAccount = () => {
   }, [loading, isAuthenticated, router]);
 
   useEffect(() => {
-    if (user) {
+    if (user && isAuthenticated) {
+      setProfile({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+      
       setEditData({
         name: user.name || "",
         email: user.email || "",
@@ -63,15 +119,35 @@ const MyAccount = () => {
       
       // Fetch user statistics
       fetchUserStats();
+      // Fetch wishlist and addresses
+      fetchWishlist();
+      fetchAddresses();
     }
-  }, [user]);
+  }, [user, isAuthenticated]);
+
+  useEffect(() => {
+    if (activeTab === 'orders' && user && isAuthenticated) {
+      fetchOrders();
+    } else if (activeTab === 'wishlist' && user && isAuthenticated) {
+      fetchWishlist();
+    } else if (activeTab === 'addresses' && user && isAuthenticated) {
+      fetchAddresses();
+    }
+  }, [activeTab, user, isAuthenticated]);
 
   const fetchUserStats = async () => {
+    if (!user || !isAuthenticated) {
+      console.log('User not authenticated, skipping stats fetch');
+      return;
+    }
+    
     try {
       const response = await fetch('/api/user/stats');
       if (response.ok) {
         const stats = await response.json();
         setUserStats(stats);
+      } else {
+        console.error('Failed to fetch user stats:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to fetch user stats:', error);
@@ -82,6 +158,162 @@ const MyAccount = () => {
         wishlistItems: 8,
         c2cListings: 2,
       });
+    }
+  };
+
+  const fetchOrders = async () => {
+    if (!user || !isAuthenticated) {
+      console.log('User not authenticated, skipping orders fetch');
+      return;
+    }
+    
+    setOrdersLoading(true);
+    try {
+      const response = await fetch('/api/orders');
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data.orders || []);
+      } else {
+        console.error('Failed to fetch orders:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const fetchWishlist = async () => {
+    if (!user || !isAuthenticated) {
+      console.log('User not authenticated, skipping wishlist fetch');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/wishlist');
+      if (response.ok) {
+        const data = await response.json();
+        setWishlist(data.wishlist || []);
+      } else {
+        console.error('Failed to fetch wishlist:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to fetch wishlist:', error);
+    }
+  };
+
+  const fetchAddresses = async () => {
+    if (!user || !isAuthenticated) {
+      console.log('User not authenticated, skipping addresses fetch');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/user/address');
+      if (response.ok) {
+        const data = await response.json();
+        setAddresses(data.addresses || []);
+      } else {
+        console.error('Failed to fetch addresses:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to fetch addresses:', error);
+    }
+  };
+
+  const handleRemoveFromWishlist = async (productId) => {
+    if (!user || !isAuthenticated) {
+      console.log('User not authenticated, cannot remove from wishlist');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (response.ok) {
+        setWishlist(prev => prev.filter(item => item.product.id !== productId));
+        // Update user stats
+        fetchUserStats();
+      } else {
+        console.error('Failed to remove from wishlist:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to remove from wishlist:', error);
+    }
+  };
+
+  const handleAddAddress = async (addressData) => {
+    try {
+      const response = await fetch('/api/user/address', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addressData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAddresses(prev => [...prev, data.address]);
+        setShowAddressForm(false);
+        setNewAddress({
+          name: '',
+          street: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: '',
+          isDefault: false
+        });
+      }
+    } catch (error) {
+      console.error('Failed to add address:', error);
+    }
+  };
+
+  const handleUpdateAddress = async (addressId, addressData) => {
+    try {
+      const response = await fetch('/api/user/address', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ addressId, ...addressData }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAddresses(prev => prev.map(addr => 
+          addr.id === addressId ? data.address : addr
+        ));
+        setEditingAddress(null);
+      }
+    } catch (error) {
+      console.error('Failed to update address:', error);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId) => {
+    try {
+      const response = await fetch('/api/user/address', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ addressId }),
+      });
+
+      if (response.ok) {
+        setAddresses(prev => prev.filter(addr => addr.id !== addressId));
+      }
+    } catch (error) {
+      console.error('Failed to delete address:', error);
     }
   };
 
@@ -455,10 +687,35 @@ const MyAccount = () => {
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-8">
                       Order History
                     </h1>
-                    <div className="text-center py-12">
-                      <ShoppingBagIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 dark:text-gray-400">No orders yet</p>
-                    </div>
+                    
+                    {ordersLoading ? (
+                      <div className="text-center py-12">
+                        <motion.div
+                          className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        />
+                        <p className="text-gray-600 dark:text-gray-400 mt-4">Loading orders...</p>
+                      </div>
+                    ) : orders.length > 0 ? (
+                      <div className="space-y-6">
+                        {orders.map((order) => (
+                          <OrderHistoryCard 
+                            key={order.id} 
+                            order={order} 
+                            onOrderUpdate={fetchOrders}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <ShoppingBagIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400">No orders yet</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                          Start shopping to see your orders here
+                        </p>
+                      </div>
+                    )}
                   </motion.div>
                 )}
 
@@ -655,6 +912,335 @@ const MyAccount = () => {
                         </div>
                       )}
                     </div>
+                  </motion.div>
+                )}
+
+                {activeTab === "wishlist" && (
+                  <motion.div
+                    key="wishlist"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-8">
+                      My Wishlist
+                    </h1>
+                    
+                    {wishlist.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {wishlist.map((item) => (
+                          <motion.div
+                            key={item.id}
+                            className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all"
+                            whileHover={{ scale: 1.02 }}
+                            layout
+                          >
+                            <div className="relative">
+                              {item.product.images && item.product.images.length > 0 ? (
+                                <img
+                                  src={item.product.images[0]}
+                                  alt={item.product.name}
+                                  className="w-full h-48 object-cover rounded-lg mb-4"
+                                />
+                              ) : (
+                                <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center">
+                                  <span className="text-gray-400">No Image</span>
+                                </div>
+                              )}
+                              <button
+                                onClick={() => handleRemoveFromWishlist(item.product.id)}
+                                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.product.name}</h3>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">{item.product.description}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-lg font-bold text-blue-600">₹{item.product.price}</span>
+                              <motion.button
+                                onClick={() => router.push(`/products/${item.product.id}`)}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                View Product
+                              </motion.button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <HeartIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400">Your wishlist is empty</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                          Add products to your wishlist to save them for later
+                        </p>
+                        <motion.button
+                          onClick={() => router.push('/products')}
+                          className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Browse Products
+                        </motion.button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {activeTab === "addresses" && (
+                  <motion.div
+                    key="addresses"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex justify-between items-center mb-8">
+                      <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        My Addresses
+                      </h1>
+                      <motion.button
+                        onClick={() => setShowAddressForm(!showAddressForm)}
+                        className="px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors flex items-center space-x-2"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <PlusIcon className="w-5 h-5" />
+                        <span>Add Address</span>
+                      </motion.button>
+                    </div>
+
+                    {showAddressForm && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6"
+                      >
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add New Address</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            placeholder="Full Name"
+                            value={newAddress.name}
+                            onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Street Address"
+                            value={newAddress.street}
+                            onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="City"
+                            value={newAddress.city}
+                            onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="State"
+                            value={newAddress.state}
+                            onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="ZIP Code"
+                            value={newAddress.zipCode}
+                            onChange={(e) => setNewAddress({...newAddress, zipCode: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Country"
+                            value={newAddress.country}
+                            onChange={(e) => setNewAddress({...newAddress, country: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2 mt-4">
+                          <input
+                            type="checkbox"
+                            id="defaultAddress"
+                            checked={newAddress.isDefault}
+                            onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <label htmlFor="defaultAddress" className="text-sm text-gray-700 dark:text-gray-300">
+                            Set as default address
+                          </label>
+                        </div>
+                        <div className="flex justify-end space-x-3 mt-6">
+                          <button
+                            onClick={() => setShowAddressForm(false)}
+                            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <motion.button
+                            onClick={() => handleAddAddress(newAddress)}
+                            className="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Save Address
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {addresses.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {addresses.map((address) => (
+                          <motion.div
+                            key={address.id}
+                            className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+                            whileHover={{ scale: 1.02 }}
+                            layout
+                          >
+                            {address.isDefault && (
+                              <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 mb-3">
+                                Default Address
+                              </div>
+                            )}
+                            <div className="space-y-2">
+                              <h3 className="font-semibold text-gray-900 dark:text-white">{address.name}</h3>
+                              <p className="text-gray-600 dark:text-gray-400">{address.street}</p>
+                              <p className="text-gray-600 dark:text-gray-400">
+                                {address.city}, {address.state} {address.zipCode}
+                              </p>
+                              <p className="text-gray-600 dark:text-gray-400">{address.country}</p>
+                            </div>
+                            <div className="flex justify-end space-x-2 mt-4">
+                              <button
+                                onClick={() => setEditingAddress(address)}
+                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteAddress(address.id)}
+                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <MapPinIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400">No addresses saved</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                          Add an address to make checkout faster
+                        </p>
+                      </div>
+                    )}
+
+                    {editingAddress && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                        onClick={() => setEditingAddress(null)}
+                      >
+                        <motion.div
+                          initial={{ scale: 0.9 }}
+                          animate={{ scale: 1 }}
+                          className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Address</h3>
+                          <div className="space-y-4">
+                            <input
+                              type="text"
+                              placeholder="Full Name"
+                              value={editingAddress.name}
+                              onChange={(e) => setEditingAddress({...editingAddress, name: e.target.value})}
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Street Address"
+                              value={editingAddress.street}
+                              onChange={(e) => setEditingAddress({...editingAddress, street: e.target.value})}
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                              <input
+                                type="text"
+                                placeholder="City"
+                                value={editingAddress.city}
+                                onChange={(e) => setEditingAddress({...editingAddress, city: e.target.value})}
+                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                              />
+                              <input
+                                type="text"
+                                placeholder="State"
+                                value={editingAddress.state}
+                                onChange={(e) => setEditingAddress({...editingAddress, state: e.target.value})}
+                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <input
+                                type="text"
+                                placeholder="ZIP Code"
+                                value={editingAddress.zipCode}
+                                onChange={(e) => setEditingAddress({...editingAddress, zipCode: e.target.value})}
+                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Country"
+                                value={editingAddress.country}
+                                onChange={(e) => setEditingAddress({...editingAddress, country: e.target.value})}
+                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                              />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                id="editDefaultAddress"
+                                checked={editingAddress.isDefault}
+                                onChange={(e) => setEditingAddress({...editingAddress, isDefault: e.target.checked})}
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                              />
+                              <label htmlFor="editDefaultAddress" className="text-sm text-gray-700 dark:text-gray-300">
+                                Set as default address
+                              </label>
+                            </div>
+                          </div>
+                          <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                              onClick={() => setEditingAddress(null)}
+                              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <motion.button
+                              onClick={() => handleUpdateAddress(editingAddress.id, editingAddress)}
+                              className="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              Update Address
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    )}
                   </motion.div>
                 )}
 

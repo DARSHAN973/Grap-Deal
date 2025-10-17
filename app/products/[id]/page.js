@@ -97,22 +97,24 @@ const ProductDetailsPage = () => {
   };
 
   // Zoom functionality
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (e) => {
     setIsZoomed(true);
+    handleMouseMove(e);
   };
 
   const handleMouseLeave = () => {
     setIsZoomed(false);
+    setZoomPosition({ x: 50, y: 50 });
   };
 
   const handleMouseMove = (e) => {
-    if (!isZoomed) return;
+    if (!e.currentTarget) return;
     
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
-    setZoomPosition({ x, y });
+    setZoomPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
   };
 
   if (loading) {
@@ -216,14 +218,14 @@ const ProductDetailsPage = () => {
                       transition={{ duration: 0.5 }}
                     >
                       <div
-                        className={`h-full w-full bg-cover bg-center transition-all duration-300 ${isZoomed ? 'cursor-crosshair' : 'cursor-zoom-in'}`}
+                        className={`h-full w-full transition-all duration-200 ${isZoomed ? 'cursor-crosshair' : 'cursor-zoom-in'}`}
                         style={{ 
                           backgroundImage: `url(${primaryImage})`,
-                          backgroundSize: isZoomed ? '250%' : 'cover',
+                          backgroundSize: isZoomed ? '300%' : 'cover',
                           backgroundPosition: isZoomed 
                             ? `${zoomPosition.x}% ${zoomPosition.y}%` 
                             : 'center',
-                          transform: isZoomed ? 'scale(1)' : 'scale(1)'
+                          backgroundRepeat: 'no-repeat'
                         }}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
@@ -523,49 +525,66 @@ const ProductDetailsPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.0 }}
             >
-              <div className="flex gap-3">
-                <MagneticButton
-                  variant="gradient"
-                  size="md"
-                  className="flex-1 justify-center py-3 text-base font-semibold rounded-xl shadow-xl"
-                  onClick={handleAddToCart}
-                  disabled={cartLoading || product.stock === 0}
-                >
-                  {cartLoading ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-2">
+                  <MagneticButton
+                    variant="gradient"
+                    size="md"
+                    className="flex-1 justify-center py-3 text-sm font-semibold rounded-xl shadow-xl"
+                    onClick={handleAddToCart}
+                    disabled={cartLoading || product.stock === 0}
+                  >
+                    {cartLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        <span>Adding...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <ShoppingCart className="h-4 w-4" />
+                        <span>Add to Cart</span>
+                        {cartCount > 0 && (
+                          <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                            {cartCount}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </MagneticButton>
+
+                  <MagneticButton
+                    variant="outline"
+                    size="md"
+                    className="flex-1 justify-center py-3 text-sm font-semibold rounded-xl shadow-xl bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+                    onClick={() => window.location.href = `/checkout?productId=${product.id}&quantity=${quantity}&type=buy-now`}
+                    disabled={product.stock === 0}
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      <span>Adding...</span>
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Buy Now</span>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart className="h-5 w-5" />
-                      <span>Add to Cart</span>
-                      {cartCount > 0 && (
-                        <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
-                          {cartCount}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </MagneticButton>
+                  </MagneticButton>
+                </div>
                 
-                <motion.button
-                  onClick={() => setIsLiked(!isLiked)}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/60 dark:border-white/20 rounded-xl text-gray-700 dark:text-gray-200 transition-all hover:bg-white/80 dark:hover:bg-white/20 shadow-md hover:shadow-lg"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                  <span className="text-sm font-medium hidden sm:inline">{isLiked ? 'Loved' : 'Wishlist'}</span>
-                </motion.button>
-                
-                <motion.button 
-                  className="flex items-center justify-center h-12 w-12 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/60 dark:border-white/20 rounded-xl text-gray-700 dark:text-gray-200 transition-all hover:bg-white/80 dark:hover:bg-white/20 shadow-md hover:shadow-lg"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Share2 className="h-4 w-4" />
-                </motion.button>
+                <div className="flex gap-2">
+                  <motion.button
+                    onClick={() => setIsLiked(!isLiked)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/60 dark:border-white/20 rounded-xl text-gray-700 dark:text-gray-200 transition-all hover:bg-white/80 dark:hover:bg-white/20 shadow-md hover:shadow-lg"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                    <span className="text-sm font-medium">{isLiked ? 'Loved' : 'Wishlist'}</span>
+                  </motion.button>
+                  
+                  <motion.button 
+                    className="flex items-center justify-center h-12 w-12 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/60 dark:border-white/20 rounded-xl text-gray-700 dark:text-gray-200 transition-all hover:bg-white/80 dark:hover:bg-white/20 shadow-md hover:shadow-lg"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

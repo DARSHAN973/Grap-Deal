@@ -262,7 +262,7 @@ const ProductCard = ({
             variant="gradient"
             size="md"
             className="w-full justify-center rounded-2xl relative"
-            onClick={() => window.location.href = `/products/${product.id}`}
+            onClick={() => window.location.href = `/checkout?productId=${product.id}&quantity=1&type=buynow`}
           >
             <div className="flex items-center gap-2">
               <span>Buy Now</span>

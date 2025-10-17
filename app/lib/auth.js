@@ -16,22 +16,23 @@ export async function verifyAuth() {
     const decoded = jwt.verify(token.value, JWT_SECRET);
 
     // Normalize userId to string to match Prisma schema (User.id is String)
+    // Ensure both id and userId fields exist for compatibility
     if (decoded && typeof decoded.userId !== 'undefined') {
-      try {
-        decoded.userId = String(decoded.userId);
-      } catch (e) {
-        // ignore coercion errors, keep original
-      }
+      decoded.userId = String(decoded.userId);
+      decoded.id = decoded.userId; // Set id field for compatibility
+    } else if (decoded && typeof decoded.id !== 'undefined') {
+      decoded.id = String(decoded.id);
+      decoded.userId = decoded.id; // Set userId field for consistency
     }
 
     // If role is missing from token (old token), fetch from database
-    if (!decoded.role && decoded.userId) {
+    if (!decoded.role && (decoded.userId || decoded.id)) {
       try {
         const { PrismaClient } = await import('@prisma/client');
         const prisma = new PrismaClient();
         
         const user = await prisma.user.findUnique({
-          where: { id: decoded.userId },
+          where: { id: decoded.userId || decoded.id },
           select: { role: true }
         });
         

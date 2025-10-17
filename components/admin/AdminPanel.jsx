@@ -3,6 +3,7 @@
 import { useState } from "react";
 import CategoryManagement from "./CategoryManagement";
 import ProductManagement from "./ProductManagement";
+import OrderManagement from "./OrderManagement";
 import AdminHeader from "./AdminHeader";
 import {
   HomeIcon,
@@ -43,7 +44,7 @@ const AdminPanel = () => {
       case "categories":
         return <CategoryManagementContent />;
       case "orders":
-        return <OrderManagementContent />;
+        return <OrderManagement />;
       case "c2c":
         return <C2CManagementContent />;
       case "payments":
@@ -303,76 +304,6 @@ const UserManagementContent = () => (
 const CategoryManagementContent = () => (
   <div>
     <CategoryManagement />
-  </div>
-);
-
-// Order Management Content
-const OrderManagementContent = () => (
-  <div>
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Order Management</h1>
-      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-        Track orders, assign delivery partners, and manage logistics.
-      </p>
-    </div>
-
-    {/* Order Stats */}
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-4 mb-6">
-      <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow">
-        <div className="text-sm text-gray-500 dark:text-gray-400">New Orders</div>
-        <div className="text-2xl font-bold text-blue-600">23</div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow">
-        <div className="text-sm text-gray-500 dark:text-gray-400">Processing</div>
-        <div className="text-2xl font-bold text-yellow-600">45</div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow">
-        <div className="text-sm text-gray-500 dark:text-gray-400">Shipped</div>
-        <div className="text-2xl font-bold text-blue-600">67</div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow">
-        <div className="text-sm text-gray-500 dark:text-gray-400">Delivered</div>
-        <div className="text-2xl font-bold text-green-600">123</div>
-      </div>
-    </div>
-
-    {/* Orders Table */}
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Order ID</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Customer</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Amount</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Delivery Partner</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">#ORD-1234</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">John Doe</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">₹2,999</td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Processing</span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-              <select className="border border-gray-300 rounded px-2 py-1 text-xs">
-                <option>Assign Partner</option>
-                <option>BlueDart</option>
-                <option>Delhivery</option>
-                <option>Shiprocket</option>
-              </select>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm">
-              <button className="text-blue-600 hover:text-blue-800 mr-2">View</button>
-              <button className="text-green-600 hover:text-green-800">Track</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
 );
 

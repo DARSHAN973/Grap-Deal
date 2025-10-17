@@ -2,9 +2,12 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../providers/CartProvider';
+import { useRouter } from 'next/navigation';
+import { getImageUrl } from '@/app/lib/image-utils';
 import MagneticButton from '../ui/MagneticButton';
 
 const CartSidebar = () => {
+  const router = useRouter();
   const {
     isOpen,
     items,
@@ -25,14 +28,20 @@ const CartSidebar = () => {
     }
   };
 
-  const getImageUrl = (images) => {
-    if (!images || images.length === 0) return '/placeholder-product.jpg';
-    return images[0].startsWith('http') ? images[0] : `/uploads/products/${images[0]}`;
+  const handleProductClick = (productId) => {
+    closeCart();
+    router.push(`/products/${productId}`);
   };
 
   const calculateItemPrice = (item) => {
     const price = item.variant?.price || item.product.price;
     return parseFloat(price) * item.quantity;
+  };
+
+  const handleCheckout = () => {
+    console.log('Checkout clicked, items:', items.length);
+    closeCart();
+    router.push('/checkout?type=cart');
   };
 
   return (
@@ -97,17 +106,26 @@ const CartSidebar = () => {
                         exit={{ opacity: 0, y: -20 }}
                       >
                         {/* Product Image */}
-                        <div className="h-20 w-20 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                        <div 
+                          className="h-20 w-20 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 cursor-pointer"
+                          onClick={() => handleProductClick(item.product.id)}
+                        >
                           <img
-                            src={getImageUrl(item.product.images)}
+                            src={getImageUrl(item.product.images?.[0]?.url || item.product.images?.[0] || '')}
                             alt={item.product.name}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover hover:scale-105 transition-transform"
+                            onError={(e) => {
+                              e.target.src = '/placeholder-product.jpg';
+                            }}
                           />
                         </div>
 
                         {/* Product Details */}
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white line-clamp-2">
+                          <h4 
+                            className="font-medium text-gray-900 dark:text-white line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
+                            onClick={() => handleProductClick(item.product.id)}
+                          >
                             {item.product.name}
                           </h4>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -142,7 +160,12 @@ const CartSidebar = () => {
                           {/* Quantity Controls */}
                           <div className="mt-3 flex items-center gap-3">
                             <button
-                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleQuantityChange(item.id, item.quantity - 1);
+                              }}
                               className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-800"
                             >
                               <Minus className="h-4 w-4" />
@@ -151,7 +174,12 @@ const CartSidebar = () => {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleQuantityChange(item.id, item.quantity + 1);
+                              }}
                               className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-800"
                             >
                               <Plus className="h-4 w-4" />
@@ -183,10 +211,7 @@ const CartSidebar = () => {
                       variant="gradient"
                       size="lg"
                       className="w-full justify-center"
-                      onClick={() => {
-                        // TODO: Navigate to checkout
-                        console.log('Proceeding to checkout...');
-                      }}
+                      onClick={handleCheckout}
                     >
                       Proceed to Checkout
                     </MagneticButton>

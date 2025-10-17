@@ -34,11 +34,16 @@ const cartReducer = (state, action) => {
     
     case CART_ACTIONS.SET_CART:
       const { items } = action.payload;
+      const safeItems = Array.isArray(items) ? items.filter(item => item && typeof item.quantity === 'number') : [];
       return {
         ...state,
-        items,
-        totalItems: items.reduce((sum, item) => sum + item.quantity, 0),
-        totalPrice: items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0),
+        items: safeItems,
+        totalItems: safeItems.reduce((sum, item) => sum + (item.quantity || 0), 0),
+        totalPrice: safeItems.reduce((sum, item) => {
+          const price = item.variant?.price || item.product?.price || item.price || 0;
+          const quantity = item.quantity || 0;
+          return sum + (parseFloat(price) * quantity);
+        }, 0),
         loading: false,
         error: null,
       };
@@ -63,8 +68,12 @@ const cartReducer = (state, action) => {
       return {
         ...state,
         items: updatedItems,
-        totalItems: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
-        totalPrice: updatedItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0),
+        totalItems: updatedItems.reduce((sum, item) => sum + (item?.quantity || 0), 0),
+        totalPrice: updatedItems.reduce((sum, item) => {
+          const price = item?.variant?.price || item?.product?.price || item?.price || 0;
+          const quantity = item?.quantity || 0;
+          return sum + (parseFloat(price) * quantity);
+        }, 0),
       };
     
     case CART_ACTIONS.REMOVE_ITEM:
@@ -72,8 +81,12 @@ const cartReducer = (state, action) => {
       return {
         ...state,
         items: filteredItems,
-        totalItems: filteredItems.reduce((sum, item) => sum + item.quantity, 0),
-        totalPrice: filteredItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0),
+        totalItems: filteredItems.reduce((sum, item) => sum + (item?.quantity || 0), 0),
+        totalPrice: filteredItems.reduce((sum, item) => {
+          const price = item?.variant?.price || item?.product?.price || item?.price || 0;
+          const quantity = item?.quantity || 0;
+          return sum + (parseFloat(price) * quantity);
+        }, 0),
       };
     
     case CART_ACTIONS.UPDATE_QUANTITY:
@@ -84,8 +97,12 @@ const cartReducer = (state, action) => {
       return {
         ...state,
         items: updatedQuantityItems,
-        totalItems: updatedQuantityItems.reduce((sum, item) => sum + item.quantity, 0),
-        totalPrice: updatedQuantityItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0),
+        totalItems: updatedQuantityItems.reduce((sum, item) => sum + (item?.quantity || 0), 0),
+        totalPrice: updatedQuantityItems.reduce((sum, item) => {
+          const price = item?.variant?.price || item?.product?.price || item?.price || 0;
+          const quantity = item?.quantity || 0;
+          return sum + (parseFloat(price) * quantity);
+        }, 0),
       };
     
     case CART_ACTIONS.CLEAR_CART:
@@ -129,8 +146,11 @@ export const CartProvider = ({ children }) => {
         const items = guestCart ? JSON.parse(guestCart) : [];
         dispatch({ type: CART_ACTIONS.SET_CART, payload: { items } });
       } else {
-        // If no cart exists, start with empty cart
-        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: [] } });
+        // If API fails, try localStorage as fallback
+        console.log('Cart API failed, using localStorage fallback');
+        const fallbackCart = localStorage.getItem('cartFallback');
+        const items = fallbackCart ? JSON.parse(fallbackCart) : [];
+        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items } });
       }
     } catch (error) {
       console.error('Error loading cart:', error);
@@ -204,11 +224,112 @@ export const CartProvider = ({ children }) => {
           window.dispatchEvent(event);
         }
       } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add item to cart');
+        // API error - fallback to localStorage
+        const fallbackCartItem = {
+          id: `fallback-${Date.now()}-${Math.random()}`,
+          productId: product.id,
+          variantId,
+          quantity,
+          price: product.price,
+          product: {
+            id: product.id,
+            name: product.name,
+            images: product.images,
+            price: product.price,
+            brand: product.brand,
+            category: product.category,
+          },
+          addedAt: new Date().toISOString(),
+        };
+        
+        dispatch({ type: CART_ACTIONS.ADD_ITEM, payload: fallbackCartItem });
+        
+        // Save to localStorage as fallback
+        const currentItems = [...state.items, fallbackCartItem];
+        localStorage.setItem('cartFallback', JSON.stringify(currentItems));
+        
+        // Show message about offline mode
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('cart-success', {
+            detail: { message: `${product.name} added to cart! (Offline mode)` }
+          });
+          window.dispatchEvent(event);
+        }
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
+      
+      // If complete API failure, add to localStorage as fallback
+      try {
+        const fallbackCartItem = {
+          id: `offline-${Date.now()}-${Math.random()}`,
+          productId: product.id,
+          variantId,
+          quantity,
+          price: product.price,
+          product: {
+            id: product.id,
+            name: product.name,
+            images: product.images || [],
+            price: product.price,
+            brand: product.brand || '',
+            category: product.category || '',
+          },
+          addedAt: new Date().toISOString(),
+        };
+        
+        dispatch({ type: CART_ACTIONS.ADD_ITEM, payload: fallbackCartItem });
+        
+        // Save to localStorage
+        const currentItems = [...state.items, fallbackCartItem];
+        localStorage.setItem('cartFallback', JSON.stringify(currentItems));
+        
+        // Show offline success message
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('cart-success', {
+            detail: { message: `${product.name} added to cart! (Working offline)` }
+          });
+          window.dispatchEvent(event);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback cart operation failed:', fallbackError);
+        dispatch({ type: CART_ACTIONS.SET_ERROR, payload: 'Unable to add item to cart' });
+        
+        // Show error message
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('cart-error', {
+            detail: { message: 'Unable to add item to cart. Please try again.' }
+          });
+          window.dispatchEvent(event);
+        }
+      }
+    } finally {
+      dispatch({ type: CART_ACTIONS.SET_LOADING, payload: false });
+    }
+  };
+
+  // Remove item from cart
+  const removeFromCart = async (itemId) => {
+    try {
+      dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
+      
+      const response = await fetch(`/api/cart/${itemId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        dispatch({ type: CART_ACTIONS.REMOVE_ITEM, payload: itemId });
+      } else if (response.status === 401) {
+        // Handle guest cart removal
+        const updatedItems = state.items.filter(item => item.id !== itemId);
+        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: updatedItems } });
+        localStorage.setItem('guestCart', JSON.stringify(updatedItems));
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to remove item from cart');
+      }
+    } catch (error) {
+      console.error('Error removing from cart:', error);
       dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
       
       // Show error message
@@ -223,25 +344,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Remove item from cart
-  const removeFromCart = async (itemId) => {
-    try {
-      const response = await fetch(`/api/cart/${itemId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        dispatch({ type: CART_ACTIONS.REMOVE_ITEM, payload: itemId });
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to remove item from cart');
-      }
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-      dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
-    }
-  };
-
   // Update item quantity
   const updateQuantity = async (itemId, quantity) => {
     if (quantity <= 0) {
@@ -249,6 +351,8 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
+      dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
+      
       const response = await fetch(`/api/cart/${itemId}`, {
         method: 'PATCH',
         headers: {
@@ -259,6 +363,13 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         dispatch({ type: CART_ACTIONS.UPDATE_QUANTITY, payload: { itemId, quantity } });
+      } else if (response.status === 401) {
+        // Handle guest cart update
+        const updatedItems = state.items.map(item =>
+          item.id === itemId ? { ...item, quantity } : item
+        );
+        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: updatedItems } });
+        localStorage.setItem('guestCart', JSON.stringify(updatedItems));
       } else {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update quantity');
@@ -266,18 +377,35 @@ export const CartProvider = ({ children }) => {
     } catch (error) {
       console.error('Error updating quantity:', error);
       dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
+      
+      // Show error message
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('cart-error', {
+          detail: { message: error.message }
+        });
+        window.dispatchEvent(event);
+      }
+    } finally {
+      dispatch({ type: CART_ACTIONS.SET_LOADING, payload: false });
     }
   };
 
   // Clear entire cart
   const clearCart = async () => {
     try {
+      dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
+      
       const response = await fetch('/api/cart', {
         method: 'DELETE',
       });
 
       if (response.ok) {
         dispatch({ type: CART_ACTIONS.CLEAR_CART });
+        localStorage.removeItem('guestCart'); // Also clear guest cart
+      } else if (response.status === 401) {
+        // Handle guest cart clear
+        dispatch({ type: CART_ACTIONS.CLEAR_CART });
+        localStorage.removeItem('guestCart');
       } else {
         const error = await response.json();
         throw new Error(error.message || 'Failed to clear cart');
@@ -285,6 +413,16 @@ export const CartProvider = ({ children }) => {
     } catch (error) {
       console.error('Error clearing cart:', error);
       dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
+      
+      // Show error message
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('cart-error', {
+          detail: { message: error.message }
+        });
+        window.dispatchEvent(event);
+      }
+    } finally {
+      dispatch({ type: CART_ACTIONS.SET_LOADING, payload: false });
     }
   };
 
