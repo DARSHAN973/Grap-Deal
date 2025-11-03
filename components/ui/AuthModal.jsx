@@ -458,6 +458,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={formData.password}
                         onChange={handleInputChange}
                         placeholder="Enter your password"
+                        autoComplete={isLogin ? "current-password" : "new-password"}
                         className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                           errors.password
                             ? "border-red-500 bg-red-50 dark:bg-red-900/20"
@@ -509,6 +510,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                               value={formData.confirmPassword}
                               onChange={handleInputChange}
                               placeholder="Confirm your password"
+                              autoComplete="new-password"
                               className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                                 errors.confirmPassword
                                   ? "border-red-500 bg-red-50 dark:bg-red-900/20"

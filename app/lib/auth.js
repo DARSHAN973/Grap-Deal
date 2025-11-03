@@ -28,8 +28,7 @@ export async function verifyAuth() {
     // If role is missing from token (old token), fetch from database
     if (!decoded.role && (decoded.userId || decoded.id)) {
       try {
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
+        const prisma = (await import('./prisma')).default;
         
         const user = await prisma.user.findUnique({
           where: { id: decoded.userId || decoded.id },
@@ -38,11 +37,14 @@ export async function verifyAuth() {
         
         if (user) {
           decoded.role = user.role;
+        } else {
+          // User not found in database, but token is still valid
+          decoded.role = 'USER'; // Default role
         }
-        
-        await prisma.$disconnect();
       } catch (error) {
-        console.error('Error fetching user role:', error);
+        console.log('Database unavailable for role lookup, using default role:', error.message);
+        // Set default role if database is unavailable
+        decoded.role = decoded.role || 'USER';
       }
     }
 

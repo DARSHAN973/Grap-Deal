@@ -20,13 +20,20 @@ export async function POST(request) {
       return NextResponse.json({ message: "Validation failed", errors }, { status: 400 });
     }
 
-    // Find user by email or phone
+    // Find user by email or phone with database resilience
     let user = null;
-    if (email) {
-      user = await prisma.user.findUnique({ where: { email } });
-    }
-    if (!user && phone) {
-      user = await prisma.user.findUnique({ where: { phone: phone } });
+    try {
+      if (email) {
+        user = await prisma.user.findUnique({ where: { email } });
+      }
+      if (!user && phone) {
+        user = await prisma.user.findUnique({ where: { phone: phone } });
+      }
+    } catch (dbError) {
+      console.log('Database connection failed during login:', dbError.message);
+      return NextResponse.json({ 
+        message: "Service temporarily unavailable. Please try again later." 
+      }, { status: 503 });
     }
 
     if (!user) {

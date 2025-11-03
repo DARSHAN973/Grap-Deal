@@ -26,6 +26,9 @@ export async function GET() {
     let totalSpent = 0;
 
     try {
+      // Test database connection first
+      await prisma.$queryRaw`SELECT 1`;
+      
       // Get real-time stats from database with fallbacks
       const results = await Promise.allSettled([
         prisma.cartItem.count({ 

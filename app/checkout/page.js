@@ -18,6 +18,7 @@ const CheckoutContent = () => {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [product, setProduct] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('online');
@@ -50,6 +51,24 @@ const CheckoutContent = () => {
       setLoading(false);
     }
   }, [productId]);
+
+  const fetchCartItems = useCallback(async () => {
+    try {
+      const response = await fetch('/api/cart');
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data.items || []);
+      } else {
+        // Handle cart loading failure
+        setCartItems([]);
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      setCartItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const checkAuthentication = useCallback(async () => {
     try {
@@ -85,10 +104,15 @@ const CheckoutContent = () => {
   }, [checkAuthentication]);
 
   useEffect(() => {
-    if (productId) {
+    if (type === 'cart') {
+      fetchCartItems();
+    } else if (productId) {
       fetchProduct();
+    } else {
+      // No product ID and not cart checkout
+      setLoading(false);
     }
-  }, [productId, fetchProduct]);
+  }, [type, productId, fetchProduct, fetchCartItems]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -281,6 +305,44 @@ const CheckoutContent = () => {
           <p className="text-gray-600 dark:text-gray-400">
             {authLoading ? 'Checking authentication...' : 'Loading checkout...'}
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if cart is empty when type is cart
+  if (type === 'cart' && cartItems.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🛒</div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Your cart is empty</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Add some products to your cart before checkout</p>
+          <MagneticButton
+            onClick={() => router.push('/products')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Browse Products
+          </MagneticButton>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if product doesn't exist when type is product
+  if (type !== 'cart' && !product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">❌</div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Product not found</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">The product you&apos;re trying to checkout doesn&apos;t exist</p>
+          <MagneticButton
+            onClick={() => router.push('/products')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Browse Products
+          </MagneticButton>
         </div>
       </div>
     );

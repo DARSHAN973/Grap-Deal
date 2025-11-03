@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/app/lib/prisma';
 
 // GET - Fetch products with filtering, search, and pagination
 export async function GET(request) {
@@ -172,12 +170,10 @@ export async function GET(request) {
     });
     
   } catch (error) {
-    console.error('Products fetch error:', error);
+    console.error('Error in products API:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch products' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

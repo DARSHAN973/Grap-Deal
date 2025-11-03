@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {
+    root: '/home/darshan/darshan/WEB_DEVELOPMENT /Grap Deal'
+  },
   async rewrites() {
     return [
       {

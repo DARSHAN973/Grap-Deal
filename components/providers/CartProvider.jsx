@@ -34,7 +34,13 @@ const cartReducer = (state, action) => {
     
     case CART_ACTIONS.SET_CART:
       const { items } = action.payload;
-      const safeItems = Array.isArray(items) ? items.filter(item => item && typeof item.quantity === 'number') : [];
+      const safeItems = Array.isArray(items) ? items.filter(item => 
+        item && 
+        item.productId && 
+        typeof item.quantity === 'number' && 
+        item.quantity > 0 &&
+        (item.price !== null && item.price !== undefined)
+      ) : [];
       return {
         ...state,
         items: safeItems,
@@ -50,19 +56,25 @@ const cartReducer = (state, action) => {
     
     case CART_ACTIONS.ADD_ITEM:
       const newItem = action.payload;
-      const existingItemIndex = state.items.findIndex(
-        item => item.productId === newItem.productId && item.variantId === newItem.variantId
+      
+      // Filter out any invalid items before processing
+      const validItems = state.items.filter(item => item && item.productId);
+      
+      const existingItemIndex = validItems.findIndex(
+        item => item && 
+                item.productId === newItem.productId && 
+                item.variantId === newItem.variantId
       );
       
       let updatedItems;
       if (existingItemIndex >= 0) {
-        updatedItems = state.items.map((item, index) =>
+        updatedItems = validItems.map((item, index) =>
           index === existingItemIndex
             ? { ...item, quantity: item.quantity + newItem.quantity }
             : item
         );
       } else {
-        updatedItems = [...state.items, newItem];
+        updatedItems = [...validItems, newItem];
       }
       
       return {
@@ -77,7 +89,7 @@ const cartReducer = (state, action) => {
       };
     
     case CART_ACTIONS.REMOVE_ITEM:
-      const filteredItems = state.items.filter(item => item.id !== action.payload);
+      const filteredItems = state.items.filter(item => item && item.productId && item.id !== action.payload);
       return {
         ...state,
         items: filteredItems,
@@ -91,9 +103,9 @@ const cartReducer = (state, action) => {
     
     case CART_ACTIONS.UPDATE_QUANTITY:
       const { itemId, quantity } = action.payload;
-      const updatedQuantityItems = state.items.map(item =>
-        item.id === itemId ? { ...item, quantity } : item
-      );
+      const updatedQuantityItems = state.items
+        .map(item => item && item.id === itemId ? { ...item, quantity } : item)
+        .filter(item => item && item.productId && item.quantity > 0);
       return {
         ...state,
         items: updatedQuantityItems,
@@ -142,22 +154,73 @@ export const CartProvider = ({ children }) => {
         dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: data.items || [] } });
       } else if (response.status === 401) {
         // User not authenticated, try to load from localStorage for guest cart
-        const guestCart = localStorage.getItem('guestCart');
-        const items = guestCart ? JSON.parse(guestCart) : [];
-        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items } });
+        try {
+          const guestCart = localStorage.getItem('guestCart');
+          const items = guestCart ? JSON.parse(guestCart) : [];
+          const validItems = Array.isArray(items) ? items.filter(item => 
+            item && 
+            item.productId && 
+            typeof item.quantity === 'number' && 
+            item.quantity > 0
+          ) : [];
+          
+          // Clean up localStorage if we filtered out any corrupted items
+          if (validItems.length !== items.length) {
+            console.log('Cleaned up corrupted guest cart items from localStorage');
+            localStorage.setItem('guestCart', JSON.stringify(validItems));
+          }
+          dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: validItems } });
+        } catch (localStorageError) {
+          console.error('Error parsing guest cart from localStorage:', localStorageError);
+          dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: [] } });
+        }
       } else {
         // If API fails, try localStorage as fallback
         console.log('Cart API failed, using localStorage fallback');
-        const fallbackCart = localStorage.getItem('cartFallback');
-        const items = fallbackCart ? JSON.parse(fallbackCart) : [];
-        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items } });
+        try {
+          const fallbackCart = localStorage.getItem('cartFallback');
+          const items = fallbackCart ? JSON.parse(fallbackCart) : [];
+          const validItems = Array.isArray(items) ? items.filter(item => 
+            item && 
+            item.productId && 
+            typeof item.quantity === 'number' && 
+            item.quantity > 0
+          ) : [];
+          
+          // Clean up localStorage if we filtered out any corrupted items
+          if (validItems.length !== items.length) {
+            console.log('Cleaned up corrupted fallback cart items from localStorage');
+            localStorage.setItem('cartFallback', JSON.stringify(validItems));
+          }
+          dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: validItems } });
+        } catch (localStorageError) {
+          console.error('Error parsing fallback cart from localStorage:', localStorageError);
+          dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: [] } });
+        }
       }
     } catch (error) {
       console.error('Error loading cart:', error);
       // Try to load from localStorage as fallback
-      const guestCart = localStorage.getItem('guestCart');
-      const items = guestCart ? JSON.parse(guestCart) : [];
-      dispatch({ type: CART_ACTIONS.SET_CART, payload: { items } });
+      try {
+        const guestCart = localStorage.getItem('guestCart');
+        const items = guestCart ? JSON.parse(guestCart) : [];
+        const validItems = Array.isArray(items) ? items.filter(item => 
+          item && 
+          item.productId && 
+          typeof item.quantity === 'number' && 
+          item.quantity > 0
+        ) : [];
+        
+        // Clean up localStorage if we filtered out any corrupted items
+        if (validItems.length !== items.length) {
+          console.log('Cleaned up corrupted cart items from localStorage during error recovery');
+          localStorage.setItem('guestCart', JSON.stringify(validItems));
+        }
+        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: validItems } });
+      } catch (localStorageError) {
+        console.error('Error parsing localStorage cart data:', localStorageError);
+        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: [] } });
+      }
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: false });
     }
   };
@@ -438,10 +501,22 @@ export const CartProvider = ({ children }) => {
 
   // Get item count for a specific product
   const getItemCount = (productId, variantId = null) => {
+    if (!productId || !Array.isArray(state.items)) {
+      return 0;
+    }
+    
+    // Debug logging to help identify the issue
+    const invalidItems = state.items.filter(item => !item || !item.productId);
+    if (invalidItems.length > 0) {
+      console.warn('Found invalid cart items:', invalidItems);
+    }
+    
     const item = state.items.find(
-      item => item.productId === productId && item.variantId === variantId
+      item => item && 
+              item.productId === productId && 
+              item.variantId === variantId
     );
-    return item ? item.quantity : 0;
+    return item && typeof item.quantity === 'number' ? item.quantity : 0;
   };
 
   const value = {

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
 import { verifyAuth } from '../../../lib/auth';
-
-const prisma = new PrismaClient();
 
 // GET - Fetch all categories
 export async function GET(request) {

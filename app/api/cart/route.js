@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
 import { verifyAuth } from '@/app/lib/auth';
+import { tempCartOperations } from '@/app/lib/temp-storage';
+
+// Timeout wrapper for database operations - increased timeout for slow connections
+async function withTimeout(promise, timeoutMs = 60000) { // 60 seconds instead of 15
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Database operation timed out')), timeoutMs)
+  );
+  
+  return Promise.race([promise, timeout]);
+}
 
 // GET - Get user's cart
 export async function GET(request) {
@@ -16,10 +26,15 @@ export async function GET(request) {
       });
     }
 
+    // Try temp storage first for faster response
+    let tempCartItems = [];
     try {
-      // Test database connection first
-      await prisma.$queryRaw`SELECT 1`;
-      
+      tempCartItems = tempCartOperations.getCart(user.id);
+    } catch (tempError) {
+      console.log('Temp cart access failed:', tempError);
+    }
+
+    try {
       const cart = await prisma.cart.findUnique({
         where: { userId: user.id },
         include: {
@@ -55,7 +70,7 @@ export async function GET(request) {
             }
           }
         }
-      });
+        }); // 30 seconds for complex query with joins
 
       if (!cart) {
         return NextResponse.json({ 
@@ -66,23 +81,61 @@ export async function GET(request) {
         });
       }
 
-      const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-      const totalPrice = cart.items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+      // Validate and clean cart items before sending to frontend
+      const validItems = cart.items.filter(item => {
+        return item && 
+               item.productId && 
+               typeof item.quantity === 'number' && 
+               item.quantity > 0 &&
+               item.price !== null && 
+               item.price !== undefined;
+      });
+
+      const totalItems = validItems.reduce((sum, item) => sum + item.quantity, 0);
+      const totalPrice = validItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
       return NextResponse.json({
         success: true,
-        items: cart.items,
+        items: validItems,
         totalItems,
         totalPrice: totalPrice.toFixed(2),
       });
     } catch (dbError) {
-      console.log('Cart database query failed:', dbError.message);
-      return NextResponse.json({ 
-        success: true,
-        items: [], 
-        totalItems: 0, 
-        totalPrice: 0 
-      });
+      console.log('Cart database query failed, checking temp storage:', dbError.message);
+      
+      // Try to get data from temp storage
+      try {
+        const tempCartItems = tempCartOperations.getCart(user.id);
+        
+        // Validate temp storage items too
+        const validTempItems = tempCartItems.filter(item => {
+          return item && 
+                 item.productId && 
+                 typeof item.quantity === 'number' && 
+                 item.quantity > 0 &&
+                 item.price !== null && 
+                 item.price !== undefined;
+        });
+        
+        const totalItems = validTempItems.reduce((sum, item) => sum + item.quantity, 0);
+        const totalPrice = validTempItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+        
+        return NextResponse.json({ 
+          success: true,
+          items: validTempItems,
+          totalItems,
+          totalPrice: totalPrice.toFixed(2),
+          tempMode: true
+        });
+      } catch (tempError) {
+        console.log('Temp storage also failed:', tempError);
+        return NextResponse.json({ 
+          success: true,
+          items: [], 
+          totalItems: 0, 
+          totalPrice: 0 
+        });
+      }
     }
 
   } catch (error) {
@@ -123,50 +176,55 @@ export async function POST(request) {
     }
 
     try {
-      // Test database connection first
-      await prisma.$queryRaw`SELECT 1`;
-      
-      // Find or create cart
-      let cart = await prisma.cart.findUnique({
-        where: { userId: user.id }
-      });
+      // Use transaction for better performance - no artificial timeout
+      await prisma.$transaction(async (tx) => {
+          // Find or create cart
+          let cart = await tx.cart.findUnique({
+            where: { userId: user.id }
+          });
 
-      if (!cart) {
-        cart = await prisma.cart.create({
-          data: { userId: user.id }
-        });
-      }
+          if (!cart) {
+            cart = await tx.cart.create({
+              data: { userId: user.id }
+            });
+          }
 
-      // Check if item already exists in cart
-      const existingCartItem = await prisma.cartItem.findFirst({
-        where: {
-          cartId: cart.id,
-          productId: productId,
-          variantId: variantId || null
-        }
-      });
+          // Handle cart item creation/update with proper null variant handling
+          const whereCondition = {
+            cartId_productId_variantId: {
+              cartId: cart.id,
+              productId: productId,
+              variantId: variantId || null
+            }
+          };
 
-      if (existingCartItem) {
-        // Update quantity if item exists
-        await prisma.cartItem.update({
-          where: { id: existingCartItem.id },
-          data: { 
-            quantity: existingCartItem.quantity + quantity,
-            price: parseFloat(price)
+          // Check if item already exists
+          const existingItem = await tx.cartItem.findUnique({
+            where: whereCondition
+          });
+
+          if (existingItem) {
+            // Update existing item
+            await tx.cartItem.update({
+              where: { id: existingItem.id },
+              data: {
+                quantity: existingItem.quantity + quantity,
+                price: parseFloat(price)
+              }
+            });
+          } else {
+            // Create new item
+            await tx.cartItem.create({
+              data: {
+                cartId: cart.id,
+                productId,
+                variantId: variantId || null,
+                quantity,
+                price: parseFloat(price)
+              }
+            });
           }
         });
-      } else {
-        // Create new cart item
-        await prisma.cartItem.create({
-          data: {
-            cartId: cart.id,
-            productId,
-            variantId: variantId || null,
-            quantity,
-            price: parseFloat(price)
-          }
-        });
-      }
 
       return NextResponse.json({
         success: true,
@@ -174,11 +232,37 @@ export async function POST(request) {
       });
 
     } catch (dbError) {
-      console.log('Cart database operation failed:', dbError.message);
-      return NextResponse.json({
-        success: false,
-        error: 'Failed to add item to cart. Please try again.'
-      }, { status: 500 });
+      console.log('Cart database operation failed, using temp storage:', dbError.message);
+      
+      // Log specific Prisma errors for debugging
+      if (dbError.code) {
+        console.log('Prisma error code:', dbError.code);
+      }
+      if (dbError.meta) {
+        console.log('Prisma error meta:', dbError.meta);
+      }
+      
+      // Use temporary storage as fallback for instant response
+      try {
+        const cartItems = tempCartOperations.addItem(user.id, {
+          productId,
+          variantId,
+          quantity,
+          price: parseFloat(price)
+        });
+        
+        return NextResponse.json({
+          success: true,
+          message: 'Item added to cart successfully (offline mode)',
+          tempMode: true
+        });
+      } catch (tempError) {
+        console.error('Temp storage also failed:', tempError);
+        return NextResponse.json({
+          success: false,
+          error: 'Failed to add item to cart. Please try again.'
+        }, { status: 500 });
+      }
     }
 
   } catch (error) {

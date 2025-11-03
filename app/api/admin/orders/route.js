@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from '@/app/lib/prisma';
 import jwt from "jsonwebtoken";
-
-const prisma = new PrismaClient();
 
 // Verify admin token
 async function verifyAdminToken(request) {
