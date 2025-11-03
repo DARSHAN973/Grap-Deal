@@ -37,6 +37,8 @@ const ProductManagement = () => {
     fetch: false,
     upload: false
   });
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(null);
 
   // Form state - E-Commerce products only (simplified)
   const [formData, setFormData] = useState({
@@ -233,11 +235,15 @@ const ProductManagement = () => {
         fetchProducts(currentPage);
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to save product');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('cart-error', { detail: { message: error.error || 'Failed to save product' } }));
+        }
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Failed to save product');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cart-error', { detail: { message: 'Failed to save product' } }));
+      }
     } finally {
       setOperationLoading(prev => ({ ...prev, [loadingKey]: false }));
     }
@@ -257,13 +263,51 @@ const ProductManagement = () => {
         fetchProducts(currentPage);
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to delete product');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('cart-error', { detail: { message: error.error || 'Failed to delete product' } }));
+        }
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cart-error', { detail: { message: 'Failed to delete product' } }));
+      }
     } finally {
       setOperationLoading(prev => ({ ...prev, delete: false }));
+    }
+  };
+
+  // Update product status (supports any status value)
+  const updateProductStatus = async (productId, newStatus) => {
+    setStatusUpdatingId(productId);
+    setStatusDropdownOpen(null);
+    try {
+      const payload = { id: productId, status: newStatus };
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        // refresh
+        fetchProducts(currentPage);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('cart-success', { detail: { message: 'Product status updated' } }));
+        }
+      } else {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('cart-error', { detail: { message: data.error || 'Failed to update product status' } }));
+        }
+      }
+    } catch (error) {
+      console.error('Error updating product status:', error);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cart-error', { detail: { message: 'Error updating product status: ' + error.message } }));
+      }
+    } finally {
+      setStatusUpdatingId(null);
     }
   };
 
@@ -416,10 +460,8 @@ const ProductManagement = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
             <option value="">All Status</option>
-            <option value="DRAFT">Draft</option>
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>
-            <option value="ARCHIVED">Archived</option>
           </select>
 
           {/* Category Filter */}
@@ -558,18 +600,60 @@ const ProductManagement = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          product.status === 'ACTIVE' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            : product.status === 'DRAFT'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                            : product.status === 'INACTIVE'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                        }`}>
-                          {product.status}
-                        </span>
+                      <td className="px-6 py-4 whitespace-nowrap relative">
+                        <div className="flex items-center gap-2">
+                          {/* Quick toggle: clicking badge toggles ACTIVE <-> INACTIVE */}
+                          <button
+                            onClick={() => {
+                              if (statusUpdatingId) return;
+                              const newStatus = product.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+                              updateProductStatus(product.id, newStatus);
+                            }}
+                            disabled={statusUpdatingId === product.id}
+                            title="Toggle Active / Inactive"
+                            className="inline-flex items-center"
+                          >
+                            {statusUpdatingId === product.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            ) : (
+                              // Show only ACTIVE or INACTIVE to admins. Map any non-ACTIVE status to INACTIVE for display.
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                product.status === 'ACTIVE'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              }`}>
+                                {product.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE'}
+                              </span>
+                            )}
+                          </button>
+
+                          {/* Dropdown button for choosing any status */}
+                          <div className="relative">
+                            <button
+                              onClick={() => setStatusDropdownOpen(prev => (prev === product.id ? null : product.id))}
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                              title="Change status"
+                              disabled={statusUpdatingId === product.id}
+                            >
+                              <FunnelIcon className="h-4 w-4 text-gray-500" />
+                            </button>
+
+                            {statusDropdownOpen === product.id && (
+                              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-20">
+                                {['ACTIVE','INACTIVE'].map(s => (
+                                  <button
+                                    key={s}
+                                    onClick={() => updateProductStatus(product.id, s)}
+                                    disabled={statusUpdatingId === product.id}
+                                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 ${product.status === s ? 'font-semibold' : ''}`}
+                                  >
+                                    {s}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">

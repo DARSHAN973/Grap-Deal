@@ -10,6 +10,16 @@ const RETRY_COOLDOWN = 30000; // 30 seconds between retries
 const createPrismaProxy = (client) => {
   return new Proxy(client, {
     get(target, prop) {
+      // Prevent accidental disconnects from tearing down a shared client in the app
+      if (prop === '$disconnect') {
+        return async () => {
+          // no-op in the app/runtime; scripts should use their own PrismaClient instance
+          if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'production') {
+            console.log('Skipped prisma.$disconnect() on shared client');
+          }
+        };
+      }
+
       const value = target[prop];
       
       // If it's a function, wrap it with error handling
