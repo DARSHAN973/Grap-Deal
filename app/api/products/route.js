@@ -27,9 +27,9 @@ export async function GET(request) {
       isActive: true,
       ...(search && {
         OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-          { brand: { contains: search, mode: 'insensitive' } }
+          { name: { contains: search } },
+          { description: { contains: search } },
+          { brand: { contains: search } }
         ]
       }),
       ...(category && { categoryId: category }),
