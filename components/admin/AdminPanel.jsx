@@ -4,6 +4,7 @@ import { useState } from "react";
 import CategoryManagement from "./CategoryManagement";
 import ProductManagement from "./ProductManagement";
 import OrderManagement from "./OrderManagement";
+import UserManagement from "./UserManagement";
 import AdminHeader from "./AdminHeader";
 import {
   HomeIcon,
@@ -38,7 +39,7 @@ const AdminPanel = () => {
       case "dashboard":
         return <DashboardContent />;
       case "users":
-        return <UserManagementContent />;
+        return <UserManagement />;
       case "products":
         return <ProductManagement />;
       case "categories":
@@ -234,71 +235,7 @@ const DashboardContent = () => (
   </div>
 );
 
-// User Management Content
-const UserManagementContent = () => (
-  <div>
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">User Management</h1>
-      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-        Manage customers, vendors, and delivery partners.
-      </p>
-    </div>
 
-    {/* Tabs */}
-    <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-      <nav className="-mb-px flex space-x-8">
-        <button className="border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-          Customers
-        </button>
-        <button className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-          Vendors
-        </button>
-        <button className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-          Delivery Partners
-        </button>
-      </nav>
-    </div>
-
-    {/* Table */}
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Joined</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="h-10 w-10 flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-gray-300"></div>
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">John Doe</div>
-                  <div className="text-sm text-gray-500">Customer</div>
-                </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">john@example.com</td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Oct 1, 2024</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <button className="text-indigo-600 hover:text-indigo-900 mr-3">View</button>
-              <button className="text-red-600 hover:text-red-900">Block</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
 
 // Category Management Content
 const CategoryManagementContent = () => (
