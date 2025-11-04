@@ -187,7 +187,7 @@ const TrendingSlider = () => {
   if (loading) {
     return (
       <section className="relative w-full overflow-hidden bg-transparent pt-0 sm:pt-0 lg:pt-0">
-        <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-20 sm:px-6 lg:px-10 xl:px-16">
+        <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-8 sm:px-6 lg:px-10 xl:px-16">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
@@ -201,7 +201,7 @@ const TrendingSlider = () => {
 
   return (
     <section className="relative w-full overflow-hidden bg-transparent pt-0 sm:pt-0 lg:pt-0">
-      <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-20 sm:px-6 lg:px-10 xl:px-16">
+  <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-2 sm:px-6 lg:px-10 xl:px-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <motion.span
@@ -281,7 +281,7 @@ const TrendingSlider = () => {
           </div>
 
           <motion.div
-            className="grid grid-cols-1 gap-4 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05] sm:grid-cols-3"
+            className="hidden sm:grid grid-cols-1 gap-4 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05] sm:grid-cols-3"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -300,13 +300,13 @@ const TrendingSlider = () => {
           </motion.div>
         </div>
 
-        <div className="relative mt-16">
+  <div className="relative mt-0">
           <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-gray-50 via-transparent to-transparent dark:from-gray-950" />
           <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-gray-50 via-transparent to-transparent dark:from-gray-950" />
 
           <div
             ref={scrollContainerRef}
-            className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8"
+            className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4"
             tabIndex={0}
           >
             {trendingProducts.map((product, idx) => {
@@ -330,22 +330,12 @@ const TrendingSlider = () => {
                 testSavingsAmount = testOriginalPrice - currentPrice;
               }
               
-              // Debug log to see EXACT database values
-              console.log('TrendingSlider - DB + TEST VALUES:', product.name, {
-                dbPrice: product.price,
-                dbOriginalPrice: product.originalPrice, 
-                dbDiscount: product.discount,
-                finalCurrentPrice: currentPrice,
-                finalOriginalPrice: testOriginalPrice,
-                finalDiscount: testDiscount,
-                finalSavings: testSavingsAmount,
-                usingTestData: !originalPrice || !discount
-              });
+              // Removed noisy debug logging in render for performance
               
               return (
                 <motion.article
                   key={product.id}
-                  className="group relative flex h-full min-h-[32rem] w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] sm:w-[calc(25%-18px)] lg:w-[calc(25%-18px)] cursor-pointer"
+                  className="group relative flex h-full min-h-[22rem] w-[calc(50%-12px)] sm:w-[calc(50%-12px)] md:w-[calc(33%-12px)] lg:w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-2 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] cursor-pointer"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -354,7 +344,7 @@ const TrendingSlider = () => {
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${getAccentGradient(idx)} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
 
-                  <div className="relative h-96 overflow-hidden">
+                  <div className="relative h-64 sm:h-96 overflow-hidden">
                     <div
                       className="absolute inset-0 scale-105 transform bg-cover bg-center transition-transform duration-500 group-hover:scale-125"
                       style={{ backgroundImage: `url(${product.image})` }}
@@ -365,7 +355,7 @@ const TrendingSlider = () => {
                       whileHover={{ opacity: 0.78 }}
                     />
                     <div className="absolute left-5 right-5 top-5 flex items-center justify-between text-[0.7rem] uppercase tracking-[0.3em] text-white/80">
-                      <span className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 font-semibold backdrop-blur">
+                      <span className="hidden sm:flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 font-semibold backdrop-blur">
                         Trending
                       </span>
                       <button
@@ -375,7 +365,7 @@ const TrendingSlider = () => {
                           handleProductView(product.id);
                         }}
                         aria-label={`Quick view ${product.name}`}
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+                        className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
                       >
                         <Eye className="h-4.5 w-4.5" />
                       </button>
@@ -391,8 +381,8 @@ const TrendingSlider = () => {
                     </div>
                   </div>
 
-                  <div className="relative flex flex-col px-4 pt-4 pb-1.5 text-gray-700 dark:text-gray-300">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="relative flex flex-col px-4 pt-4 pb-1.5 text-gray-700 dark:text-gray-300">
+                    <div className="hidden sm:flex items-center justify-between mb-2">
                       <StarRating rating={product.rating} />
                       {discount && (
                         <span className="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
@@ -422,7 +412,7 @@ const TrendingSlider = () => {
                       <MagneticButton
                         variant="gradient"
                         size="md"
-                        className="w-full justify-center rounded-2xl"
+                        className="hidden sm:flex w-full justify-center rounded-2xl"
                         onClick={(e) => {
                           e.stopPropagation();
                           window.location.href = `/checkout?productId=${product.id}&quantity=1&type=buynow`;
@@ -435,7 +425,7 @@ const TrendingSlider = () => {
                       <MagneticButton
                         variant="secondary"
                         size="md"
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12 relative"
+                        className="flex h-12 w-full sm:w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white relative"
                         whileTap={{ scale: 0.94 }}
                         onClick={(e) => handleAddToCart(product, e)}
                         disabled={cartLoading}

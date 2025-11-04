@@ -4,7 +4,6 @@ import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import HeroBannerSlider from '@/components/sections/HeroBannerSlider';
 import TrendingSlider from '@/components/sections/TrendingSlider';
-import AnimatedHeroHeading from '@/components/sections/AnimatedHeroHeading';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -19,7 +18,7 @@ function HomeContent() {
 
   return (
     <main className="min-h-screen">
-      <AnimatedHeroHeading />
+      {/* Removed AnimatedHeroHeading to eliminate extra mobile spacing */}
       <HeroBannerSlider />
       <TrendingSlider />
     </main>

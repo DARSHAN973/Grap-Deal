@@ -59,30 +59,30 @@ const dropSignals = [
 
 const footerNav = [
   {
-    title: 'Platform',
+    title: 'Shop',
     links: [
-      { label: 'Hero composer', href: '/products' },
-      { label: 'Trending rail', href: '/products' },
-      { label: 'Dynamic widgets', href: '/products' },
-      { label: 'Automation API', href: '/products' }
+      { label: 'All Products', href: '/products' },
+      { label: 'Categories', href: '/products' },
+      { label: 'Special Offers', href: '/products' },
+      { label: 'New Arrivals', href: '/products' }
     ]
   },
   {
-    title: 'Resources',
+    title: 'Support',
     links: [
-      { label: 'Documentation', href: '/docs' },
-      { label: 'Marketplace playbook', href: '/playbook' },
-      { label: 'Design tokens', href: '/tokens' },
-      { label: 'Status page', href: '/status' }
+      { label: 'Help Center', href: '/contact' },
+      { label: 'Order Tracking', href: '/account' },
+      { label: 'Returns & Exchanges', href: '/contact' },
+      { label: 'Size Guide', href: '/contact' }
     ]
   },
   {
     title: 'Company',
     links: [
-      { label: 'About Grap Deal', href: '/about' },
-      { label: 'Careers', href: '/careers' },
-      { label: 'Press kit', href: '/press' },
-      { label: 'Contact', href: '/contact' }
+      { label: 'About Grap Deal', href: '/contact' },
+      { label: 'Business Services', href: '/services' },
+      { label: 'Careers', href: '/contact' },
+      { label: 'Contact Us', href: '/contact' }
     ]
   }
 ];
@@ -122,76 +122,10 @@ const Footer = () => {
         <div className="absolute -bottom-32 right-[10%] h-[24rem] w-[24rem] rounded-full bg-gradient-to-br from-orange-500/10 to-rose-500/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-24 sm:px-6 lg:px-10 xl:px-16">
-        <motion.div
-          className="flex flex-col gap-10 rounded-[3rem] border border-gray-200/30 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] p-10 shadow-[0_40px_120px_rgba(15,23,42,0.15)] dark:shadow-[0_40px_120px_rgba(15,23,42,0.45)] backdrop-blur-3xl lg:flex-row lg:items-center lg:justify-between"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
-          <div className="max-w-xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gray-300/60 dark:border-white/20 bg-gray-100/80 dark:bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 dark:text-white/80">
-              <Sparkles className="h-4 w-4" />
-              Beta collective
-            </span>
-            <h3 className="mt-6 text-3xl font-semibold leading-tight text-gray-900 dark:text-white sm:text-4xl">
-              Get the hottest deals, fresh drops, and exclusive offers in your inbox every week
-            </h3>
-            
-          </div>
+  <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-12 sm:px-6 lg:px-10 xl:px-16">
+        {/* Email signup section removed for cleaner launch */}
 
-          <form
-            onSubmit={handleSubscribe}
-            className="w-full max-w-xl rounded-[2rem] border border-gray-200/30 dark:border-white/10 bg-gray-100/50 dark:bg-white/10 p-6 shadow-inner"
-          >
-                          <div className="flex flex-col gap-4">
-              <span className="text-[0.7rem] uppercase tracking-[0.4em] text-gray-500 dark:text-white/60">
-                Stay ahead of every drop
-              </span>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="group relative flex w-full items-center gap-3 rounded-[1.8rem] border border-gray-300/50 dark:border-white/15 bg-white/90 dark:bg-white/5 px-4 py-3 text-sm text-gray-700 dark:text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all focus-within:border-blue-400 dark:focus-within:border-white/35 focus-within:bg-white dark:focus-within:bg-white/10 focus-within:shadow-[0_0_28px_rgba(96,165,250,0.25)]">
-                  <Mail className="h-5 w-5 text-blue-500 dark:text-emerald-200/90" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="yourname@brand.com"
-                    className="w-full bg-transparent text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none"
-                    required
-                  />
-                </div>
-                <MagneticButton
-                  type="submit"
-                  variant="gradient"
-                  className="w-full justify-center px-6 py-3 text-sm font-semibold sm:w-auto"
-                  disabled={isSubscribed}
-                >
-                  {isSubscribed ? (
-                    <motion.span
-                      className="flex items-center gap-2"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                    >
-                      <Heart className="h-4 w-4 text-rose-400" />
-                      Added to the runway list
-                    </motion.span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Send className="h-4 w-4" />
-                      Request access
-                    </span>
-                  )}
-                </MagneticButton>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-white/50">
-                No spam, just launch signals and frameworks. Unsubscribe anytime.
-              </p>
-            </div>
-          </form>
-        </motion.div>
-
-        <div className="mt-16 grid gap-10 lg:grid-cols-[1.6fr,1fr]">
+  <div className="mt-8 grid gap-10 lg:grid-cols-[1.6fr,1fr]">
           <div className="grid gap-6 rounded-[2.5rem] border border-gray-200/30 bg-gray-50/60 dark:border-white/10 dark:bg-white/[0.03] p-8 backdrop-blur-2xl md:grid-cols-2">
             {dropSignals.map(({ id, title, value, description, Icon, accent }) => (
               <motion.div
@@ -246,7 +180,7 @@ const Footer = () => {
           </motion.div>
         </div>
 
-  <div className="mt-16 grid gap-12 lg:grid-cols-[2fr,3fr]">
+  <div className="mt-8 grid gap-12 lg:grid-cols-[2fr,3fr]">
           <motion.div
             className="flex flex-col gap-6"
             initial={{ opacity: 0, y: 30 }}
@@ -312,7 +246,7 @@ const Footer = () => {
           </motion.div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-6 border-t border-gray-200/30 dark:border-white/10 pt-8 text-xs uppercase tracking-[0.28em] text-gray-500 dark:text-white/50 sm:flex-row sm:items-center sm:justify-between">
+  <div className="mt-8 flex flex-col gap-6 border-t border-gray-200/30 dark:border-white/10 pt-8 text-xs uppercase tracking-[0.28em] text-gray-500 dark:text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full border border-gray-300/50 dark:border-white/10 px-4 py-1">Launch kits</span>
             <span className="rounded-full border border-gray-300/50 dark:border-white/10 px-4 py-1">No-code ready</span>
