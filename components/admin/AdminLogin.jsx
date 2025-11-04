@@ -54,7 +54,7 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+  <div className="max-w-md w-full space-y-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/70 p-6 shadow-md">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Admin Login
@@ -119,11 +119,11 @@ const AdminLogin = () => {
             </button>
           </div>
 
-          <div className="text-center">
+          {/* <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               For demo purposes: Create an admin user in your database with role = "admin"
             </p>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>
