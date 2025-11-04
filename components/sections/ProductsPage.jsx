@@ -183,7 +183,7 @@ const ProductsPage = () => {
   return (
     <main className="relative min-h-screen bg-transparent">
       {/* Hero Section */}
-  <section ref={heroRef} className="relative overflow-hidden pb-8 pt-6 sm:pt-28">
+  <section ref={heroRef} className="relative overflow-hidden pb-4 pt-6 sm:pb-8 sm:pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
@@ -210,10 +210,10 @@ const ProductsPage = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="relative py-12">
+  <section className="relative py-4 sm:py-12">
         <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           <motion.div
-            className="text-center mb-8"
+            className="text-center mb-4 sm:mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -227,7 +227,7 @@ const ProductsPage = () => {
           </motion.div>
 
           {/* Category Cards Grid */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 mb-12">
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 mb-6 sm:mb-10">
             {loadingCategories ? (
               // Loading skeleton
               Array.from({ length: 8 }).map((_, index) => (
@@ -253,7 +253,7 @@ const ProductsPage = () => {
                       setSelectedCategory(category.id);
                       setCurrentPage(1); // Reset to first page when changing category
                     }}
-                    className={`group relative overflow-hidden rounded-2xl border-2 text-center transition-all duration-300 ${
+                    className={`group relative overflow-hidden rounded-2xl border-2 text-center transition-all duration-300 p-0 ${
                       isActive
                         ? 'border-blue-500 bg-blue-50 shadow-lg scale-105 dark:border-blue-400 dark:bg-blue-950/30'
                         : 'border-gray-200/50 bg-white/90 hover:border-blue-300 hover:shadow-md hover:scale-102 dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-400'
@@ -272,7 +272,7 @@ const ProductsPage = () => {
                     )}
 
                     {/* Category Image */}
-                    <div className="relative h-24 w-full overflow-hidden rounded-t-xl">
+                    <div className="relative h-20 sm:h-24 w-full overflow-hidden rounded-t-xl">
                       {category.image ? (
                         <Image
                           src={category.image}
@@ -285,10 +285,18 @@ const ProductsPage = () => {
                           <IconComponent className="h-8 w-8 text-gray-400" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                      
-                      {/* Icon Overlay */}
-                      <div className={`absolute bottom-2 left-2 flex h-6 w-6 items-center justify-center rounded-lg transition-colors ${
+                      {/* Mobile overlay: show name & count on image to save space */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-2 sm:hidden">
+                        <div className="w-full text-left">
+                          <div className="text-sm font-semibold text-white leading-tight truncate">{category.name}</div>
+                          <div className="text-[11px] text-white/80">{category.productCount} items</div>
+                        </div>
+                      </div>
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent hidden sm:block" />
+
+                      {/* Icon Overlay (desktop) */}
+                      <div className={`absolute bottom-2 left-2 hidden sm:flex h-6 w-6 items-center justify-center rounded-lg transition-colors ${
                         isActive
                           ? 'bg-blue-500 text-white'
                           : 'bg-white/90 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600'
@@ -296,9 +304,8 @@ const ProductsPage = () => {
                         <IconComponent className="h-3 w-3" />
                       </div>
                     </div>
-
-                    {/* Category Info */}
-                    <div className="p-3">
+                    {/* Category Info (desktop) */}
+                    <div className="p-3 hidden sm:block">
                       {/* Category Name */}
                       <h3 className={`text-sm font-semibold transition-colors leading-tight mb-1 ${
                         isActive
@@ -326,7 +333,7 @@ const ProductsPage = () => {
       </section>
 
       {/* Search and Filter Controls */}
-      <section className="relative py-8 bg-gray-50/50 dark:bg-gray-900/20">
+  <section className="relative py-4 sm:py-8 bg-gray-50/50 dark:bg-gray-900/20">
         <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             
@@ -411,7 +418,7 @@ const ProductsPage = () => {
       </section>
 
       {/* Products Section */}
-      <section className="relative py-12">
+  <section className="relative py-6 sm:py-12">
         <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           
           {/* Section Header */}
