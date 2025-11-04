@@ -15,7 +15,8 @@ export async function GET(request) {
     const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')) : undefined;
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
-    const featured = searchParams.get('featured') === 'true';
+  const featured = searchParams.get('featured') === 'true';
+  const productType = searchParams.get('productType');
     const status = searchParams.get('status') || 'ACTIVE';
     
     // Calculate offset for pagination
@@ -39,7 +40,8 @@ export async function GET(request) {
           ...(maxPrice !== undefined && { lte: maxPrice })
         }
       },
-      ...(featured && { productType: { in: ['FEATURED', 'TRENDING', 'BESTSELLER'] } })
+      ...(featured && { productType: { in: ['FEATURED', 'TRENDING', 'BESTSELLER'] } }),
+      ...(productType && { productType: productType })
     };
     
     // Build orderBy clause

@@ -3,6 +3,10 @@ const nextConfig = {
   turbopack: {
     root: '/home/darshan/darshan/WEB_DEVELOPMENT /Grap Deal'
   },
+  images: {
+    // Allow loading images from Unsplash used as category placeholders
+    domains: ['images.unsplash.com'],
+  },
   async rewrites() {
     return [
       {

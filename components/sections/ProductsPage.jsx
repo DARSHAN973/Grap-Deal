@@ -183,7 +183,7 @@ const ProductsPage = () => {
   return (
     <main className="relative min-h-screen bg-transparent">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden pb-8 pt-28">
+  <section ref={heroRef} className="relative overflow-hidden pb-8 pt-6 sm:pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
