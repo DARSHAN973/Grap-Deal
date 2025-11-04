@@ -82,6 +82,12 @@ const MyAccount = () => {
     isDefault: false
   });
 
+  const [showBusinessForm, setShowBusinessForm] = useState(false);
+  const [businessServices, setBusinessServices] = useState([]);
+  const [businessServicesLoading, setBusinessServicesLoading] = useState(false);
+  const [businessPhoto, setBusinessPhoto] = useState(null);
+  const [businessPhotoPreview, setBusinessPhotoPreview] = useState(null);
+
   // Helper function to determine step status
   const getStepStatus = (currentStatus, stepStatus) => {
     const statusOrder = ['PENDING', 'IN_PROCESS', 'DELIVERED'];
@@ -102,6 +108,19 @@ const MyAccount = () => {
       router.push("/");
     }
   }, [loading, isAuthenticated, router]);
+
+  useEffect(() => {
+    // Handle URL parameters for direct tab navigation
+    // Avoid referencing `tabs` here (can cause TDZ/initialization ordering issues in some bundlers)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    const allowedTabs = [
+      'profile','security','orders','wishlist','addresses','payments','business','vendor','c2c','notifications'
+    ];
+    if (tabParam && allowedTabs.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, []);
 
   useEffect(() => {
     if (user && isAuthenticated) {
@@ -132,6 +151,8 @@ const MyAccount = () => {
       fetchWishlist();
     } else if (activeTab === 'addresses' && user && isAuthenticated) {
       fetchAddresses();
+    } else if (activeTab === 'business' && user && isAuthenticated) {
+      fetchBusinessServices();
     }
   }, [activeTab, user, isAuthenticated]);
 
@@ -317,6 +338,99 @@ const MyAccount = () => {
     }
   };
 
+  const handleBusinessPhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBusinessPhoto(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBusinessPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBusinessServiceSubmit = async (serviceData) => {
+    try {
+      let imageUrl = null;
+      
+      // Upload image first if there's a photo
+      if (businessPhoto) {
+        const formData = new FormData();
+        formData.append('image', businessPhoto);
+        formData.append('folder', 'business'); // Specify business folder for USER permissions
+        
+        const uploadResponse = await fetch('/api/upload/image', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const uploadResult = await uploadResponse.json();
+        
+        if (uploadResult.success) {
+          imageUrl = uploadResult.url;
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      }
+
+      // Submit business service with image URL
+      const response = await fetch('/api/b2b/services', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...serviceData,
+          images: imageUrl ? [imageUrl] : []
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Dispatch success event for toast
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: result.message || 'Business service submitted successfully! It will be reviewed by our team.' }
+        }));
+        
+        setShowBusinessForm(false);
+        setBusinessPhoto(null);
+        setBusinessPhotoPreview(null);
+        fetchBusinessServices(); // Refresh the business services list
+      } else {
+        // Dispatch error event for toast
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: result.error || 'Failed to submit business service' }
+        }));
+      }
+    } catch (error) {
+      console.error('Business service submission error:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to submit business service. Please try again.' }
+      }));
+    }
+  };
+
+  const fetchBusinessServices = async () => {
+    if (!user || !isAuthenticated) return;
+    
+    setBusinessServicesLoading(true);
+    try {
+      const response = await fetch('/api/admin/b2b/services?userId=' + user.id);
+      if (response.ok) {
+        const data = await response.json();
+        setBusinessServices(data.services || []);
+      } else {
+        console.error('Failed to fetch business services:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to fetch business services:', error);
+    } finally {
+      setBusinessServicesLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -340,6 +454,7 @@ const MyAccount = () => {
     { id: "wishlist", name: "Wishlist", icon: HeartIcon },
     { id: "addresses", name: "Addresses", icon: MapPinIcon },
     { id: "payments", name: "Payment Methods", icon: CreditCardIcon },
+    { id: "business", name: "List Your Business", icon: BuildingStorefrontIcon },
     { id: "vendor", name: "Become Vendor", icon: BuildingStorefrontIcon },
     { id: "c2c", name: "Sell Items", icon: TagIcon },
     { id: "notifications", name: "Notifications", icon: BellIcon },
@@ -716,6 +831,464 @@ const MyAccount = () => {
                         </p>
                       </div>
                     )}
+                  </motion.div>
+                )}
+
+                {activeTab === "business" && (
+                  <motion.div
+                    key="business"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex justify-between items-center mb-8">
+                      <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                          List Your Business
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400 mt-2">
+                          Get your business listed in our B2B services directory
+                        </p>
+                      </div>
+                      <motion.button
+                        onClick={() => setShowBusinessForm(!showBusinessForm)}
+                        className={`px-6 py-3 font-medium rounded-xl transition-all flex items-center space-x-2 ${
+                          showBusinessForm 
+                            ? 'bg-gray-500 hover:bg-gray-600 text-white' 
+                            : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg'
+                        }`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <PlusIcon className={`w-5 h-5 transition-transform ${showBusinessForm ? 'rotate-45' : ''}`} />
+                        <span>{showBusinessForm ? 'Cancel' : 'List New Business'}</span>
+                      </motion.button>
+                    </div>
+
+                    {/* Business Service Form - Inline Display */}
+                    {showBusinessForm && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-8"
+                      >
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 shadow-lg">
+                          <div className="flex items-center space-x-3 mb-6">
+                            <BuildingStorefrontIcon className="h-6 w-6 text-blue-600" />
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add Your Business</h2>
+                          </div>
+                          
+                          <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.target);
+                            const data = {
+                              name: formData.get('businessName'),
+                              serviceType: formData.get('serviceType'),
+                              contactNumber: formData.get('contactNumber'),
+                              city: formData.get('city'),
+                              state: formData.get('state'),
+                              description: formData.get('description'),
+                              // KYC and Bank Details
+                              kycAccountHolderName: formData.get('kycAccountHolderName'),
+                              kycBankAccountNumber: formData.get('kycBankAccountNumber'),
+                              kycIfscCode: formData.get('kycIfscCode'),
+                              kycBankName: formData.get('kycBankName'),
+                              kycBranchName: formData.get('kycBranchName') || null,
+                              kycAccountType: formData.get('kycAccountType'),
+                              kycPanNumber: formData.get('kycPanNumber') || null,
+                              kycAadharNumber: formData.get('kycAadharNumber') || null
+                            };
+                            handleBusinessServiceSubmit(data);
+                          }} className="space-y-6">
+                            {/* Business Photo Upload */}
+                            <div className="mb-6">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Business Photo *
+                              </label>
+                              <div className="flex items-center space-x-4">
+                                <div className="flex-shrink-0">
+                                  {businessPhotoPreview ? (
+                                    <img
+                                      src={businessPhotoPreview}
+                                      alt="Business preview"
+                                      className="w-24 h-24 object-cover rounded-xl border-2 border-gray-300 dark:border-gray-600"
+                                    />
+                                  ) : (
+                                    <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+                                      <BuildingStorefrontIcon className="w-8 h-8 text-gray-400" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleBusinessPhotoChange}
+                                    className="hidden"
+                                    id="business-photo-upload"
+                                    required
+                                  />
+                                  <label
+                                    htmlFor="business-photo-upload"
+                                    className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    {businessPhoto ? 'Change Photo' : 'Upload Photo'}
+                                  </label>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    PNG, JPG up to 5MB. This will be displayed on your business card.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  Business Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  name="businessName"
+                                  required
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                                  placeholder="Your business name"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  Contact Number *
+                                </label>
+                                <input
+                                  type="tel"
+                                  name="contactNumber"
+                                  required
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                                  placeholder="+91 98765 43210"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  Service Type *
+                                </label>
+                                <select
+                                  name="serviceType"
+                                  required
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                                >
+                                  <option value="">Select Service Type</option>
+                                  <option value="HEALTHCARE">Healthcare</option>
+                                  <option value="LEGAL">Legal Services</option>
+                                  <option value="EDUCATION">Education</option>
+                                  <option value="TECHNOLOGY">Technology</option>
+                                  <option value="OTHER">Other</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  City *
+                                </label>
+                                <input
+                                  type="text"
+                                  name="city"
+                                  required
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                                  placeholder="City"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  State *
+                                </label>
+                                <input
+                                  type="text"
+                                  name="state"
+                                  required
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                                  placeholder="State"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Business Description *
+                              </label>
+                              <textarea
+                                name="description"
+                                required
+                                rows={4}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white resize-none"
+                                placeholder="Describe your services and what makes your business unique..."
+                              />
+                            </div>
+
+                            {/* KYC and Bank Details Section */}
+                            <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10 rounded-xl p-6 border border-orange-200 dark:border-orange-700">
+                              <div className="flex items-center space-x-2 mb-4">
+                                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">KYC & Bank Details</h3>
+                                <span className="px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400 text-xs font-medium rounded-full">
+                                  Required for Refund Processing
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                These details are required for refund processing if your listing is rejected by admin.
+                              </p>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Account Holder Name *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    name="kycAccountHolderName"
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                    placeholder="Full name as per bank account"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Bank Account Number *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    name="kycBankAccountNumber"
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                    placeholder="Enter bank account number"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    IFSC Code *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    name="kycIfscCode"
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                    placeholder="Bank IFSC code"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Bank Name *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    name="kycBankName"
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                    placeholder="Name of your bank"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Branch Name
+                                  </label>
+                                  <input
+                                    type="text"
+                                    name="kycBranchName"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                    placeholder="Bank branch name (optional)"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Account Type *
+                                  </label>
+                                  <select
+                                    name="kycAccountType"
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                  >
+                                    <option value="SAVINGS">Savings Account</option>
+                                    <option value="CURRENT">Current Account</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    PAN Number *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    name="kycPanNumber"
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                    placeholder="PAN card number (e.g. ABCDE1234F)"
+                                    pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Aadhar Number *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    name="kycAadharNumber"
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white"
+                                    placeholder="Aadhar card number (12 digits)"
+                                    pattern="[0-9]{12}"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                              <button
+                                type="button"
+                                onClick={() => setShowBusinessForm(false)}
+                                className="px-6 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <motion.button
+                                type="submit"
+                                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                Submit Business
+                              </motion.button>
+                            </div>
+                          </form>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Business Listing Benefits */}
+                    {!showBusinessForm && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl">
+                          <BuildingStorefrontIcon className="w-10 h-10 text-blue-600 mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Free Listing</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Get your business listed in our directory at no cost
+                          </p>
+                        </div>
+                        <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl">
+                          <PhoneIcon className="w-10 h-10 text-green-600 mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Direct Contact</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Customers can contact you directly through our platform
+                          </p>
+                        </div>
+                        <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl">
+                          <TruckIcon className="w-10 h-10 text-purple-600 mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Lead Generation</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Generate quality leads from our customer base
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Your Business Listings */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Your Business Listings</h2>
+                      
+                      {businessServicesLoading ? (
+                        <div className="text-center py-8">
+                          <motion.div
+                            className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          />
+                          <p className="text-gray-600 dark:text-gray-400 mt-4">Loading your listings...</p>
+                        </div>
+                      ) : businessServices.length > 0 ? (
+                        <div className="space-y-4">
+                          {businessServices.map((service) => (
+                            <motion.div
+                              key={service.id}
+                              className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-md transition-all"
+                              whileHover={{ scale: 1.01 }}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-3 mb-3">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                      {service.name}
+                                    </h3>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                      service.adminApprovalStatus === 'APPROVED' 
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                        : service.adminApprovalStatus === 'REJECTED'
+                                        ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                    }`}>
+                                      {service.adminApprovalStatus}
+                                    </span>
+                                  </div>
+                                  <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                                    {service.description}
+                                  </p>
+                                  <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="flex items-center space-x-1">
+                                      <BuildingStorefrontIcon className="w-4 h-4" />
+                                      <span>{service.serviceType.replace(/_/g, ' ')}</span>
+                                    </span>
+                                    <span className="flex items-center space-x-1">
+                                      <MapPinIcon className="w-4 h-4" />
+                                      <span>{service.city}, {service.state}</span>
+                                    </span>
+                                    <span className="flex items-center space-x-1">
+                                      <PhoneIcon className="w-4 h-4" />
+                                      <span>{service.contactNumber}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  {service.adminApprovalStatus === 'APPROVED' && (
+                                    <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                                  )}
+                                  {service.adminApprovalStatus === 'REJECTED' && (
+                                    <XCircleIcon className="w-6 h-6 text-red-500" />
+                                  )}
+                                  {service.adminApprovalStatus === 'PENDING' && (
+                                    <ClockIcon className="w-6 h-6 text-yellow-500" />
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <BuildingStorefrontIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-600 dark:text-gray-400 mb-2">No business listings yet</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+                            List your first business to start getting customers
+                          </p>
+                          <motion.button
+                            onClick={() => setShowBusinessForm(true)}
+                            className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            List Your Business
+                          </motion.button>
+                        </div>
+                      )}
+                    </div>
+
+
                   </motion.div>
                 )}
 

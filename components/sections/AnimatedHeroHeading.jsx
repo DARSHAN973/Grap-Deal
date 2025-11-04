@@ -66,10 +66,11 @@ const AnimatedHeroHeading = () => {
     }
   };
 
-  const words = ["Shop", "Smart.", "Save", "Big.", "Grap", "the", "Deal"];
+  const words = [];
 
   return (
-    <section className="relative w-full pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-16 lg:pb-20 overflow-hidden bg-transparent">
+    // Removed top padding so banner sits flush under sticky header
+    <section className="relative w-full pt-0 pb-0 overflow-hidden bg-transparent">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="text-center"
@@ -77,8 +78,8 @@ const AnimatedHeroHeading = () => {
           initial="hidden"
           animate={isVisible ? "visible" : "hidden"}
         >
-          {/* Main heading with word animation */}
-          <div className="relative mb-6">
+          {/* Main heading with word animation - HIDDEN */}
+          {/* <div className="relative mb-6">
             <motion.h1 className="text-3xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight">
               {words.map((word, index) => (
                 <motion.span
@@ -100,7 +101,6 @@ const AnimatedHeroHeading = () => {
                       <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500">
                         {word}
                       </span>
-                      {/* Shimmer effect */}
                       <motion.div
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                         variants={shimmerVariants}
@@ -114,15 +114,14 @@ const AnimatedHeroHeading = () => {
               ))}
             </motion.h1>
 
-            {/* Highlight decoration */}
             <motion.div
               className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-32 sm:w-40 lg:w-48 h-1 sm:h-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-full opacity-80"
               variants={highlightVariants}
             />
-          </div>
+          </div> */}
 
-          {/* Subtext with typewriter effect */}
-          <motion.div
+          {/* Subtext with typewriter effect - HIDDEN */}
+          {/* <motion.div
             className="max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -136,7 +135,7 @@ const AnimatedHeroHeading = () => {
                 transition={{ duration: 1, repeat: Infinity }}
               />
             </p>
-          </motion.div>
+          </motion.div> */}
 
           {/* Floating elements */}
           <div className="absolute inset-0 pointer-events-none">
@@ -162,8 +161,8 @@ const AnimatedHeroHeading = () => {
             ))}
           </div>
 
-          {/* Call to action indicator */}
-          <motion.div
+          {/* Call to action indicator - HIDDEN */}
+          {/* <motion.div
             className="mt-8 sm:mt-12"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -191,7 +190,7 @@ const AnimatedHeroHeading = () => {
                 ↓
               </motion.div>
             </motion.div>
-          </motion.div>
+          </motion.div> */}
         </motion.div>
       </div>
 

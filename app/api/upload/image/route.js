@@ -29,19 +29,22 @@ export async function POST(request) {
       );
     }
     
-    if (user.role !== 'ADMIN') {
-      console.log(`User role is ${user.role}, expected ADMIN - returning 403`);
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized access' },
-        { status: 403 }
-      );
-    }
-    
     console.log('Auth passed - processing file upload');
 
     const formData = await request.formData();
     const file = formData.get('image');
     const folder = formData.get('folder') || 'general';
+    
+    // Allow ADMIN for all uploads, and USER for business listing images
+    const isBusinessUpload = folder === 'business' || folder === 'services';
+    
+    if (user.role !== 'ADMIN' && !(user.role === 'USER' && isBusinessUpload)) {
+      console.log(`User role is ${user.role}, folder is ${folder} - returning 403`);
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized access' },
+        { status: 403 }
+      );
+    }
     
     console.log('Upload details:', {
       fileName: file?.name,

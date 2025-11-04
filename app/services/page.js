@@ -1,94 +1,40 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Image from 'next/image';
 import { 
   Building2, 
-  Truck, 
-  Package, 
+  Phone, 
+  Mail, 
+  MapPin, 
   Users, 
-  Globe, 
   Shield, 
-  Zap, 
   HeadphonesIcon,
-  ArrowRight,
-  CheckCircle,
   Star,
-  Award,
   TrendingUp,
   Clock,
   Handshake,
   FileText,
-  BarChart,
-  Settings
+  Globe,
+  CheckCircle,
+  ArrowRight
 } from 'lucide-react';
 
-// B2B Services Data
-const services = [
-  {
-    id: 1,
-    title: 'Bulk Procurement',
-    description: 'Source products in large quantities at wholesale prices with dedicated account management.',
-    icon: Package,
-    features: ['Volume discounts up to 40%', 'Dedicated account manager', 'Priority sourcing', 'Custom packaging'],
-    image: 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=800&q=80',
-    badge: 'Popular',
-    badgeColor: 'bg-blue-500'
-  },
-  {
-    id: 2,
-    title: 'White Label Solutions',
-    description: 'Private label manufacturing and branding services for your business products.',
-    icon: Award,
-    features: ['Custom branding', 'Quality assurance', 'Flexible MOQ', 'Design support'],
-    image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80',
-    badge: 'Premium',
-    badgeColor: 'bg-purple-500'
-  },
-  {
-    id: 3,
-    title: 'Supply Chain Management',
-    description: 'End-to-end supply chain solutions with real-time tracking and optimization.',
-    icon: Truck,
-    features: ['Real-time tracking', 'Inventory management', 'Cost optimization', 'Risk mitigation'],
-    image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=800&q=80',
-    badge: 'Enterprise',
-    badgeColor: 'bg-green-500'
-  },
-  {
-    id: 4,
-    title: 'B2B Marketplace',
-    description: 'Connect with verified suppliers and buyers in our exclusive B2B marketplace.',
-    icon: Globe,
-    features: ['Verified suppliers', 'Secure transactions', 'Trade financing', 'Global reach'],
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
-    badge: 'New',
-    badgeColor: 'bg-red-500'
-  },
-  {
-    id: 5,
-    title: 'Business Analytics',
-    description: 'Advanced analytics and insights to optimize your business operations.',
-    icon: BarChart,
-    features: ['Market intelligence', 'Performance metrics', 'Predictive analytics', 'Custom reports'],
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-    badge: 'Growth',
-    badgeColor: 'bg-orange-500'
-  },
-  {
-    id: 6,
-    title: 'Custom Integration',
-    description: 'Seamless API integrations and custom solutions for your existing systems.',
-    icon: Settings,
-    features: ['API integration', 'Custom development', 'System compatibility', 'Technical support'],
-    image: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?auto=format&fit=crop&w=800&q=80',
-    badge: 'Technical',
-    badgeColor: 'bg-indigo-500'
-  }
-];
+// Service type icons mapping
+const serviceTypeIcons = {
+  'HEALTHCARE': Building2,
+  'LEGAL': FileText,
+  'EDUCATION': Users,
+  'TECHNOLOGY': Globe,
+  'FINANCE': TrendingUp,
+  'REAL_ESTATE': Building2,
+  'AUTOMOTIVE': Building2,
+  'HOME_SERVICES': Handshake,
+  'OTHER': Building2
+};
 
 // Success metrics
 const metrics = [
@@ -121,8 +67,34 @@ const testimonials = [
 ];
 
 const ServicesPage = () => {
-  const [selectedService, setSelectedService] = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const heroRef = useRef(null);
+
+  // Fetch services from API
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/b2b/services');
+        const data = await response.json();
+        
+        if (data.success) {
+          setServices(data.services);
+        } else {
+          setError(data.error || 'Failed to load services');
+        }
+      } catch (err) {
+        console.error('Failed to fetch services:', err);
+        setError('Failed to load services');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   // GSAP Animations
   useGSAP(() => {
@@ -180,18 +152,12 @@ const ServicesPage = () => {
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-6">
               <motion.button
+                onClick={() => window.location.href = '/account?tab=business'}
                 className="rounded-2xl bg-blue-600 px-8 py-4 text-white font-semibold hover:bg-blue-700 transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Get Started Today
-              </motion.button>
-              <motion.button
-                className="rounded-2xl border border-gray-300 bg-white/80 px-8 py-4 text-gray-700 font-semibold hover:bg-gray-50 transition-colors dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-200 dark:hover:bg-gray-700"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Schedule Demo
+                List Your Business
               </motion.button>
             </div>
           </div>
@@ -250,138 +216,182 @@ const ServicesPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((service, index) => {
-              const Icon = service.icon;
-              return (
-                <motion.div
-                  key={service.id}
-                  className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white/90 backdrop-blur transition-all hover:border-blue-300 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
+          {loading ? (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, index) => (
+                <div
+                  key={index}
+                  className="animate-pulse rounded-2xl border border-gray-200/50 bg-white/90 dark:border-white/10 dark:bg-white/5"
                 >
-                  {/* Service Badge */}
-                  {service.badge && (
-                    <div className={`absolute top-4 right-4 z-10 rounded-full px-3 py-1 text-xs font-semibold text-white ${service.badgeColor}`}>
-                      {service.badge}
+                  <div className="h-48 bg-gray-300 dark:bg-gray-700 rounded-t-2xl"></div>
+                  <div className="p-6">
+                    <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded mb-3"></div>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
+                    <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="text-red-600 dark:text-red-400 mb-4">
+                <Building2 className="h-16 w-16 mx-auto opacity-50 mb-4" />
+                <p className="text-lg font-medium">Failed to load services</p>
+                <p className="text-sm opacity-75">{error}</p>
+              </div>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : services.length === 0 ? (
+            <div className="text-center py-12">
+              <Building2 className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <p className="text-lg text-gray-600 dark:text-gray-400">No services available at the moment</p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">Check back later for new service listings</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {services.map((service, index) => {
+                const Icon = serviceTypeIcons[service.serviceType] || Building2;
+                const businessImage = service.images && service.images.length > 0 
+                  ? (Array.isArray(service.images) ? service.images[0]?.url || service.images[0] : service.images)
+                  : null;
+                
+                return (
+                  <motion.div
+                    key={service.id}
+                    className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white/90 backdrop-blur transition-all hover:border-blue-300 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    whileHover={{ y: -5 }}
+                  >
+                    {/* Business Image */}
+                    <div className="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      {businessImage ? (
+                        <Image
+                          src={businessImage}
+                          alt={service.name}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-110"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`${businessImage ? 'hidden' : 'flex'} absolute inset-0 items-center justify-center bg-gradient-to-br from-blue-500/20 to-purple-500/20`}>
+                        <Icon className="h-16 w-16 text-gray-400 dark:text-gray-600" />
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
-                  )}
 
-                  {/* Service Image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <Image
-                      src={service.image}
-                      alt={service.title}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    <div className="absolute bottom-4 left-4">
-                      <div className="rounded-xl bg-white/90 p-3 backdrop-blur">
-                        <Icon className="h-6 w-6 text-blue-600" />
+                    {/* Service Content */}
+                    <div className="p-6">
+                      <div className="mb-3">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+                          {service.name}
+                        </h3>
+                        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                          {service.serviceType.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                        </p>
+                      </div>
+
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
+                        {service.description}
+                      </p>
+
+                      {/* Business Info */}
+                      <div className="space-y-2 mb-4">
+                        {/* Contact Number */}
+                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                          <Phone className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          <a 
+                            href={`tel:${service.contactNumber}`}
+                            className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          >
+                            {service.contactNumber}
+                          </a>
+                        </div>
+
+                        {/* Email (if available) */}
+                        {service.email && (
+                          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                            <Mail className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                            <a 
+                              href={`mailto:${service.email}`}
+                              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
+                            >
+                              {service.email}
+                            </a>
+                          </div>
+                        )}
+
+                        {/* Location */}
+                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                          <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+                          <span className="truncate">
+                            {service.city}, {service.state}
+                          </span>
+                        </div>
+
+                        {/* Website (if available) */}
+                        {service.website && (
+                          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                            <Globe className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                            <a 
+                              href={service.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
+                            >
+                              Visit Website
+                            </a>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Pricing Info */}
+                      {service.priceType !== 'CONTACT' && service.basePrice && (
+                        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <p className="text-sm font-medium text-green-800 dark:text-green-400">
+                            {service.priceType === 'HOURLY' ? 'Starting from' : 'Price:'} ₹{service.basePrice}
+                            {service.priceType === 'HOURLY' ? '/hour' : ''}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Contact Actions */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <a
+                          href={`tel:${service.contactNumber}`}
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                          <Phone className="h-4 w-4" />
+                          Call
+                        </a>
+                        <a
+                          href={`sms:${service.contactNumber}`}
+                          className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          Message
+                        </a>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Service Content */}
-                  <div className="p-6">
-                    <h3 className="mb-3 text-xl font-semibold text-gray-900 dark:text-white">
-                      {service.title}
-                    </h3>
-                    <p className="mb-4 text-gray-600 dark:text-gray-300">
-                      {service.description}
-                    </p>
-
-                    {/* Features List */}
-                    <ul className="mb-6 space-y-2">
-                      {service.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-
-                    {/* CTA Button */}
-                    <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-white font-medium transition-colors hover:bg-blue-700">
-                      Learn More
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="relative py-16 bg-gray-50/50 dark:bg-gray-900/20">
-        <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              How It Works
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Simple steps to get started with our B2B services
-            </p>
-          </motion.div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {[
-              {
-                step: '1',
-                title: 'Consultation',
-                description: 'Schedule a free consultation to discuss your business needs and requirements.',
-                icon: Handshake
-              },
-              {
-                step: '2',
-                title: 'Custom Proposal',
-                description: 'Receive a tailored proposal with pricing and implementation timeline.',
-                icon: FileText
-              },
-              {
-                step: '3',
-                title: 'Implementation',
-                description: 'Our team implements the solution with ongoing support and monitoring.',
-                icon: Zap
-              }
-            ].map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <motion.div
-                  key={step.step}
-                  className="text-center"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                >
-                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white text-2xl font-bold">
-                    {step.step}
-                  </div>
-                  <h3 className="mb-3 text-xl font-semibold text-gray-900 dark:text-white">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {step.description}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials Section */}
       <section className="relative py-16">
@@ -442,42 +452,7 @@ const ServicesPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-16">
-        <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
-          <motion.div
-            className="rounded-3xl border border-blue-200/50 bg-gradient-to-br from-blue-50 to-purple-50 p-12 text-center dark:border-blue-800/50 dark:from-blue-950/20 dark:to-purple-950/20"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
-              Ready to Transform Your Business?
-            </h2>
-            <p className="mb-8 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Join hundreds of successful businesses already using our B2B services. 
-              Get started today with a free consultation.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <motion.button
-                className="rounded-2xl bg-blue-600 px-8 py-4 text-white font-semibold hover:bg-blue-700 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Start Free Consultation
-              </motion.button>
-              <motion.button
-                className="rounded-2xl border border-gray-300 bg-white/80 px-8 py-4 text-gray-700 font-semibold hover:bg-gray-50 transition-colors dark:border-gray-600 dark:bg-gray-800/80 dark:text-gray-200 dark:hover:bg-gray-700"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Download Brochure
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+
     </main>
   );
 };

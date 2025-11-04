@@ -572,6 +572,70 @@ model ContactMessage {
   createdAt DateTime @default(now())
 }
 
+model B2BService {
+  id                     String                @id @default(cuid())
+  name                   String
+  description            String                @db.Text
+  serviceType            String
+  contactNumber          String
+  email                  String?
+  website                String?
+  address                String?
+  city                   String
+  state                  String
+  pincode                String?
+  priceType              ServicePriceType      @default(CONTACT)
+  basePrice              Decimal?              @db.Decimal(10, 2)
+  businessModel          BusinessModel         @default(B2B)
+  status                 ServiceStatus         @default(DRAFT)
+  adminApprovalStatus    ApprovalStatus        @default(PENDING)
+  isActive               Boolean               @default(false)
+  leadGenerationEnabled  Boolean               @default(true)
+  images                 Json?
+  viewCount              Int                   @default(0)
+  leadCount              Int                   @default(0)
+  submittedAt            DateTime              @default(now())
+  approvedAt             DateTime?
+  approvedBy             String?
+  
+  // KYC and Bank Details for Refund Processing
+  kycAccountHolderName   String?
+  kycBankAccountNumber   String?
+  kycIfscCode            String?
+  kycBankName            String?
+  kycBranchName          String?
+  kycAccountType         String?               @default("SAVINGS")
+  kycPanNumber           String?
+  kycAadharNumber        String?
+  
+  // Subscription and Payment
+  subscriptionTier       SubscriptionTier      @default(NORMAL)
+  monthlyAmount          Decimal?              @db.Decimal(10, 2)
+  paymentId              String?
+  paymentStatus          PaymentStatus         @default(PENDING)
+  subscriptionStartDate  DateTime?
+  subscriptionEndDate    DateTime?
+  
+  // Refund Processing
+  refundRequested        Boolean               @default(false)
+  refundProcessed        Boolean               @default(false)
+  refundAmount           Decimal?              @db.Decimal(10, 2)
+  refundDate             DateTime?
+  refundTransactionId    String?
+  refundNotes            String?
+  
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+
+  @@index([serviceType])
+  @@index([city, state])
+  @@index([adminApprovalStatus, status])
+  @@index([isActive])
+  @@index([subscriptionTier])
+  @@index([paymentStatus])
+  @@map("b2b_services")
+}
+
 enum ProductType {
   REGULAR
   TRENDING
@@ -635,6 +699,7 @@ enum OrderStatus {
 enum PaymentStatus {
   PENDING
   COMPLETED
+  PAID
   FAILED
   CANCELLED
   REFUNDED
@@ -725,4 +790,29 @@ enum RiskLevel {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+enum ServicePriceType {
+  CONTACT
+  HOURLY
+  FIXED
+  QUOTE
+}
+
+enum ServiceStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SubscriptionTier {
+  NORMAL
+  PREMIUM
 }

@@ -91,8 +91,9 @@ const HeroBannerSlider = () => {
 
   return (
     <section className="relative w-full overflow-hidden bg-transparent">
-  <div className="relative z-10 mx-auto flex min-h-[88vh] w-full max-w-[min(98vw,1800px)] flex-col items-center justify-center px-4 pb-0 pt-4 sm:min-h-[92vh] sm:px-6 lg:min-h-[96vh] lg:px-10 xl:px-14">
-    <div className="relative mt-2 w-full max-w-[min(96vw,1850px)]">
+  {/* Pull the banner up under the sticky header: negative top margin matched to header height */}
+  <div className="relative z-10 mx-auto flex min-h-[88vh] w-full max-w-[min(98vw,1800px)] flex-col items-center justify-center px-4 pb-0 pt-0 -mt-12 lg:-mt-14 sm:min-h-[92vh] sm:px-6 lg:min-h-[96vh] lg:px-10 xl:px-14">
+    <div className="relative mt-0 w-full max-w-[min(96vw,1850px)]">
           <div className="relative overflow-hidden rounded-[2.75rem] border border-white/30 bg-white/70 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.06]">
             <motion.div
               aria-hidden
@@ -173,7 +174,7 @@ const HeroBannerSlider = () => {
           </div>
         </div>
 
-        <div className="mt-14 flex justify-center">
+  <div className="mt-8 flex justify-center">
           <button
             type="button"
             disabled={loading || slides.length === 0}
