@@ -191,7 +191,7 @@ const ProductsPage = () => {
           <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
+  <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-3 text-center sm:px-6 lg:px-10 xl:px-16">
           <div className="space-y-6">
             <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-gray-200/60 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
               <Sparkles className="h-4 w-4 text-violet-500" />
@@ -211,7 +211,7 @@ const ProductsPage = () => {
 
       {/* Categories Section */}
   <section className="relative py-4 sm:py-12">
-        <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
+  <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-3 sm:px-6 lg:px-10 xl:px-16">
           <motion.div
             className="text-center mb-4 sm:mb-8"
             initial={{ opacity: 0, y: 20 }}
@@ -334,7 +334,7 @@ const ProductsPage = () => {
 
       {/* Search and Filter Controls */}
   <section className="relative py-4 sm:py-8 bg-gray-50/50 dark:bg-gray-900/20">
-        <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
+          <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-3 sm:px-6 lg:px-10 xl:px-16">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             
             {/* Search Bar */}
@@ -471,10 +471,10 @@ const ProductsPage = () => {
             // Products Grid
             <motion.div
               className={`${
-                viewMode === 'grid'
-                  ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
-                  : 'space-y-4'
-              }`}
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
+                    : 'space-y-4'
+                }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}

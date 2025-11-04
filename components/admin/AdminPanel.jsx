@@ -465,7 +465,7 @@ const SettingsContent = () => (
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Admin Email</label>
-            <input type="email" value="admin@grapdeal.com" className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700" />
+            <input type="email" value="admin@Grapdeal.com" className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700" />
           </div>
         </div>
       </div>

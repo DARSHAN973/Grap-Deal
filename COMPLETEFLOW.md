@@ -1,4 +1,4 @@
-# 🎯 GRAP DEAL - COMPLETE BUSINESS FLOW
+# 🎯 Grap DEAL - COMPLETE BUSINESS FLOW
 
 > **Comprehensive Business Logic & User Journey Documentation**  
 > Last Updated: October 10, 2025  
@@ -33,7 +33,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     CUSTOMER ENTRY POINT                     │
-│                    www.grapdeal.com                          │
+│                    www.Grapdeal.com                          │
 └──────────────────┬──────────────────────────────────────────┘
                    │
          ┌─────────┴─────────┐
@@ -2154,8 +2154,8 @@ async function approveVendor(req, res) {
   // 5. Send approval email
   await sendVendorApprovalEmail(vendor.user.email, {
     businessName: vendor.businessName,
-    loginUrl: 'https://grapdeal.com/login',
-    dashboardUrl: 'https://grapdeal.com/vendor/dashboard'
+    loginUrl: 'https://Grapdeal.com/login',
+    dashboardUrl: 'https://Grapdeal.com/vendor/dashboard'
   });
   
   return res.json({ success: true });
@@ -2207,7 +2207,7 @@ async function rejectVendor(req, res) {
   await sendVendorRejectionEmail(vendor.user.email, {
     businessName: vendor.businessName,
     reason: rejectionReason,
-    reapplyUrl: 'https://grapdeal.com/vendor/reapply'
+    reapplyUrl: 'https://Grapdeal.com/vendor/reapply'
   });
   
   return res.json({ success: true });
@@ -4335,7 +4335,7 @@ async function createLead(req, res) {
     requesterName: leadData.name,
     companyName: leadData.companyName,
     message: leadData.message,
-    leadUrl: `https://grapdeal.com/business/leads/${lead.id}`
+    leadUrl: `https://Grapdeal.com/business/leads/${lead.id}`
   });
   
   // 6. Send confirmation to requester
@@ -6456,7 +6456,7 @@ Response:
 **URL:** `/admin/ecommerce/analytics`
 
 #### **Metrics:**
-- Total sales (graph)
+- Total sales (Graph)
 - Top selling products
 - Category performance
 - Revenue by day/week/month
@@ -7519,7 +7519,7 @@ Response:
 
 **Charts:**
 - Revenue by business model (pie chart)
-- Revenue trend (line graph)
+- Revenue trend (line Graph)
 - Monthly comparison
 
 **API Call:**
@@ -7666,12 +7666,12 @@ Response:
   settings: {
     siteName: "Grap Deal",
     logo: "/uploads/logo.png",
-    contactEmail: "support@grapdeal.com",
+    contactEmail: "support@Grapdeal.com",
     contactPhone: "+91-1234567890",
     address: "123 Business Park, Mumbai",
     socialMedia: {
-      facebook: "https://facebook.com/grapdeal",
-      instagram: "https://instagram.com/grapdeal"
+      facebook: "https://facebook.com/Grapdeal",
+      instagram: "https://instagram.com/Grapdeal"
     },
     maintenanceMode: false
   }
@@ -7804,7 +7804,7 @@ Response:
       enabled: true,
       smtpHost: "smtp.gmail.com",
       smtpPort: 587,
-      smtpUser: "noreply@grapdeal.com",
+      smtpUser: "noreply@Grapdeal.com",
       notifications: {
         orderConfirmation: true,
         shippingUpdate: true,

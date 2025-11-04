@@ -172,7 +172,7 @@ const ProductCard = ({
   // Grid view design (matching TrendingSlider)
   return (
     <motion.article
-      className="group relative flex h-full min-h-[32rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] cursor-pointer"
+      className="group relative flex h-full min-h-[34rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] cursor-pointer"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -181,7 +181,7 @@ const ProductCard = ({
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
 
-      <div className="relative h-96 overflow-hidden">
+  <div className="relative h-96 overflow-hidden">
         <div
           className="absolute inset-0 scale-105 transform bg-cover bg-center transition-transform duration-500 group-hover:scale-125"
           style={{ backgroundImage: `url(${primaryImage})` }}
@@ -230,11 +230,12 @@ const ProductCard = ({
         </div>
       </div>
 
-      <div className="relative flex flex-col px-4 pt-4 pb-1.5 text-gray-700 dark:text-gray-300">
+  <div className="relative flex flex-col px-4 pt-4 pb-3 text-gray-700 dark:text-gray-300">
         <div className="flex items-center justify-between mb-2">
           <StarRating rating={product.rating} />
           {discount && discount > 0 && (
-            <span className="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+            // hide discount pill on small screens to save space
+            <span className="hidden sm:inline-flex rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
               {discount}% OFF
             </span>
           )}
@@ -258,20 +259,23 @@ const ProductCard = ({
           )}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          {/* Hide Buy Now on small screens to make card tappable and save space */}
           <MagneticButton
             variant="gradient"
             size="md"
-            className="w-full justify-center rounded-2xl relative"
+            className="hidden sm:flex w-full justify-center rounded-2xl relative"
             onClick={() => window.location.href = `/checkout?productId=${product.id}&quantity=1&type=buynow`}
           >
             <div className="flex items-center gap-2">
               <span>Buy Now</span>
             </div>
           </MagneticButton>
+
+          {/* Make cart button full width on mobile, compact on sm+ */}
           <MagneticButton
             variant="secondary"
             size="md"
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12 relative"
+            className="flex h-12 w-full items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12 relative"
             whileTap={{ scale: 0.94 }}
             onClick={handleAddToCart}
             disabled={cartLoading}

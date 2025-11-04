@@ -135,7 +135,7 @@ const marketingPlaybooks = [
   {
     title: 'Conversion signal loops',
     description:
-      'Deploy data-backed offers with built-in social proof, urgency choreography, and adaptive pricing to unlock the next 10% uplift.',
+      'Deploy data-backed offers with built-in social proof, urgency choreoGraphy, and adaptive pricing to unlock the next 10% uplift.',
     icon: LineChart,
     metric: 'Playbook 02',
   },
@@ -365,7 +365,7 @@ const ProductsExperience = () => {
                 <span className="rounded-full border border-white/20 px-4 py-1">Retention loops</span>
                 <span className="rounded-full border border-white/20 px-4 py-1">Creator pods</span>
                 <span className="rounded-full border border-white/20 px-4 py-1">Geo personalization</span>
-                <span className="rounded-full border border-white/20 px-4 py-1">Offer choreography</span>
+                <span className="rounded-full border border-white/20 px-4 py-1">Offer choreoGraphy</span>
               </div>
             </div>
 

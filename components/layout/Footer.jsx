@@ -27,7 +27,7 @@ const dropSignals = [
     id: 'drop-1',
     title: 'Weekly Drops',
     value: 'Fridays · 21:00 IST',
-    description: 'Fresh arrivals and exclusive deals — grab them before they’re gone.',
+    description: 'Fresh arrivals and exclusive deals — Grap them before they’re gone.',
     Icon: Sparkles,
     accent: 'from-blue-500/25 via-indigo-500/15 to-purple-500/25',
   },
@@ -174,7 +174,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-3 rounded-2xl border border-gray-200/30 bg-gray-50/60 dark:border-white/10 dark:bg-white/5 px-4 py-3">
                 <Mail className="h-4 w-4" />
-                <span>team@grapdeal.dev</span>
+                <span>team@Grapdeal.dev</span>
               </div>
             </div>
           </motion.div>

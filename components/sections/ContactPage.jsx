@@ -81,7 +81,7 @@ const ContactPage = () => {
     {
       icon: Mail,
       title: 'Email Us',
-      value: 'hello@grapdeal.com',
+      value: 'hello@Grapdeal.com',
       description: 'We\'ll respond within 24 hours',
       color: 'text-blue-500',
       bgColor: 'bg-blue-50 dark:bg-blue-950/20',
@@ -554,7 +554,7 @@ const ContactPage = () => {
                     className="w-full justify-center border-blue-300 text-blue-700 hover:border-blue-500 hover:text-blue-800 dark:border-blue-600 dark:text-blue-300"
                   >
                     <Mail className="h-4 w-4" />
-                    partner@grapdeal.com
+                    partner@Grapdeal.com
                   </MagneticButton>
                 </div>
               </div>
