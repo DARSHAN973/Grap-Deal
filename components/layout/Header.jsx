@@ -97,6 +97,19 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Prevent background scroll when mobile menu is open
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   const toggleMobileSearch = () => {
     setIsMobileSearchOpen(!isMobileSearchOpen);
   };
@@ -503,11 +516,12 @@ const Header = () => {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
-            className="lg:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 overflow-hidden"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            // Fix: make mobile menu fixed to viewport so it opens at the current scroll position
+            className="lg:hidden fixed left-0 right-0 top-12 z-60 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 overflow-hidden max-h-[calc(100vh-3rem)]"
+            initial={{ y: -8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -8, opacity: 0 }}
+            transition={{ duration: 0.22, ease: "easeInOut" }}
           >
             <div className="px-4 pt-4 pb-6 space-y-1">
               {/* Mobile navigation - only navigation links, no action buttons */}
