@@ -540,7 +540,7 @@ const ProductManagement = () => {
                     <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-12 w-12">
+                          <div className="shrink-0 h-12 w-12">
                             {product.images && product.images.length > 0 ? (
                               <img
                                 className="h-12 w-12 rounded-lg object-cover"

@@ -122,7 +122,7 @@ const CustomerListingForm = ({ isOpen, onClose, onSubmit }) => {
           {/* Info Banner */}
           <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800 mb-6">
             <div className="flex items-start">
-              <EyeSlashIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-3 flex-shrink-0" />
+              <EyeSlashIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-3 shrink-0" />
               <div>
                 <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">Anonymous Listing</h3>
                 <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
@@ -311,7 +311,7 @@ const CustomerListingForm = ({ isOpen, onClose, onSubmit }) => {
 
               <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
                 <div className="flex items-start">
-                  <ShieldCheckIcon className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 mr-3 flex-shrink-0" />
+                  <ShieldCheckIcon className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 mr-3 shrink-0" />
                   <div className="text-sm">
                     <p className="font-medium text-green-900 dark:text-green-100">Safe Transaction</p>
                     <p className="text-green-800 dark:text-green-200">

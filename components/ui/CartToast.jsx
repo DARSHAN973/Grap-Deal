@@ -61,9 +61,9 @@ const CartToast = () => {
             transition={{ duration: 0.3 }}
           >
             {toast.type === 'success' ? (
-              <CheckCircle className="h-5 w-5 flex-shrink-0" />
+              <CheckCircle className="h-5 w-5 shrink-0" />
             ) : (
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <AlertCircle className="h-5 w-5 shrink-0" />
             )}
             <span className="text-sm font-medium">{toast.message}</span>
             <button

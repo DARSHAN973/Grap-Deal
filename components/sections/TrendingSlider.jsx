@@ -281,7 +281,7 @@ const TrendingSlider = () => {
           </div>
 
           <motion.div
-            className="hidden sm:grid grid-cols-1 gap-4 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05] sm:grid-cols-3"
+            className="hidden sm:grid grid-cols-1 gap-4 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5 sm:grid-cols-3"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -335,7 +335,7 @@ const TrendingSlider = () => {
               return (
                 <motion.article
                   key={product.id}
-                  className="group relative flex h-full min-h-[22rem] w-[calc(50%-12px)] sm:w-[calc(50%-12px)] md:w-[calc(33%-12px)] lg:w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-2 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] cursor-pointer"
+                  className="group relative flex h-full min-h-[22rem] w-[calc(50%-12px)] sm:w-[calc(50%-12px)] md:w-[calc(33%-12px)] lg:w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-2 hover:shadow-2xl dark:border-white/10 dark:bg-white/5 cursor-pointer"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

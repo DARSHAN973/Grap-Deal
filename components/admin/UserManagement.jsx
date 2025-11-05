@@ -372,7 +372,7 @@ const UserManagement = () => {
                     <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0">
+                          <div className="h-10 w-10 shrink-0">
                             {user.avatar ? (
                               <img className="h-10 w-10 rounded-full" src={user.avatar} alt="" />
                             ) : (

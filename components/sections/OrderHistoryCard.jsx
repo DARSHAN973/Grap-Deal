@@ -205,7 +205,7 @@ const OrderHistoryCard = ({ order, onOrderUpdate }) => {
             <div className="space-y-3">
               {(order.orderItems || []).map((item) => (
                 <div key={item.id} className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <div className="flex-shrink-0 w-16 h-16 bg-white dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm">
+                  <div className="shrink-0 w-16 h-16 bg-white dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm">
                     {item.product?.images && item.product.images.length > 0 ? (
                       <Image
                         src={getImageUrl(item.product.images[0].url || item.product.images[0])}

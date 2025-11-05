@@ -310,7 +310,7 @@ const ServicesPage = () => {
                       <div className="space-y-2 mb-4">
                         {/* Contact Number */}
                         <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                          <Phone className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          <Phone className="h-4 w-4 text-green-600 shrink-0" />
                           <a 
                             href={`tel:${service.contactNumber}`}
                             className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -322,7 +322,7 @@ const ServicesPage = () => {
                         {/* Email (if available) */}
                         {service.email && (
                           <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <Mail className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                            <Mail className="h-4 w-4 text-blue-600 shrink-0" />
                             <a 
                               href={`mailto:${service.email}`}
                               className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
@@ -334,7 +334,7 @@ const ServicesPage = () => {
 
                         {/* Location */}
                         <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                          <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+                          <MapPin className="h-4 w-4 text-red-600 shrink-0" />
                           <span className="truncate">
                             {service.city}, {service.state}
                           </span>
@@ -343,7 +343,7 @@ const ServicesPage = () => {
                         {/* Website (if available) */}
                         {service.website && (
                           <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <Globe className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                            <Globe className="h-4 w-4 text-purple-600 shrink-0" />
                             <a 
                               href={service.website}
                               target="_blank"

@@ -399,7 +399,7 @@ const OrderManagement = () => {
                 <div className="space-y-4">
                   {selectedOrder.orderItems?.map((item) => (
                     <div key={item.id} className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex-shrink-0 w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden relative">
+                      <div className="shrink-0 w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden relative">
                         {item.product.images?.[0] && (
                           <Image
                             src={getImageUrl(item.product.images[0].url)}

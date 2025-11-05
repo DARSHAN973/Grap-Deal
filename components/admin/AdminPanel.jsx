@@ -89,7 +89,7 @@ const AdminPanel = () => {
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
                   }`}
                 >
-                  <Icon className="mr-3 h-6 w-6 flex-shrink-0" />
+                  <Icon className="mr-3 h-6 w-6 shrink-0" />
                   {item.name}
                 </button>
               );
@@ -207,7 +207,7 @@ const DashboardContent = () => {
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <UsersIcon className="h-6 w-6 text-gray-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -225,7 +225,7 @@ const DashboardContent = () => {
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <UsersIcon className="h-6 w-6 text-gray-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -243,7 +243,7 @@ const DashboardContent = () => {
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <TruckIcon className="h-6 w-6 text-gray-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -261,7 +261,7 @@ const DashboardContent = () => {
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <CreditCardIcon className="h-6 w-6 text-gray-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -282,7 +282,7 @@ const DashboardContent = () => {
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <CubeIcon className="h-6 w-6 text-gray-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -300,7 +300,7 @@ const DashboardContent = () => {
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <TruckIcon className="h-6 w-6 text-yellow-500" />
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -318,7 +318,7 @@ const DashboardContent = () => {
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <CubeIcon className="h-6 w-6 text-blue-500" />
               </div>
               <div className="ml-5 w-0 flex-1">

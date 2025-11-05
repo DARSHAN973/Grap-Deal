@@ -445,7 +445,7 @@ const Header = () => {
                             className="p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 flex items-center space-x-3"
                           >
                             {/* Result Image/Icon */}
-                            <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                            <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
                               {result.image ? (
                                 <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
                               ) : (
@@ -849,7 +849,7 @@ const Header = () => {
                       className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 flex items-center space-x-3"
                     >
                       {/* Result Image/Icon */}
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                      <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
                         {result.image ? (
                           <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
                         ) : (

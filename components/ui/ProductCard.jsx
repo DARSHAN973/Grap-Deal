@@ -125,7 +125,7 @@ const ProductCard = ({
     // List view design (simplified version)
     return (
       <motion.article
-        className="group relative flex h-32 w-full shrink-0 overflow-hidden rounded-2xl border border-white/60 bg-white/85 shadow-lg backdrop-blur-[40px] transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.05]"
+        className="group relative flex h-32 w-full shrink-0 overflow-hidden rounded-2xl border border-white/60 bg-white/85 shadow-lg backdrop-blur-2xl transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -172,7 +172,7 @@ const ProductCard = ({
   // Grid view design (matching TrendingSlider)
   return (
     <motion.article
-      className="group relative flex h-full min-h-[34rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-[40px] transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.05] cursor-pointer"
+      className="group relative flex h-full min-h-[34rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/5 cursor-pointer"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
