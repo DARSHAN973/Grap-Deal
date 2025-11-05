@@ -63,22 +63,16 @@ const MyAccount = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [newAddress, setNewAddress] = useState({
-    name: '',
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    isDefault: false
-  });
-  const [addressForm, setAddressForm] = useState({
     fullName: '',
+    email: '',
     phone: '',
     addressLine1: '',
     addressLine2: '',
     city: '',
     state: '',
     pincode: '',
+    landmark: '',
+    addressType: 'HOME',
     isDefault: false
   });
 
@@ -87,6 +81,15 @@ const MyAccount = () => {
   const [businessServicesLoading, setBusinessServicesLoading] = useState(false);
   const [businessPhoto, setBusinessPhoto] = useState(null);
   const [businessPhotoPreview, setBusinessPhotoPreview] = useState(null);
+  
+  // Password change states
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   // Helper function to determine step status
   const getStepStatus = (currentStatus, stepStatus) => {
@@ -115,7 +118,7 @@ const MyAccount = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
     const allowedTabs = [
-      'profile','security','orders','wishlist','addresses','payments','business','vendor','c2c','notifications'
+      'profile','security','orders','wishlist','addresses','business','vendor','c2c','notifications'
     ];
     if (tabParam && allowedTabs.includes(tabParam)) {
       setActiveTab(tabParam);
@@ -210,6 +213,7 @@ const MyAccount = () => {
       return;
     }
     
+    setWishlistLoading(true);
     try {
       const response = await fetch('/api/wishlist');
       if (response.ok) {
@@ -220,6 +224,8 @@ const MyAccount = () => {
       }
     } catch (error) {
       console.error('Failed to fetch wishlist:', error);
+    } finally {
+      setWishlistLoading(false);
     }
   };
 
@@ -261,11 +267,22 @@ const MyAccount = () => {
         setWishlist(prev => prev.filter(item => item.product.id !== productId));
         // Update user stats
         fetchUserStats();
+        // Show success message
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: 'Removed from wishlist' }
+        }));
       } else {
+        const data = await response.json();
         console.error('Failed to remove from wishlist:', response.status, response.statusText);
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: data.error || 'Failed to remove from wishlist' }
+        }));
       }
     } catch (error) {
       console.error('Failed to remove from wishlist:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to remove from wishlist. Please try again.' }
+      }));
     }
   };
 
@@ -279,22 +296,39 @@ const MyAccount = () => {
         body: JSON.stringify(addressData),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setAddresses(prev => [...prev, data.address]);
+      const data = await response.json();
+      
+      if (data.success) {
+        // Refresh addresses list
+        fetchAddresses();
         setShowAddressForm(false);
         setNewAddress({
-          name: '',
-          street: '',
+          fullName: '',
+          email: '',
+          phone: '',
+          addressLine1: '',
+          addressLine2: '',
           city: '',
           state: '',
-          zipCode: '',
-          country: '',
+          pincode: '',
+          landmark: '',
+          addressType: 'HOME',
           isDefault: false
         });
+        
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: data.message || 'Address added successfully!' }
+        }));
+      } else {
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: data.error || 'Failed to add address' }
+        }));
       }
     } catch (error) {
       console.error('Failed to add address:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to add address. Please try again.' }
+      }));
     }
   };
 
@@ -305,18 +339,28 @@ const MyAccount = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ addressId, ...addressData }),
+        body: JSON.stringify({ id: addressId, ...addressData }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setAddresses(prev => prev.map(addr => 
-          addr.id === addressId ? data.address : addr
-        ));
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchAddresses(); // Refresh addresses list
         setEditingAddress(null);
+        
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: 'Address updated successfully!' }
+        }));
+      } else {
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: data.error || 'Failed to update address' }
+        }));
       }
     } catch (error) {
       console.error('Failed to update address:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to update address. Please try again.' }
+      }));
     }
   };
 
@@ -330,11 +374,24 @@ const MyAccount = () => {
         body: JSON.stringify({ addressId }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      
+      if (data.success) {
         setAddresses(prev => prev.filter(addr => addr.id !== addressId));
+        
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: data.message || 'Address deleted successfully!' }
+        }));
+      } else {
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: data.error || 'Failed to delete address' }
+        }));
       }
     } catch (error) {
       console.error('Failed to delete address:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to delete address. Please try again.' }
+      }));
     }
   };
 
@@ -431,6 +488,49 @@ const MyAccount = () => {
     }
   };
 
+  const handlePasswordChange = async () => {
+    setPasswordChangeLoading(true);
+    
+    try {
+      const response = await fetch('/api/user/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Reset password form
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        
+        // Dispatch success event
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: result.message || 'Password changed successfully!' }
+        }));
+        
+        setShowPasswordForm(false);
+      } else {
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: result.error || 'Failed to change password' }
+        }));
+      }
+    } catch (error) {
+      console.error('Password change error:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to change password. Please try again.' }
+      }));
+    } finally {
+      setPasswordChangeLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -453,7 +553,6 @@ const MyAccount = () => {
     { id: "orders", name: "Orders", icon: ShoppingBagIcon },
     { id: "wishlist", name: "Wishlist", icon: HeartIcon },
     { id: "addresses", name: "Addresses", icon: MapPinIcon },
-    { id: "payments", name: "Payment Methods", icon: CreditCardIcon },
     { id: "business", name: "List Your Business", icon: BuildingStorefrontIcon },
     { id: "vendor", name: "Become Vendor", icon: BuildingStorefrontIcon },
     { id: "c2c", name: "Sell Items", icon: TagIcon },
@@ -462,10 +561,41 @@ const MyAccount = () => {
 
   const handleSave = async () => {
     setSaveLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setSaveLoading(false);
-    setIsEditing(false);
+    
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update profile state with new data
+        setProfile(editData);
+        
+        // Dispatch success event
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: result.message || 'Profile updated successfully!' }
+        }));
+        
+        setIsEditing(false);
+      } else {
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: result.error || 'Failed to update profile' }
+        }));
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to update profile. Please try again.' }
+      }));
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const containerVariants = {
@@ -760,6 +890,7 @@ const MyAccount = () => {
                             </div>
                           </div>
                           <motion.button
+                            onClick={() => setShowPasswordForm(!showPasswordForm)}
                             className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -767,25 +898,91 @@ const MyAccount = () => {
                             Change
                           </motion.button>
                         </div>
-                      </div>
 
-                      <div className="p-6 bg-linear-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-xl border border-green-200 dark:border-green-700">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <ShieldCheckIcon className="w-6 h-6 text-green-600" />
-                            <div>
-                              <h3 className="font-semibold text-gray-900 dark:text-white">Two-Factor Authentication</h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">Add an extra layer of security</p>
-                            </div>
-                          </div>
-                          <motion.button
-                            className="px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                        {/* Change Password Form */}
+                        {showPasswordForm && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-6 pt-6 border-t border-blue-200 dark:border-blue-700"
                           >
-                            Enable
-                          </motion.button>
-                        </div>
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  Current Password
+                                </label>
+                                <input
+                                  type="password"
+                                  value={passwordData.currentPassword}
+                                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  placeholder="Enter current password"
+                                />
+                              </div>
+                              
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  New Password
+                                </label>
+                                <input
+                                  type="password"
+                                  value={passwordData.newPassword}
+                                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  placeholder="Enter new password (minimum 6 characters)"
+                                />
+                              </div>
+                              
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  Confirm New Password
+                                </label>
+                                <input
+                                  type="password"
+                                  value={passwordData.confirmPassword}
+                                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  placeholder="Confirm new password"
+                                />
+                              </div>
+                              
+                              <div className="flex justify-end space-x-3 pt-4">
+                                <button
+                                  onClick={() => {
+                                    setShowPasswordForm(false);
+                                    setPasswordData({
+                                      currentPassword: '',
+                                      newPassword: '',
+                                      confirmPassword: ''
+                                    });
+                                  }}
+                                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <motion.button
+                                  onClick={handlePasswordChange}
+                                  disabled={passwordChangeLoading}
+                                  className="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                >
+                                  {passwordChangeLoading ? (
+                                    <motion.div
+                                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                                      animate={{ rotate: 360 }}
+                                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                    />
+                                  ) : (
+                                    <CheckIcon className="w-4 h-4" />
+                                  )}
+                                  <span>Update Password</span>
+                                </motion.button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -1500,7 +1697,16 @@ const MyAccount = () => {
                       My Wishlist
                     </h1>
                     
-                    {wishlist.length > 0 ? (
+                    {wishlistLoading ? (
+                      <div className="text-center py-12">
+                        <motion.div
+                          className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        />
+                        <p className="text-gray-600 dark:text-gray-400 mt-4">Loading wishlist...</p>
+                      </div>
+                    ) : wishlist.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {wishlist.map((item) => (
                           <motion.div
@@ -1512,9 +1718,18 @@ const MyAccount = () => {
                             <div className="relative">
                               {item.product.images && item.product.images.length > 0 ? (
                                 <img
-                                  src={item.product.images[0]}
+                                  src={
+                                    Array.isArray(item.product.images) 
+                                      ? item.product.images[0]
+                                      : typeof item.product.images === 'string'
+                                      ? item.product.images
+                                      : item.product.images[0]?.url || '/placeholder-product.png'
+                                  }
                                   alt={item.product.name}
                                   className="w-full h-48 object-cover rounded-lg mb-4"
+                                  onError={(e) => {
+                                    e.target.src = '/placeholder-product.png';
+                                  }}
                                 />
                               ) : (
                                 <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center">
@@ -1601,15 +1816,36 @@ const MyAccount = () => {
                           <input
                             type="text"
                             placeholder="Full Name"
-                            value={newAddress.name}
-                            onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
+                            value={newAddress.fullName}
+                            onChange={(e) => setNewAddress({...newAddress, fullName: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="email"
+                            placeholder="Email"
+                            value={newAddress.email}
+                            onChange={(e) => setNewAddress({...newAddress, email: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="tel"
+                            placeholder="Phone Number"
+                            value={newAddress.phone}
+                            onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
                             className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                           />
                           <input
                             type="text"
-                            placeholder="Street Address"
-                            value={newAddress.street}
-                            onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                            placeholder="Address Line 1"
+                            value={newAddress.addressLine1}
+                            onChange={(e) => setNewAddress({...newAddress, addressLine1: e.target.value})}
+                            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Address Line 2 (Optional)"
+                            value={newAddress.addressLine2}
+                            onChange={(e) => setNewAddress({...newAddress, addressLine2: e.target.value})}
                             className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                           />
                           <input
@@ -1628,16 +1864,16 @@ const MyAccount = () => {
                           />
                           <input
                             type="text"
-                            placeholder="ZIP Code"
-                            value={newAddress.zipCode}
-                            onChange={(e) => setNewAddress({...newAddress, zipCode: e.target.value})}
+                            placeholder="Pincode"
+                            value={newAddress.pincode}
+                            onChange={(e) => setNewAddress({...newAddress, pincode: e.target.value})}
                             className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                           />
                           <input
                             type="text"
-                            placeholder="Country"
-                            value={newAddress.country}
-                            onChange={(e) => setNewAddress({...newAddress, country: e.target.value})}
+                            placeholder="Landmark (Optional)"
+                            value={newAddress.landmark}
+                            onChange={(e) => setNewAddress({...newAddress, landmark: e.target.value})}
                             className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                           />
                         </div>
@@ -1687,12 +1923,15 @@ const MyAccount = () => {
                               </div>
                             )}
                             <div className="space-y-2">
-                              <h3 className="font-semibold text-gray-900 dark:text-white">{address.name}</h3>
-                              <p className="text-gray-600 dark:text-gray-400">{address.street}</p>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">{address.fullName}</h3>
+                              <p className="text-gray-600 dark:text-gray-400">{address.addressLine1}</p>
+                              {address.addressLine2 && (
+                                <p className="text-gray-600 dark:text-gray-400">{address.addressLine2}</p>
+                              )}
                               <p className="text-gray-600 dark:text-gray-400">
-                                {address.city}, {address.state} {address.zipCode}
+                                {address.city}, {address.state} {address.pincode}
                               </p>
-                              <p className="text-gray-600 dark:text-gray-400">{address.country}</p>
+                              <p className="text-gray-600 dark:text-gray-400">{address.phone}</p>
                             </div>
                             <div className="flex justify-end space-x-2 mt-4">
                               <button
@@ -1739,15 +1978,29 @@ const MyAccount = () => {
                             <input
                               type="text"
                               placeholder="Full Name"
-                              value={editingAddress.name}
-                              onChange={(e) => setEditingAddress({...editingAddress, name: e.target.value})}
+                              value={editingAddress.fullName}
+                              onChange={(e) => setEditingAddress({...editingAddress, fullName: e.target.value})}
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                            <input
+                              type="tel"
+                              placeholder="Phone Number"
+                              value={editingAddress.phone}
+                              onChange={(e) => setEditingAddress({...editingAddress, phone: e.target.value})}
                               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             />
                             <input
                               type="text"
-                              placeholder="Street Address"
-                              value={editingAddress.street}
-                              onChange={(e) => setEditingAddress({...editingAddress, street: e.target.value})}
+                              placeholder="Address Line 1"
+                              value={editingAddress.addressLine1}
+                              onChange={(e) => setEditingAddress({...editingAddress, addressLine1: e.target.value})}
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Address Line 2 (Optional)"
+                              value={editingAddress.addressLine2 || ''}
+                              onChange={(e) => setEditingAddress({...editingAddress, addressLine2: e.target.value})}
                               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             />
                             <div className="grid grid-cols-2 gap-4">
@@ -1769,16 +2022,16 @@ const MyAccount = () => {
                             <div className="grid grid-cols-2 gap-4">
                               <input
                                 type="text"
-                                placeholder="ZIP Code"
-                                value={editingAddress.zipCode}
-                                onChange={(e) => setEditingAddress({...editingAddress, zipCode: e.target.value})}
+                                placeholder="Pincode"
+                                value={editingAddress.pincode}
+                                onChange={(e) => setEditingAddress({...editingAddress, pincode: e.target.value})}
                                 className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                               />
                               <input
                                 type="text"
-                                placeholder="Country"
-                                value={editingAddress.country}
-                                onChange={(e) => setEditingAddress({...editingAddress, country: e.target.value})}
+                                placeholder="Landmark (Optional)"
+                                value={editingAddress.landmark || ''}
+                                onChange={(e) => setEditingAddress({...editingAddress, landmark: e.target.value})}
                                 className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                               />
                             </div>

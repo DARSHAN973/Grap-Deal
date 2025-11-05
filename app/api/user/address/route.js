@@ -14,7 +14,7 @@ export async function GET(request) {
     }
 
     try {
-      const addresses = await prisma.address.findMany({
+      const addresses = await prisma.userAddress.findMany({
         where: { userId: user.id },
         orderBy: { createdAt: 'desc' }
       });
@@ -144,7 +144,7 @@ export async function PUT(request) {
     } = addressData;
 
     // Verify address belongs to user
-    const existingAddress = await prisma.address.findFirst({
+    const existingAddress = await prisma.userAddress.findFirst({
       where: { 
         id,
         userId: user.id 
@@ -158,7 +158,7 @@ export async function PUT(request) {
       );
     }
 
-    const updatedAddress = await prisma.address.update({
+    const updatedAddress = await prisma.userAddress.update({
       where: { id },
       data: {
         fullName,
@@ -199,8 +199,7 @@ export async function DELETE(request) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const addressId = searchParams.get('id');
+    const { addressId } = await request.json();
 
     if (!addressId) {
       return NextResponse.json(
@@ -210,7 +209,7 @@ export async function DELETE(request) {
     }
 
     // Verify address belongs to user
-    const existingAddress = await prisma.address.findFirst({
+    const existingAddress = await prisma.userAddress.findFirst({
       where: { 
         id: addressId,
         userId: user.id 
@@ -224,7 +223,7 @@ export async function DELETE(request) {
       );
     }
 
-    await prisma.address.delete({
+    await prisma.userAddress.delete({
       where: { id: addressId }
     });
 
