@@ -33,10 +33,10 @@ export async function GET(request) {
               { isActive: true },
               {
                 OR: [
-                  { name: { contains: searchTerm, mode: 'insensitive' } },
-                  { description: { contains: searchTerm, mode: 'insensitive' } },
-                  { brand: { contains: searchTerm, mode: 'insensitive' } },
-                  { sku: { contains: searchTerm, mode: 'insensitive' } }
+                  { name: { contains: searchTerm } },
+                  { description: { contains: searchTerm } },
+                  { brand: { contains: searchTerm } },
+                  { sku: { contains: searchTerm } }
                 ]
               }
             ]
@@ -94,8 +94,8 @@ export async function GET(request) {
               { isActive: true },
               {
                 OR: [
-                  { name: { contains: searchTerm, mode: 'insensitive' } },
-                  { slug: { contains: searchTerm, mode: 'insensitive' } }
+                  { name: { contains: searchTerm } },
+                  { slug: { contains: searchTerm } }
                 ]
               }
             ]
@@ -143,11 +143,11 @@ export async function GET(request) {
               { adminApprovalStatus: 'APPROVED' },
               {
                 OR: [
-                  { name: { contains: searchTerm, mode: 'insensitive' } },
-                  { description: { contains: searchTerm, mode: 'insensitive' } },
-                  { serviceType: { contains: searchTerm, mode: 'insensitive' } },
-                  { city: { contains: searchTerm, mode: 'insensitive' } },
-                  { state: { contains: searchTerm, mode: 'insensitive' } }
+                  { name: { contains: searchTerm } },
+                  { description: { contains: searchTerm } },
+                  { serviceType: { contains: searchTerm } },
+                  { city: { contains: searchTerm } },
+                  { state: { contains: searchTerm } }
                 ]
               }
             ]
