@@ -123,24 +123,24 @@ const ServicesPage = () => {
   return (
     <main className="relative min-h-screen bg-transparent">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden pb-16 pt-28">
+  <section ref={heroRef} className="relative overflow-hidden pb-16 pt-16 sm:pt-20 md:pt-24 lg:pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-[-10%] h-96 w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
-          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-linear-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
+          <div className="absolute left-1/2 top-[-10%] h-48 w-48 sm:h-72 sm:w-72 md:h-96 md:w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-[8%] top-[18%] h-20 w-20 sm:h-28 sm:w-28 md:h-32 md:w-32 rounded-full bg-linear-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
+          <div className="absolute right-[8%] top-[28%] h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 rounded-full bg-linear-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
-          <div className="space-y-6">
+          <div className="space-y-4">
             <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-gray-200/60 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
               <Building2 className="h-4 w-4 text-blue-500" />
               B2B Services
             </span>
             
-            <h1 className="hero-title text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-              Enterprise Solutions for <br />
-              <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="hero-title text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl md:text-5xl lg:text-6xl leading-tight">
+              Enterprise Solutions for{' '}
+              <span className="block sm:inline bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Growing Businesses
               </span>
             </h1>
@@ -150,7 +150,7 @@ const ServicesPage = () => {
               reduce costs, and accelerate growth through our proven solutions.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-6">
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
               <motion.button
                 onClick={() => window.location.href = '/account?tab=business'}
                 className="rounded-2xl bg-blue-600 px-8 py-4 text-white font-semibold hover:bg-blue-700 transition-colors"
@@ -223,7 +223,7 @@ const ServicesPage = () => {
                   key={index}
                   className="animate-pulse rounded-2xl border border-gray-200/50 bg-white/90 dark:border-white/10 dark:bg-white/5"
                 >
-                  <div className="h-48 bg-gray-300 dark:bg-gray-700 rounded-t-2xl"></div>
+                  <div className="h-40 sm:h-48 md:h-56 bg-gray-300 dark:bg-gray-700 rounded-t-2xl"></div>
                   <div className="p-6">
                     <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded mb-3"></div>
                     <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
@@ -272,7 +272,7 @@ const ServicesPage = () => {
                     whileHover={{ y: -5 }}
                   >
                     {/* Business Image */}
-                    <div className="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <div className="relative h-40 sm:h-48 md:h-56 lg:h-64 overflow-hidden bg-gray-100 dark:bg-gray-800">
                       {businessImage ? (
                         <Image
                           src={businessImage}
@@ -429,22 +429,9 @@ const ServicesPage = () => {
                 <p className="mb-6 text-gray-700 dark:text-gray-300 italic">
                   &ldquo;{testimonial.content}&rdquo;
                 </p>
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="font-semibold text-gray-900 dark:text-white">
-                      {testimonial.name}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {testimonial.role}, {testimonial.company}
-                    </div>
-                  </div>
+                <div className="mt-4">
+                  <div className="font-semibold text-gray-900 dark:text-white">{testimonial.name}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{testimonial.role}, {testimonial.company}</div>
                 </div>
               </motion.div>
             ))}

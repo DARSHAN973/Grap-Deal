@@ -193,7 +193,7 @@ const ContactPage = () => {
   return (
     <main className="relative min-h-screen bg-transparent">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden pb-16 pt-28">
+      <section ref={heroRef} className="relative overflow-hidden pb-6 pt-16 sm:pt-20 md:pt-24 lg:pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-[-10%] h-96 w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/20 via-indigo-500/15 to-purple-500/20 blur-3xl" />
@@ -202,7 +202,7 @@ const ContactPage = () => {
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1400px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
-          <div className="space-y-6">
+          <div className="space-y-4">
             <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-blue-50/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-blue-700 shadow-sm backdrop-blur dark:border-blue-800/20 dark:bg-blue-950/20 dark:text-blue-200">
               <MessageSquare className="h-4 w-4 text-blue-500" />
               Get In Touch
@@ -217,7 +217,7 @@ const ContactPage = () => {
             </p>
 
             {/* Quick Stats */}
-            <div className="hero-stats flex items-center justify-center gap-8 pt-6">
+            <div className="hero-stats flex items-center justify-center gap-6 pt-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">24h</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Response Time</div>
@@ -236,10 +236,10 @@ const ContactPage = () => {
       </section>
 
       {/* Contact Information Grid */}
-      <section className="relative py-16">
+      <section className="relative py-12">
         <div className="mx-auto w-full max-w-[min(96vw,1400px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           <motion.div
-            className="mb-12 text-center"
+            className="mb-8 text-center"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -253,7 +253,7 @@ const ContactPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {contactInfo.map((info, index) => (
               <motion.div
                 key={info.title}
@@ -285,7 +285,7 @@ const ContactPage = () => {
       </section>
 
       {/* Contact Form & FAQ Section */}
-      <section className="relative py-16">
+      <section className="relative py-12">
         <div className="mx-auto w-full max-w-[min(96vw,1400px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           <div className="grid gap-12 lg:grid-cols-2">
             {/* Contact Form */}
@@ -295,7 +295,7 @@ const ContactPage = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="rounded-3xl border border-gray-200/50 bg-white/90 p-8 shadow-xl dark:border-white/10 dark:bg-white/5">
+              <div className="rounded-3xl border border-gray-200/50 bg-white/90 p-6 shadow-xl dark:border-white/10 dark:bg-white/5">
                 <h3 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
                   Send us a Message
                 </h3>
@@ -319,7 +319,7 @@ const ContactPage = () => {
                   )}
                 </AnimatePresence>
 
-                <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+                <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
                   {/* Name and Email */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
@@ -485,7 +485,7 @@ const ContactPage = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-8"
+              className="space-y-6"
             >
               {/* Quick Support */}
               <div className="rounded-3xl border border-gray-200/50 bg-white/90 p-8 shadow-xl dark:border-white/10 dark:bg-white/5">
@@ -494,7 +494,7 @@ const ContactPage = () => {
                 </h3>
                 
                 <div className="space-y-4">
-                  <div className="flex items-start gap-4 rounded-xl bg-blue-50 p-4 dark:bg-blue-950/20">
+                  <div className="flex items-start gap-4 rounded-xl bg-blue-50 p-3 dark:bg-blue-950/20">
                     <Shield className="h-6 w-6 text-blue-500 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-gray-900 dark:text-white">Order Issues</h4>
@@ -504,7 +504,7 @@ const ContactPage = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-start gap-4 rounded-xl bg-green-50 p-4 dark:bg-green-950/20">
+                  <div className="flex items-start gap-4 rounded-xl bg-green-50 p-3 dark:bg-green-950/20">
                     <Truck className="h-6 w-6 text-green-500 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-gray-900 dark:text-white">Shipping</h4>
@@ -514,7 +514,7 @@ const ContactPage = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-start gap-4 rounded-xl bg-purple-50 p-4 dark:bg-purple-950/20">
+                  <div className="flex items-start gap-4 rounded-xl bg-purple-50 p-3 dark:bg-purple-950/20">
                     <Star className="h-6 w-6 text-purple-500 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-gray-900 dark:text-white">VIP Support</h4>
@@ -547,7 +547,7 @@ const ContactPage = () => {
                   </div>
                 </div>
                 
-                <div className="mt-6">
+                <div className="mt-4">
                   <MagneticButton
                     variant="outline"
                     size="sm"
@@ -564,10 +564,10 @@ const ContactPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-16">
+      <section className="relative py-12">
         <div className="mx-auto w-full max-w-[min(96vw,1400px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           <motion.div
-            className="rounded-3xl border border-blue-200/50 bg-linear-to-br from-blue-50 to-indigo-50 p-8 text-center dark:border-blue-800/50 dark:from-blue-950/20 dark:to-indigo-950/20 lg:p-12"
+            className="rounded-3xl border border-blue-200/50 bg-linear-to-br from-blue-50 to-indigo-50 p-6 text-center dark:border-blue-800/50 dark:from-blue-950/20 dark:to-indigo-950/20 lg:p-10"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -580,7 +580,7 @@ const ContactPage = () => {
               Check out our comprehensive help center or schedule a call with our team.
             </p>
             
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <MagneticButton
                 variant="primary"
                 size="lg"
