@@ -25,6 +25,9 @@ const Header = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
@@ -32,6 +35,8 @@ const Header = () => {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
   const logoRef = useRef(null);
+  const searchRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   const searchPlaceholders = [
     "Search for products...",
@@ -40,6 +45,60 @@ const Header = () => {
     "What are you looking for?",
     "Search our store..."
   ];
+
+  // Search functionality
+  const performSearch = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=all&limit=8`);
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data.data.all || []);
+        setShowSearchResults(true);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Debounce search
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(value);
+    }, 300);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to products page with search query
+      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+      setShowSearchResults(false);
+    }
+  };
+
+  const handleResultClick = (result) => {
+    setSearchQuery('');
+    setShowSearchResults(false);
+    window.location.href = result.url;
+  };
 
   // Client-side hydration check
   useEffect(() => {
@@ -92,6 +151,29 @@ const Header = () => {
       logo.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, [isClient]);
+
+  // Handle clicking outside search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Cleanup search timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -290,41 +372,137 @@ const Header = () => {
             {/* Desktop Search Bar */}
             <div className="hidden md:flex flex-1 max-w-xl mx-6">
               <motion.div 
+                ref={searchRef}
                 className="relative w-full group"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, type: "spring", stiffness: 400, damping: 40 }}
               >
-                <motion.div 
-                  className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10"
-                  animate={{ 
-                    scale: isSearchFocused ? 1.1 : 1,
-                    color: isSearchFocused ? '#3b82f6' : '#9ca3af'
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <MagnifyingGlassIcon className="h-5 w-5" />
-                </motion.div>
+                <form onSubmit={handleSearchSubmit}>
+                  <motion.div 
+                    className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10"
+                    animate={{ 
+                      scale: isSearchFocused ? 1.1 : 1,
+                      color: isSearchFocused ? '#3b82f6' : '#9ca3af'
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isSearching ? (
+                      <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                    ) : (
+                      <MagnifyingGlassIcon className="h-5 w-5" />
+                    )}
+                  </motion.div>
+                  
+                  <motion.input
+                    type="text"
+                    placeholder={isClient ? searchPlaceholders[placeholderIndex] : "Search for products..."}
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => {
+                      setIsSearchFocused(true);
+                      if (searchQuery && searchResults.length > 0) {
+                        setShowSearchResults(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      setIsSearchFocused(false);
+                      // Delay hiding results to allow clicking on them
+                      setTimeout(() => setShowSearchResults(false), 200);
+                    }}
+                    className="w-full pl-12 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-2xl bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm transition-all duration-300 backdrop-blur-sm"
+                    whileFocus={{
+                      scale: 1.02,
+                      borderColor: '#3b82f6',
+                      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+                    }}
+                    whileHover={{
+                      borderColor: '#8b5cf6',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                </form>
                 
-                <motion.input
-                  type="text"
-                  placeholder={isClient ? searchPlaceholders[placeholderIndex] : "Search for products..."}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  className="w-full pl-12 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-2xl bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm transition-all duration-300 backdrop-blur-sm"
-                  whileFocus={{
-                    scale: 1.02,
-                    borderColor: '#3b82f6',
-                    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-                  }}
-                  whileHover={{
-                    borderColor: '#8b5cf6',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
+                {/* Search Results Dropdown */}
+                <AnimatePresence>
+                  {showSearchResults && searchResults.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2, type: "spring", stiffness: 400, damping: 30 }}
+                      className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50 max-h-96 overflow-y-auto"
+                    >
+                      <div className="p-2">
+                        {searchResults.map((result, index) => (
+                          <motion.div
+                            key={`${result.type}-${result.id}`}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            onClick={() => handleResultClick(result)}
+                            className="p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 flex items-center space-x-3"
+                          >
+                            {/* Result Image/Icon */}
+                            <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                              {result.image ? (
+                                <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-6 h-6 text-gray-400">
+                                  {result.type === 'product' && <MagnifyingGlassIcon />}
+                                  {result.type === 'category' && <div className="w-full h-full bg-gray-300 rounded"></div>}
+                                  {result.type === 'service' && <Cog6ToothIcon />}
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Result Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  {result.name}
+                                </p>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  result.type === 'product' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                  result.type === 'category' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                  'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                                }`}>
+                                  {result.type}
+                                </span>
+                              </div>
+                              {result.description && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
+                                  {result.description}
+                                </p>
+                              )}
+                              {result.price && (
+                                <p className="text-xs font-semibold text-gray-900 dark:text-white mt-1">
+                                  ₹{result.price.toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))}
+                        
+                        {/* View All Results */}
+                        <motion.div
+                          className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <button
+                            onClick={handleSearchSubmit}
+                            className="w-full p-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-200"
+                          >
+                            View all results for "{searchQuery}"
+                          </button>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 
                 <motion.div
                   className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 -z-10"
@@ -633,19 +811,100 @@ const Header = () => {
                   <XMarkIcon className="h-6 w-6" />
                 </button>
                 <div className="flex-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder={isClient ? searchPlaceholders[placeholderIndex] : "Search for products..."}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-14 pr-6 py-3.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 text-base"
-                    autoFocus
-                  />
+                  <form onSubmit={(e) => { handleSearchSubmit(e); toggleMobileSearch(); }}>
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      {isSearching ? (
+                        <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                      ) : (
+                        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder={isClient ? searchPlaceholders[placeholderIndex] : "Search for products..."}
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      className="w-full pl-14 pr-6 py-3.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 text-base"
+                      autoFocus
+                    />
+                  </form>
                 </div>
               </div>
+
+              {/* Mobile Search Results */}
+              {searchResults.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="mt-4 max-h-96 overflow-y-auto space-y-2"
+                >
+                  {searchResults.map((result, index) => (
+                    <motion.div
+                      key={`mobile-${result.type}-${result.id}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => { handleResultClick(result); toggleMobileSearch(); }}
+                      className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 flex items-center space-x-3"
+                    >
+                      {/* Result Image/Icon */}
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                        {result.image ? (
+                          <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-6 h-6 text-gray-400">
+                            {result.type === 'product' && <MagnifyingGlassIcon />}
+                            {result.type === 'category' && <div className="w-full h-full bg-gray-300 rounded"></div>}
+                            {result.type === 'service' && <Cog6ToothIcon />}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Result Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {result.name}
+                          </p>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            result.type === 'product' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                            result.type === 'category' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                            'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                          }`}>
+                            {result.type}
+                          </span>
+                        </div>
+                        {result.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {result.description}
+                          </p>
+                        )}
+                        {result.price && (
+                          <p className="text-xs font-semibold text-gray-900 dark:text-white mt-1">
+                            ₹{result.price.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                  
+                  {/* View All Results - Mobile */}
+                  <motion.div
+                    className="border-t border-gray-200 dark:border-gray-700 pt-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <button
+                      onClick={(e) => { handleSearchSubmit(e); toggleMobileSearch(); }}
+                      className="w-full p-3 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors duration-200"
+                    >
+                      View all results for "{searchQuery}"
+                    </button>
+                  </motion.div>
+                </motion.div>
+              )}
             </motion.div>
           </motion.div>
         )}
