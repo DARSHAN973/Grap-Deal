@@ -90,7 +90,7 @@ const WaveBackground = () => {
           <div
             key={orb.id}
             id={`orb-${orb.id}`}
-            className={`absolute ${orb.size} rounded-full bg-gradient-to-br ${orb.gradient} blur-3xl will-change-transform`}
+            className={`absolute ${orb.size} rounded-full bg-linear-to-br ${orb.gradient} blur-3xl will-change-transform`}
             style={{
               left: orb.pos.left,
               top: orb.pos.top,
@@ -107,7 +107,7 @@ const WaveBackground = () => {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-gray-50/80 to-transparent dark:from-gray-950/80 dark:to-transparent" />
       
       {/* Bottom gradient fade for better blending */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gray-50/60 to-transparent dark:from-gray-950/60 dark:to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-gray-50/60 to-transparent dark:from-gray-950/60 dark:to-transparent" />
     </div>
   );
 };

@@ -231,7 +231,7 @@ const TrendingSlider = () => {
               transition={{ delay: 0.18, duration: 0.45 }}
             >
               <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+                className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600"
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -240,7 +240,7 @@ const TrendingSlider = () => {
                 Fresh Drops.
               </motion.span>
               <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-teal-600"
+                className="text-transparent bg-clip-text bg-linear-to-r from-green-600 to-teal-600"
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -249,7 +249,7 @@ const TrendingSlider = () => {
                 Daily Deals.
               </motion.span>
               <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600"
+                className="text-transparent bg-clip-text bg-linear-to-r from-orange-600 to-red-600"
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -301,8 +301,8 @@ const TrendingSlider = () => {
         </div>
 
   <div className="relative mt-0">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-gray-50 via-transparent to-transparent dark:from-gray-950" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-gray-50 via-transparent to-transparent dark:from-gray-950" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-linear-to-r from-gray-50 via-transparent to-transparent dark:from-gray-950" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-linear-to-l from-gray-50 via-transparent to-transparent dark:from-gray-950" />
 
           <div
             ref={scrollContainerRef}
@@ -335,14 +335,14 @@ const TrendingSlider = () => {
               return (
                 <motion.article
                   key={product.id}
-                  className="group relative flex h-full min-h-[22rem] w-[calc(50%-12px)] sm:w-[calc(50%-12px)] md:w-[calc(33%-12px)] lg:w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-2 hover:shadow-2xl dark:border-white/10 dark:bg-white/5 cursor-pointer"
+                  className="group relative flex h-full min-h-88 w-[calc(50%-12px)] sm:w-[calc(50%-12px)] md:w-[calc(33%-12px)] lg:w-[calc(25%-18px)] shrink-0 snap-start flex-col overflow-hidden rounded-3xl sm:rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-2 hover:shadow-2xl dark:border-white/10 dark:bg-white/5 cursor-pointer"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.08, duration: 0.5, ease: 'easeOut' }}
                   onClick={() => handleProductView(product.id)}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${getAccentGradient(idx)} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
+                  <div className={`absolute inset-0 bg-linear-to-br ${getAccentGradient(idx)} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
 
                   <div className="relative h-64 sm:h-96 overflow-hidden">
                     <div
@@ -350,7 +350,7 @@ const TrendingSlider = () => {
                       style={{ backgroundImage: `url(${product.image})` }}
                     />
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
+                      className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent"
                       initial={{ opacity: 0.65 }}
                       whileHover={{ opacity: 0.78 }}
                     />
@@ -385,7 +385,7 @@ const TrendingSlider = () => {
                     <div className="hidden sm:flex items-center justify-between mb-2">
                       <StarRating rating={product.rating} />
                       {discount && (
-                        <span className="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                        <span className="rounded-full bg-linear-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
                           {discount}% OFF
                         </span>
                       )}

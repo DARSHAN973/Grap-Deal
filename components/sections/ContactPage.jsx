@@ -196,9 +196,9 @@ const ContactPage = () => {
       <section ref={heroRef} className="relative overflow-hidden pb-16 pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-indigo-500/15 to-purple-500/20 blur-3xl" />
-          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-gradient-to-br from-cyan-400/15 to-blue-500/20 blur-2xl" />
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-1/2 top-[-10%] h-96 w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/20 via-indigo-500/15 to-purple-500/20 blur-3xl" />
+          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-linear-to-br from-cyan-400/15 to-blue-500/20 blur-2xl" />
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-purple-500/20 to-pink-500/20 blur-3xl" />
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1400px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
@@ -567,7 +567,7 @@ const ContactPage = () => {
       <section className="relative py-16">
         <div className="mx-auto w-full max-w-[min(96vw,1400px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           <motion.div
-            className="rounded-3xl border border-blue-200/50 bg-gradient-to-br from-blue-50 to-indigo-50 p-8 text-center dark:border-blue-800/50 dark:from-blue-950/20 dark:to-indigo-950/20 lg:p-12"
+            className="rounded-3xl border border-blue-200/50 bg-linear-to-br from-blue-50 to-indigo-50 p-8 text-center dark:border-blue-800/50 dark:from-blue-950/20 dark:to-indigo-950/20 lg:p-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

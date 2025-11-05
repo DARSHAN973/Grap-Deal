@@ -126,9 +126,9 @@ const ServicesPage = () => {
       <section ref={heroRef} className="relative overflow-hidden pb-16 pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
-          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-gradient-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
+          <div className="absolute left-1/2 top-[-10%] h-96 w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-linear-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
@@ -140,7 +140,7 @@ const ServicesPage = () => {
             
             <h1 className="hero-title text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
               Enterprise Solutions for <br />
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Growing Businesses
               </span>
             </h1>
@@ -285,10 +285,10 @@ const ServicesPage = () => {
                           }}
                         />
                       ) : null}
-                      <div className={`${businessImage ? 'hidden' : 'flex'} absolute inset-0 items-center justify-center bg-gradient-to-br from-blue-500/20 to-purple-500/20`}>
+                      <div className={`${businessImage ? 'hidden' : 'flex'} absolute inset-0 items-center justify-center bg-linear-to-br from-blue-500/20 to-purple-500/20`}>
                         <Icon className="h-16 w-16 text-gray-400 dark:text-gray-600" />
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
                     </div>
 
                     {/* Service Content */}

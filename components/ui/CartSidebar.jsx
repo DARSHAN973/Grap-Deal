@@ -170,7 +170,7 @@ const CartSidebar = () => {
                             >
                               <Minus className="h-4 w-4" />
                             </button>
-                            <span className="min-w-[2rem] text-center font-medium text-gray-900 dark:text-white">
+                            <span className="min-w-8 text-center font-medium text-gray-900 dark:text-white">
                               {item.quantity}
                             </span>
                             <button

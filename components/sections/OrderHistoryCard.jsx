@@ -86,7 +86,7 @@ const OrderHistoryCard = ({ order, onOrderUpdate }) => {
       className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-xl transition-all duration-300"
     >
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3">
+      <div className="bg-linear-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`w-10 h-10 rounded-full ${getStatusColor(order.status)} flex items-center justify-center shadow-lg`}>

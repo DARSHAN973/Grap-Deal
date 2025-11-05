@@ -153,9 +153,9 @@ const ProductsExperience = () => {
     <main className="relative overflow-hidden bg-transparent text-gray-100 transition-colors duration-500">
       <section className="relative isolate overflow-hidden pb-24 pt-28">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-[-20%] h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/25 via-purple-500/20 to-indigo-500/25 blur-3xl" />
-          <div className="absolute left-[10%] top-[35%] h-48 w-48 rounded-full bg-gradient-to-br from-cyan-400/20 to-sky-500/25 blur-2xl" />
-          <div className="absolute right-[12%] top-[45%] h-64 w-64 rounded-full bg-gradient-to-br from-fuchsia-500/25 to-rose-500/25 blur-3xl" />
+          <div className="absolute left-1/2 top-[-20%] h-128 w-128 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/25 via-purple-500/20 to-indigo-500/25 blur-3xl" />
+          <div className="absolute left-[10%] top-[35%] h-48 w-48 rounded-full bg-linear-to-br from-cyan-400/20 to-sky-500/25 blur-2xl" />
+          <div className="absolute right-[12%] top-[45%] h-64 w-64 rounded-full bg-linear-to-br from-fuchsia-500/25 to-rose-500/25 blur-3xl" />
         </div>
 
         <div className="relative mx-auto grid w-full max-w-[min(95vw,1400px)] gap-16 px-4 sm:px-6 lg:grid-cols-[1.2fr,1fr] lg:px-10">
@@ -215,7 +215,7 @@ const ProductsExperience = () => {
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
             className="relative flex items-center justify-center"
           >
-            <div className="relative aspect-square w-full max-w-[26rem] rounded-[3rem] border border-white/20 bg-gradient-to-br from-slate-900 via-slate-900/60 to-slate-900/90 p-8 shadow-[0_30px_100px_rgba(15,23,42,0.45)] dark:border-white/10">
+            <div className="relative aspect-square w-full max-w-[26rem] rounded-[3rem] border border-white/20 bg-linear-to-br from-slate-900 via-slate-900/60 to-slate-900/90 p-8 shadow-[0_30px_100px_rgba(15,23,42,0.45)] dark:border-white/10">
               <div className="absolute inset-0 rounded-[3rem] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_65%)]" />
               <div className="absolute inset-[12%] rounded-[2.4rem] border border-white/10" />
               <div className="absolute inset-[22%] rounded-[1.8rem] border border-white/5" />
@@ -223,14 +223,14 @@ const ProductsExperience = () => {
               {['left-[18%] top-[24%]', 'left-[55%] top-[16%]', 'left-[24%] top-[62%]', 'left-[60%] top-[66%]'].map((pos, idx) => (
                 <motion.span
                   key={pos}
-                  className={`absolute ${pos} h-2 w-2 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500`}
+                  className={`absolute ${pos} h-2 w-2 rounded-full bg-linear-to-br from-sky-400 to-indigo-500`}
                   animate={{ scale: [1, 1.4, 1], opacity: [0.6, 1, 0.6] }}
                   transition={{ duration: 2 + idx * 0.4, repeat: Infinity, ease: 'easeInOut' }}
                 />
               ))}
 
               <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-white/10 backdrop-blur-xl" />
-              <div className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500" />
+              <div className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-linear-to-br from-blue-500 via-indigo-500 to-purple-500" />
 
               <motion.div
                 className="absolute left-1/2 top-[18%] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-white"
@@ -243,7 +243,7 @@ const ProductsExperience = () => {
 
               <div className="absolute inset-0">
                 <motion.div
-                  className="absolute left-[55%] top-[28%] h-[2px] w-[22%] bg-gradient-to-r from-white/10 via-white/40 to-transparent"
+                  className="absolute left-[55%] top-[28%] h-[2px] w-[22%] bg-linear-to-r from-white/10 via-white/40 to-transparent"
                   animate={{ opacity: [0.3, 0.9, 0.3] }}
                   transition={{ duration: 2.8, repeat: Infinity }}
                 />
@@ -291,8 +291,8 @@ const ProductsExperience = () => {
             <div className="pointer-events-none absolute inset-12 rounded-[2.5rem] border border-dashed border-white/10" />
 
             <div className="relative aspect-[5/3] w-full">
-              <div className="absolute left-[18%] top-[28%] h-[2px] w-[24%] bg-gradient-to-r from-sky-500/10 via-sky-500/60 to-transparent" />
-              <div className="absolute left-[54%] top-[30%] h-[2px] w-[23%] bg-gradient-to-r from-transparent via-fuchsia-500/50 to-fuchsia-500/10" />
+              <div className="absolute left-[18%] top-[28%] h-[2px] w-[24%] bg-linear-to-r from-sky-500/10 via-sky-500/60 to-transparent" />
+              <div className="absolute left-[54%] top-[30%] h-[2px] w-[23%] bg-linear-to-r from-transparent via-fuchsia-500/50 to-fuchsia-500/10" />
               <div className="absolute left-[30%] top-[55%] h-[28%] w-[2px] bg-gradient-to-b from-transparent via-emerald-500/40 to-emerald-500/10" />
               <div className="absolute left-[48%] top-[58%] h-[24%] w-[2px] bg-gradient-to-b from-transparent via-orange-500/40 to-orange-500/10" />
 
@@ -305,7 +305,7 @@ const ProductsExperience = () => {
                   viewport={{ once: true, amount: 0.4 }}
                   transition={{ duration: 0.6, delay: idx * 0.1 }}
                 >
-                  <div className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${color} px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-white/90`}>
+                  <div className={`inline-flex items-center gap-2 rounded-full bg-linear-to-r ${color} px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-white/90`}>
                     Node
                   </div>
                   <h3 className="mt-3 text-lg font-semibold">{title}</h3>
@@ -350,7 +350,7 @@ const ProductsExperience = () => {
       </section>
 
       <section className="relative pb-28">
-        <div className="mx-auto w-full max-w-[min(95vw,1400px)] overflow-hidden rounded-[3rem] border border-gray-900/10 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-12 shadow-[0_45px_140px_-30px_rgba(15,23,42,0.6)] text-white sm:p-16">
+        <div className="mx-auto w-full max-w-[min(95vw,1400px)] overflow-hidden rounded-[3rem] border border-gray-900/10 bg-linear-to-br from-slate-900 via-slate-900/90 to-slate-950 p-12 shadow-[0_45px_140px_-30px_rgba(15,23,42,0.6)] text-white sm:p-16">
           <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-lg space-y-6">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-white/80">

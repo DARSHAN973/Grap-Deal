@@ -259,7 +259,7 @@ const Header = () => {
       >
         {/* Animated background gradient */}
         <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-blue-500/8 via-purple-500/8 to-pink-500/8 dark:from-blue-500/5 dark:via-purple-500/5 dark:to-pink-500/5"
+          className="absolute inset-0 bg-linear-to-r from-blue-500/8 via-purple-500/8 to-pink-500/8 dark:from-blue-500/5 dark:via-purple-500/5 dark:to-pink-500/5"
           animate={{ 
             background: [
               'linear-gradient(90deg, rgba(59,130,246,0.05) 0%, rgba(147,51,234,0.05) 50%, rgba(236,72,153,0.05) 100%)',
@@ -286,7 +286,7 @@ const Header = () => {
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 rounded-xl"
+                  className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 rounded-xl"
                   initial={{ scale: 0 }}
                   whileHover={{ scale: 1 }}
                   transition={{ duration: 0.2 }}
@@ -309,7 +309,7 @@ const Header = () => {
               <Link href="/" className="flex items-center space-x-2 group">
                 <motion.div 
                   ref={logoRef}
-                  className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg overflow-hidden"
+                  className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg overflow-hidden"
                   whileHover={{ 
                     scale: 1.1,
                     rotate: 360,
@@ -323,7 +323,7 @@ const Header = () => {
                   }}
                 >
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0"
+                    className="absolute inset-0 bg-linear-to-r from-blue-400 to-purple-400 opacity-0"
                     whileHover={{ opacity: 0.3 }}
                     transition={{ duration: 0.3 }}
                   />
@@ -505,7 +505,7 @@ const Header = () => {
                 </AnimatePresence>
                 
                 <motion.div
-                  className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 -z-10"
+                  className="absolute inset-0 rounded-2xl bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 -z-10"
                   animate={{ 
                     opacity: isSearchFocused ? 0.1 : 0,
                     scale: isSearchFocused ? 1.02 : 1
@@ -554,7 +554,7 @@ const Header = () => {
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 rounded-xl"
+                  className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 rounded-xl"
                   initial={{ scale: 0 }}
                   whileHover={{ scale: 1 }}
                   transition={{ duration: 0.2 }}
@@ -594,7 +594,7 @@ const Header = () => {
                 {/* Cart count badge */}
                 {totalItems > 0 && (
                   <motion.span 
-                    className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 bg-gradient-to-br from-red-500 to-pink-600 text-white text-[10px] sm:text-xs rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white dark:border-gray-800 z-20" 
+                    className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 bg-linear-to-br from-red-500 to-pink-600 text-white text-[10px] sm:text-xs rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white dark:border-gray-800 z-20" 
                     style={{ transformOrigin: 'center' }}
                     initial={{ scale: 0, rotate: -10 }}
                     animate={{ scale: 1, rotate: 0 }}
@@ -615,7 +615,7 @@ const Header = () => {
                     {/* Account Icon */}
                     <Link href="/account">
                       <motion.button 
-                        className="group relative p-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium overflow-hidden"
+                        className="group relative p-2 bg-linear-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium overflow-hidden"
                         whileHover={{ 
                           scale: 1.05,
                           boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
@@ -637,7 +637,7 @@ const Header = () => {
                     {/* Logout Icon */}
                     <motion.button 
                       onClick={handleLogout}
-                      className="group relative p-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
+                      className="group relative p-2 bg-linear-to-r from-red-500 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
                       whileHover={{ 
                         scale: 1.05,
                         boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
@@ -659,7 +659,7 @@ const Header = () => {
                   // Non-authenticated state: Login button
                   <motion.button 
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="group relative p-2 sm:px-3 sm:py-2 lg:px-6 lg:py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
+                    className="group relative p-2 sm:px-3 sm:py-2 lg:px-6 lg:py-2.5 bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-medium overflow-hidden"
                     whileHover={{ 
                       scale: 1.05,
                       boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
@@ -728,7 +728,7 @@ const Header = () => {
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     >
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 opacity-0 group-hover:opacity-100"
+                        className="absolute inset-0 bg-linear-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 opacity-0 group-hover:opacity-100"
                         initial={{ scale: 0.8 }}
                         whileHover={{ scale: 1 }}
                         transition={{ duration: 0.2 }}
@@ -767,7 +767,7 @@ const Header = () => {
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   >
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 opacity-0 group-hover:opacity-100"
+                      className="absolute inset-0 bg-linear-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 opacity-0 group-hover:opacity-100"
                       initial={{ scale: 0.8 }}
                       whileHover={{ scale: 1 }}
                       transition={{ duration: 0.2 }}

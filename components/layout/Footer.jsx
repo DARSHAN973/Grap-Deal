@@ -117,16 +117,16 @@ const Footer = () => {
   return (
     <footer className="relative overflow-hidden bg-transparent text-gray-900 dark:text-white">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl" />
-        <div className="absolute -bottom-48 left-[8%] h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-sky-500/10 to-cyan-400/10 blur-3xl" />
-        <div className="absolute -bottom-32 right-[10%] h-[24rem] w-[24rem] rounded-full bg-gradient-to-br from-orange-500/10 to-rose-500/10 blur-3xl" />
+        <div className="absolute -top-40 left-1/2 h-128 w-128 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl" />
+        <div className="absolute -bottom-48 left-[8%] h-112 w-112 rounded-full bg-linear-to-br from-sky-500/10 to-cyan-400/10 blur-3xl" />
+        <div className="absolute -bottom-32 right-[10%] h-96 w-96 rounded-full bg-linear-to-br from-orange-500/10 to-rose-500/10 blur-3xl" />
       </div>
 
   <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 py-12 sm:px-6 lg:px-10 xl:px-16">
         {/* Email signup section removed for cleaner launch */}
 
   <div className="mt-8 grid gap-10 lg:grid-cols-[1.6fr,1fr]">
-          <div className="grid gap-6 rounded-[2.5rem] border border-gray-200/30 bg-gray-50/60 dark:border-white/10 dark:bg-white/[0.03] p-8 backdrop-blur-2xl md:grid-cols-2">
+          <div className="grid gap-6 rounded-[2.5rem] border border-gray-200/30 bg-gray-50/60 dark:border-white/10 dark:bg-white/3 p-8 backdrop-blur-2xl md:grid-cols-2">
             {dropSignals.map(({ id, title, value, description, Icon, accent }) => (
               <motion.div
                 key={id}
@@ -136,7 +136,7 @@ const Footer = () => {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
               >
-                <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${accent} opacity-40`} />
+                <div className={`pointer-events-none absolute inset-0 bg-linear-to-br ${accent} opacity-40`} />
                 <div className="relative flex flex-col gap-3 text-gray-900 dark:text-white">
                   <Icon className="h-5 w-5" />
                   <div>
@@ -150,7 +150,7 @@ const Footer = () => {
           </div>
 
           <motion.div
-            className="flex h-full flex-col justify-between gap-6 rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/10 via-transparent to-white/5 p-8 backdrop-blur-2xl"
+            className="flex h-full flex-col justify-between gap-6 rounded-[2.5rem] border border-white/10 bg-linear-to-br from-white/10 via-transparent to-white/5 p-8 backdrop-blur-2xl"
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.4 }}
@@ -189,7 +189,7 @@ const Footer = () => {
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-purple-500 shadow-lg">
                 <span className="text-2xl font-bold text-white">GD</span>
               </div>
               <div>
@@ -231,7 +231,7 @@ const Footer = () => {
                     <li key={link.label}>
                       <motion.a
                         href={link.href}
-                        className="group flex items-center justify-between rounded-xl border border-gray-200/30 dark:border-white/5 bg-gray-100/30 dark:bg-white/[0.02] px-4 py-3 transition-all hover:border-gray-300 dark:hover:border-white/30 hover:bg-gray-200/50 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
+                        className="group flex items-center justify-between rounded-xl border border-gray-200/30 dark:border-white/5 bg-gray-100/30 dark:bg-white/2 px-4 py-3 transition-all hover:border-gray-300 dark:hover:border-white/30 hover:bg-gray-200/50 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
                         whileHover={{ x: 6 }}
                         transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                       >

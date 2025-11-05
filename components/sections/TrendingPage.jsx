@@ -411,7 +411,7 @@ const TrendingProductCard = ({ product, index }) => {
             {product.colors.slice(0, 3).map((color, idx) => (
               <div
                 key={idx}
-                className="h-4 w-4 rounded-full border border-gray-300 bg-gradient-to-br from-gray-300 to-gray-500"
+                className="h-4 w-4 rounded-full border border-gray-300 bg-linear-to-br from-gray-300 to-gray-500"
                 title={color}
               />
             ))}
@@ -510,9 +510,9 @@ const TrendingPage = () => {
       <section ref={heroRef} className="relative overflow-hidden pb-16 pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-orange-500/20 via-red-500/15 to-pink-500/20 blur-3xl" />
-          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-gradient-to-br from-yellow-400/15 to-orange-500/20 blur-2xl" />
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-1/2 top-[-10%] h-96 w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-orange-500/20 via-red-500/15 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-linear-to-br from-yellow-400/15 to-orange-500/20 blur-2xl" />
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-red-500/20 to-pink-500/20 blur-3xl" />
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">
@@ -621,7 +621,7 @@ const TrendingPage = () => {
       <section className="relative py-16">
         <div className="mx-auto w-full max-w-[min(96vw,1500px)] px-4 sm:px-6 lg:px-10 xl:px-16">
           <motion.div
-            className="rounded-3xl border border-orange-200/50 bg-gradient-to-br from-orange-50 to-red-50 p-8 text-center dark:border-orange-800/50 dark:from-orange-950/20 dark:to-red-950/20 lg:p-12"
+            className="rounded-3xl border border-orange-200/50 bg-linear-to-br from-orange-50 to-red-50 p-8 text-center dark:border-orange-800/50 dark:from-orange-950/20 dark:to-red-950/20 lg:p-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

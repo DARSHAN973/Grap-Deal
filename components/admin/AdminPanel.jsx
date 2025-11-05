@@ -402,7 +402,7 @@ const C2CManagementContent = () => (
       <div className="px-4 py-16 sm:px-6 lg:px-8 text-center">
         <div className="max-w-md mx-auto">
           {/* Icon */}
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-6">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-linear-to-r from-blue-500 to-purple-600 mb-6">
             <ArrowsRightLeftIcon className="h-8 w-8 text-white" />
           </div>
           
@@ -446,7 +446,7 @@ const C2CManagementContent = () => (
           </div>
 
           {/* Status Badge */}
-          <div className="inline-flex items-center px-6 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+          <div className="inline-flex items-center px-6 py-2 rounded-full text-sm font-medium bg-linear-to-r from-yellow-400 to-orange-500 text-white">
             🚧 Under Development
           </div>
           

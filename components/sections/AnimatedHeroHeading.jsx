@@ -87,7 +87,7 @@ const AnimatedHeroHeading = () => {
                   variants={wordVariants}
                   className={`inline-block mr-3 sm:mr-4 lg:mr-6 ${
                     index === 0 || index === 2 ? 'text-gray-900 dark:text-white' :
-                    index === 1 || index === 3 ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600' :
+                    index === 1 || index === 3 ? 'text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600' :
                     index === 4 ? 'relative' : 
                     'text-gray-900 dark:text-white'
                   }`}
@@ -98,11 +98,11 @@ const AnimatedHeroHeading = () => {
                 >
                   {index === 4 ? (
                     <>
-                      <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500">
+                      <span className="relative z-10 text-transparent bg-clip-text bg-linear-to-r from-orange-500 via-red-500 to-pink-500">
                         {word}
                       </span>
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                        className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent"
                         variants={shimmerVariants}
                         style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0% 100%)" }}
                       />
@@ -115,7 +115,7 @@ const AnimatedHeroHeading = () => {
             </motion.h1>
 
             <motion.div
-              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-32 sm:w-40 lg:w-48 h-1 sm:h-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-full opacity-80"
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-32 sm:w-40 lg:w-48 h-1 sm:h-2 bg-linear-to-r from-yellow-400 via-orange-400 to-red-400 rounded-full opacity-80"
               variants={highlightVariants}
             />
           </div> */}
@@ -142,7 +142,7 @@ const AnimatedHeroHeading = () => {
             {[...Array(6)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+                className="absolute w-2 h-2 bg-linear-to-r from-blue-400 to-purple-400 rounded-full"
                 style={{
                   left: `${15 + i * 15}%`,
                   top: `${20 + (i % 2) * 30}%`,
@@ -195,7 +195,7 @@ const AnimatedHeroHeading = () => {
       </div>
 
       {/* Bottom fade effect */}
-      {/* <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-950" /> */}
+      {/* <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-gray-50 to-transparent dark:from-gray-950" /> */}
     </section>
   );
 };

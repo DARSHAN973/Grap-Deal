@@ -146,7 +146,7 @@ import gsap from 'gsap';import gsap from 'gsap';
 
       <div className="group relative overflow-hidden rounded-2xl bg-gray-200/50 dark:bg-gray-800/50 animate-pulse">
 
-        <div className="aspect-square bg-gradient-to-br from-gray-300/50 to-gray-400/50 dark:from-gray-700/50 dark:to-gray-600/50" />  'Home & Garden': Home,  'Home & Garden': Home,
+        <div className="aspect-square bg-linear-to-br from-gray-300/50 to-gray-400/50 dark:from-gray-700/50 dark:to-gray-600/50" />  'Home & Garden': Home,  'Home & Garden': Home,
 
         <div className="absolute inset-0 flex items-end p-4">
 
@@ -202,7 +202,7 @@ import gsap from 'gsap';import gsap from 'gsap';
 
         ) : (
 
-          <div className="h-full w-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">  const [selectedFilter, setSelectedFilter] = useState('All');
+          <div className="h-full w-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">  const [selectedFilter, setSelectedFilter] = useState('All');
 
             {(() => {
 
@@ -220,7 +220,7 @@ import gsap from 'gsap';import gsap from 'gsap';
 
         {/* Gradient Overlay */}  }, [index]);  // Fetch categories from API
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
 
           useEffect(() => {
 
@@ -314,7 +314,7 @@ const CategoriesPage = () => {      );      }
 
           // Only show active categories on frontend
 
-          const activeCategories = data.filter(category => category.isActive);        <div className="aspect-square bg-gradient-to-br from-gray-300/50 to-gray-400/50 dark:from-gray-700/50 dark:to-gray-600/50" />  const filteredCategories = categories.filter(category => {
+          const activeCategories = data.filter(category => category.isActive);        <div className="aspect-square bg-linear-to-br from-gray-300/50 to-gray-400/50 dark:from-gray-700/50 dark:to-gray-600/50" />  const filteredCategories = categories.filter(category => {
 
           setCategories(activeCategories);
 
@@ -422,11 +422,11 @@ const CategoriesPage = () => {      );      }
 
     return (
 
-      <main className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">        ) : (          y: 30,
+      <main className="relative min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">        ) : (          y: 30,
 
         <div className="flex items-center justify-center min-h-screen">
 
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>          <div className="h-full w-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">          scale: 0.95,
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>          <div className="h-full w-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">          scale: 0.95,
 
         </div>
 
@@ -440,7 +440,7 @@ const CategoriesPage = () => {      );      }
 
   return (              return <IconComponent className="h-16 w-16 text-gray-400" />;          opacity: 1,
 
-    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <main className="relative min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
 
       {/* Hero Section */}            })()}          y: 0,
 
@@ -450,9 +450,9 @@ const CategoriesPage = () => {      );      }
 
         <div className="absolute inset-0 overflow-hidden">
 
-          <div className="absolute left-[10%] top-[20%] h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-600/20 blur-3xl" />        )}          duration: 0.6,
+          <div className="absolute left-[10%] top-[20%] h-64 w-64 rounded-full bg-linear-to-br from-blue-400/20 to-purple-600/20 blur-3xl" />        )}          duration: 0.6,
 
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
 
         </div>                  delay: index * 0.08,
 
@@ -462,7 +462,7 @@ const CategoriesPage = () => {      );      }
 
           <div className="space-y-6">
 
-            <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-gray-200/60 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-gray-200">        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />        }
+            <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-gray-200/60 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-gray-200">        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />        }
 
               <Package className="h-4 w-4 text-violet-500" />
 
@@ -494,7 +494,7 @@ const CategoriesPage = () => {      );      }
 
               <div className="text-center">
 
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{categories.length}</div>        <div className="w-full text-white">        <div className="aspect-square bg-gradient-to-br from-gray-300/50 to-gray-400/50 dark:from-gray-700/50 dark:to-gray-600/50" />
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{categories.length}</div>        <div className="w-full text-white">        <div className="aspect-square bg-linear-to-br from-gray-300/50 to-gray-400/50 dark:from-gray-700/50 dark:to-gray-600/50" />
 
                 <div className="text-sm text-gray-600 dark:text-gray-400">Categories</div>
 
@@ -606,7 +606,7 @@ const CategoriesPage = () => {      );      }
 
               className="py-16 text-center"
 
-              initial={{ opacity: 0 }}  const [selectedFilter, setSelectedFilter] = useState('All');          <div className="h-full w-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+              initial={{ opacity: 0 }}  const [selectedFilter, setSelectedFilter] = useState('All');          <div className="h-full w-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
 
               animate={{ opacity: 1 }}
 
@@ -642,7 +642,7 @@ const CategoriesPage = () => {      );      }
 
 };
 
-        if (response.ok) {        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        if (response.ok) {        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
 
 export default CategoriesPage;
           const data = await response.json();        
@@ -761,7 +761,7 @@ export default CategoriesPage;
 
     return (              className="mt-4 text-3xl font-bold text-white lg:text-4xl"
 
-      <main className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">              initial={{ opacity: 0, y: 20 }}
+      <main className="relative min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">              initial={{ opacity: 0, y: 20 }}
 
         <div className="flex items-center justify-center min-h-screen">              whileInView={{ opacity: 1, y: 0 }}
 
@@ -779,7 +779,7 @@ export default CategoriesPage;
 
   return (            <motion.p
 
-    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">              className="mt-3 text-white/90"
+    <main className="relative min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">              className="mt-3 text-white/90"
 
       {/* 1️⃣ Hero Section */}              initial={{ opacity: 0, y: 20 }}
 
@@ -789,9 +789,9 @@ export default CategoriesPage;
 
         <div className="absolute inset-0 overflow-hidden">              transition={{ duration: 0.6, delay: 0.5 }}
 
-          <div className="absolute left-[10%] top-[20%] h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-600/20 blur-3xl" />            >
+          <div className="absolute left-[10%] top-[20%] h-64 w-64 rounded-full bg-linear-to-br from-blue-400/20 to-purple-600/20 blur-3xl" />            >
 
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />              {category.description}
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />              {category.description}
 
         </div>            </motion.p>
 
@@ -839,7 +839,7 @@ export default CategoriesPage;
 
               </div>        <div className="relative lg:flex-1">
 
-              <div className="text-center">          <div className="aspect-[16/10] lg:aspect-[4/3]">
+              <div className="text-center">          <div className="aspect-[16/10] lg:aspect-4/3">
 
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">1000+</div>            <img
 
@@ -851,7 +851,7 @@ export default CategoriesPage;
 
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">24/7</div>            />
 
-                <div className="text-sm text-gray-600 dark:text-gray-400">Support</div>            <div className={`absolute inset-0 bg-gradient-to-r ${category.gradient}`} />
+                <div className="text-sm text-gray-600 dark:text-gray-400">Support</div>            <div className={`absolute inset-0 bg-linear-to-r ${category.gradient}`} />
 
               </div>          </div>
 
@@ -983,9 +983,9 @@ export default CategoriesPage;
 
         <div className="pointer-events-none absolute inset-0">
 
-export default CategoriesPage;          <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
-          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-gradient-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
+export default CategoriesPage;          <div className="absolute left-1/2 top-[-10%] h-96 w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-linear-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1400px)] px-4 text-center sm:px-6 lg:px-10 xl:px-16">

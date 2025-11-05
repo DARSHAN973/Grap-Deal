@@ -154,14 +154,14 @@ const ProductDetailsPage = () => {
   const cartCount = getItemCount(product.id);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-indigo-50/30 to-purple-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20 pb-16">
       {/* Floating particles background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -inset-10 opacity-30">
           {[...Array(30)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute h-2 w-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"
+              className="absolute h-2 w-2 bg-linear-to-r from-blue-400 to-purple-500 rounded-full"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -206,7 +206,7 @@ const ProductDetailsPage = () => {
           >
             {/* Main Image Container */}
             <div className="relative group">
-              <div className="aspect-square overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 border border-white/60 shadow-2xl backdrop-blur-xl">
+              <div className="aspect-square overflow-hidden rounded-[2.5rem] bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 border border-white/60 shadow-2xl backdrop-blur-xl">
                 <div className="relative h-full w-full">
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -232,7 +232,7 @@ const ProductDetailsPage = () => {
                         onMouseMove={handleMouseMove}
                       />
                       {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </motion.div>
                   </AnimatePresence>
 
@@ -259,7 +259,7 @@ const ProductDetailsPage = () => {
                   {/* Status Badge */}
                   <div className="absolute left-6 top-6">
                     <motion.div
-                      className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500/90 to-teal-500/90 backdrop-blur-md px-4 py-2 text-sm font-semibold text-white shadow-lg"
+                      className="flex items-center gap-2 rounded-full bg-linear-to-r from-emerald-500/90 to-teal-500/90 backdrop-blur-md px-4 py-2 text-sm font-semibold text-white shadow-lg"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.3 }}
@@ -297,7 +297,7 @@ const ProductDetailsPage = () => {
                       onClick={() => setSelectedImageIndex(index)}
                       className={`h-2 rounded-full transition-all duration-300 ${
                         index === selectedImageIndex 
-                          ? 'w-8 bg-gradient-to-r from-blue-500 to-purple-500' 
+                          ? 'w-8 bg-linear-to-r from-blue-500 to-purple-500' 
                           : 'w-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500'
                       }`}
                     />
@@ -324,7 +324,7 @@ const ProductDetailsPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <div className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-3 py-1">
+                <div className="rounded-lg bg-linear-to-r from-blue-500 to-purple-500 px-3 py-1">
                   <span className="text-xs font-semibold text-white uppercase tracking-wide">
                     {product.brand}
                   </span>
@@ -337,7 +337,7 @@ const ProductDetailsPage = () => {
               </motion.div>
               
               <motion.h1 
-                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent leading-tight"
+                className="text-2xl md:text-3xl font-bold bg-linear-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent leading-tight"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -384,14 +384,14 @@ const ProductDetailsPage = () => {
 
             {/* Price */}
             <motion.div 
-              className="space-y-3 p-4 bg-gradient-to-br from-white/80 to-white/60 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-white/20 shadow-lg"
+              className="space-y-3 p-4 bg-linear-to-br from-white/80 to-white/60 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-white/20 shadow-lg"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
             >
               <div className="flex items-center gap-3 flex-wrap">
                 <motion.span 
-                  className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+                  className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 }}
@@ -410,7 +410,7 @@ const ProductDetailsPage = () => {
                 )}
                 {discount > 0 && (
                   <motion.div
-                    className="rounded-lg bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 shadow-md"
+                    className="rounded-lg bg-linear-to-r from-red-500 to-orange-500 px-3 py-1 shadow-md"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.9 }}
@@ -497,12 +497,12 @@ const ProductDetailsPage = () => {
                 <motion.button
                   onClick={() => updateQuantity(quantity - 1)}
                   disabled={quantity <= 1}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
                   whileTap={{ scale: 0.95 }}
                 >
                   <Minus className="h-4 w-4" />
                 </motion.button>
-                <div className="flex items-center justify-center min-w-[3rem] h-10 px-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl shadow-md">
+                <div className="flex items-center justify-center min-w-12 h-10 px-3 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-xl shadow-md">
                   <span className="text-lg font-bold">
                     {quantity}
                   </span>
@@ -510,7 +510,7 @@ const ProductDetailsPage = () => {
                 <motion.button
                   onClick={() => updateQuantity(quantity + 1)}
                   disabled={quantity >= (product.stock || 99)}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
                   whileTap={{ scale: 0.95 }}
                 >
                   <Plus className="h-4 w-4" />

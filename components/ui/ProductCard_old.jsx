@@ -75,7 +75,7 @@ const ProductCard = ({
         {/* Product Tag */}
         {(product.isNew || product.isFeatured || product.isTrending || product.isHot) && (
           <motion.div
-            className="absolute top-4 left-4 z-20 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold"
+            className="absolute top-4 left-4 z-20 bg-linear-to-r from-orange-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold"
             initial={{ scale: 0, rotate: -10 }}
             animate={{ scale: 1, rotate: 0 }}
             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -98,9 +98,9 @@ const ProductCard = ({
         </motion.button>
 
         {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+        <div className="relative aspect-square overflow-hidden bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20"
+            className="absolute inset-0 bg-linear-to-r from-blue-500/20 to-purple-500/20"
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.3 }}
           />
@@ -230,7 +230,7 @@ const ProductCard = ({
 
         {/* Shimmer effect */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full"
+          className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full"
           animate={{ x: isHovered ? ['0%', '100%'] : '0%' }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
         />

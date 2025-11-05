@@ -186,9 +186,9 @@ const ProductsPage = () => {
   <section ref={heroRef} className="relative overflow-hidden pb-4 pt-6 sm:pb-8 sm:pt-28">
         {/* Background Elements */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-[-10%] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
-          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-gradient-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
-          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
+          <div className="absolute left-1/2 top-[-10%] h-96 w-96 -translate-x-1/2 rounded-full bg-linear-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-3xl" />
+          <div className="absolute left-[15%] top-[20%] h-32 w-32 rounded-full bg-linear-to-br from-cyan-400/15 to-sky-500/20 blur-2xl" />
+          <div className="absolute right-[15%] top-[30%] h-40 w-40 rounded-full bg-linear-to-br from-fuchsia-500/20 to-rose-500/20 blur-3xl" />
         </div>
 
   <div className="relative z-10 mx-auto w-full max-w-[min(96vw,1500px)] px-3 text-center sm:px-6 lg:px-10 xl:px-16">
@@ -281,19 +281,19 @@ const ProductsPage = () => {
                           className="object-cover transition-transform group-hover:scale-110"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+                        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
                           <IconComponent className="h-8 w-8 text-gray-400" />
                         </div>
                       )}
                       {/* Mobile overlay: show name & count on image to save space */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-2 sm:hidden">
+                      <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent flex items-end p-2 sm:hidden">
                         <div className="w-full text-left">
                           <div className="text-sm font-semibold text-white leading-tight truncate">{category.name}</div>
                           <div className="text-[11px] text-white/80">{category.productCount} items</div>
                         </div>
                       </div>
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent hidden sm:block" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent hidden sm:block" />
 
                       {/* Icon Overlay (desktop) */}
                       <div className={`absolute bottom-2 left-2 hidden sm:flex h-6 w-6 items-center justify-center rounded-lg transition-colors ${

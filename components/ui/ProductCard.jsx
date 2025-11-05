@@ -131,7 +131,7 @@ const ProductCard = ({
         viewport={{ once: true }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
+        <div className={`absolute inset-0 bg-linear-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
         
         <div className="relative h-full w-32 overflow-hidden">
           <div
@@ -172,14 +172,14 @@ const ProductCard = ({
   // Grid view design (matching TrendingSlider)
   return (
     <motion.article
-      className="group relative flex h-full min-h-[34rem] w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/5 cursor-pointer"
+      className="group relative flex h-full min-h-136 w-full shrink-0 flex-col overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/85 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-3 hover:shadow-2xl dark:border-white/10 dark:bg-white/5 cursor-pointer"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       onClick={handleProductView}
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
+      <div className={`absolute inset-0 bg-linear-to-br ${accent} opacity-0 transition-opacity duration-500 group-hover:opacity-90`} />
 
   <div className="relative h-96 overflow-hidden">
         <div
@@ -187,7 +187,7 @@ const ProductCard = ({
           style={{ backgroundImage: `url(${primaryImage})` }}
         />
         <motion.div
-          className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
+          className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent"
           initial={{ opacity: 0.65 }}
           whileHover={{ opacity: 0.78 }}
         />
@@ -235,7 +235,7 @@ const ProductCard = ({
           <StarRating rating={product.rating} />
           {discount && discount > 0 && (
             // hide discount pill on small screens to save space
-            <span className="hidden sm:inline-flex rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+            <span className="hidden sm:inline-flex rounded-full bg-linear-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
               {discount}% OFF
             </span>
           )}

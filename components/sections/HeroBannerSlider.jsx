@@ -94,14 +94,14 @@ const HeroBannerSlider = () => {
   {/* Pull the banner up under the sticky header: tighten spacing on mobile */}
    <div className="relative z-10 mx-auto flex min-h-[55vh] w-full max-w-[min(98vw,1800px)] flex-col items-center justify-center px-2 pb-0 pt-0 -mt-8 sm:-mt-10 sm:min-h-[68vh] sm:px-4 md:min-h-[78vh] lg:-mt-12 lg:min-h-[86vh] lg:px-10 xl:px-14">
     <div className="relative mt-0 w-full max-w-[min(95vw,1850px)]">
-          <div className="relative overflow-hidden rounded-[1.5rem] sm:rounded-[2.75rem] border border-white/30 bg-white/70 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.06]">
+          <div className="relative overflow-hidden rounded-3xl sm:rounded-[2.75rem] border border-white/30 bg-white/70 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-white/6">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -inset-[2.5px] rounded-[1.7rem] sm:rounded-[2.9rem] bg-[conic-gradient(from_0deg_at_50%_50%,rgba(248,113,113,0.35),rgba(239,68,68,0.05),rgba(248,113,113,0.35))] opacity-70"
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
             />
-            <div className="relative z-10 aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[21/8] xl:aspect-[24/9]">
+            <div className="relative z-10 aspect-4/3 w-full sm:aspect-video lg:aspect-21/8 xl:aspect-24/9">
               {loading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="animate-pulse w-full px-8">
@@ -120,7 +120,7 @@ const HeroBannerSlider = () => {
                     className="absolute inset-0"
                   >
                     <div
-                      className="absolute inset-0 rounded-[1.5rem] sm:rounded-[3rem] bg-cover bg-center"
+                      className="absolute inset-0 rounded-3xl sm:rounded-[3rem] bg-cover bg-center"
                       style={{ backgroundImage: `url(${currentSlide.image})` }}
                     />
                     <motion.div
