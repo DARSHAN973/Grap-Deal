@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CategoryManagement from "./CategoryManagement";
 import ProductManagement from "./ProductManagement";
 import OrderManagement from "./OrderManagement";
@@ -127,113 +127,256 @@ const AdminPanel = () => {
 };
 
 // Dashboard Content Component
-const DashboardContent = () => (
-  <div>
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
-      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-        Welcome to your admin dashboard. Here's an overview of your platform.
-      </p>
-    </div>
+const DashboardContent = () => {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeVendors: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    pendingOrders: 0,
+    totalProducts: 0,
+    totalCategories: 0
+  });
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    {/* Stats Grid */}
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-      <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <UsersIcon className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Users</dt>
-                <dd className="text-lg font-medium text-gray-900 dark:text-white">1,234</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
+  // Fetch dashboard stats
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch statistics
+        const statsResponse = await fetch('/api/admin/dashboard/stats');
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData.data);
+        }
+
+        // Fetch recent activity
+        const activityResponse = await fetch('/api/admin/dashboard/activity');
+        if (activityResponse.ok) {
+          const activityData = await activityResponse.json();
+          setRecentActivity(activityData.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Format time ago
+  const timeAgo = (timestamp) => {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - past) / 1000);
+    
+    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
+
+  // Get activity color class
+  const getActivityColor = (color) => {
+    const colors = {
+      green: 'bg-green-400',
+      blue: 'bg-blue-400',
+      yellow: 'bg-yellow-400',
+      red: 'bg-red-400',
+      purple: 'bg-purple-400'
+    };
+    return colors[color] || 'bg-gray-400';
+  };
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+          Welcome to your admin dashboard. Here's an overview of your platform.
+        </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <UsersIcon className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Vendors</dt>
-                <dd className="text-lg font-medium text-gray-900 dark:text-white">89</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <TruckIcon className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Orders</dt>
-                <dd className="text-lg font-medium text-gray-900 dark:text-white">2,567</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <CreditCardIcon className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Revenue</dt>
-                <dd className="text-lg font-medium text-gray-900 dark:text-white">₹4,56,789</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* Recent Activity */}
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+          <div className="p-5">
             <div className="flex items-center">
-              <div className="h-2 w-2 bg-green-400 rounded-full mr-3"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">New vendor registration: Tech Store</span>
+              <div className="flex-shrink-0">
+                <UsersIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Users</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {loading ? '...' : stats.totalUsers.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
             </div>
-            <span className="text-xs text-gray-500">2 minutes ago</span>
           </div>
-          <div className="flex items-center justify-between">
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+          <div className="p-5">
             <div className="flex items-center">
-              <div className="h-2 w-2 bg-blue-400 rounded-full mr-3"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">New order #ORD-1234 received</span>
+              <div className="flex-shrink-0">
+                <UsersIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Vendors</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {loading ? '...' : stats.activeVendors.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
             </div>
-            <span className="text-xs text-gray-500">5 minutes ago</span>
           </div>
-          <div className="flex items-center justify-between">
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+          <div className="p-5">
             <div className="flex items-center">
-              <div className="h-2 w-2 bg-yellow-400 rounded-full mr-3"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Product approval pending: iPhone 15</span>
+              <div className="flex-shrink-0">
+                <TruckIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Orders</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {loading ? '...' : stats.totalOrders.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
             </div>
-            <span className="text-xs text-gray-500">10 minutes ago</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <CreditCardIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Revenue</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {loading ? '...' : `₹${stats.totalRevenue.toLocaleString()}`}
+                  </dd>
+                </dl>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Additional Stats Grid */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <CubeIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Products</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {loading ? '...' : stats.totalProducts.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <TruckIcon className="h-6 w-6 text-yellow-500" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Pending Orders</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {loading ? '...' : stats.pendingOrders.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <CubeIcon className="h-6 w-6 text-blue-500" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Categories</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {loading ? '...' : stats.totalCategories.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="animate-pulse flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 bg-gray-300 rounded-full mr-3"></div>
+                    <div className="h-4 bg-gray-300 rounded w-48"></div>
+                  </div>
+                  <div className="h-3 bg-gray-300 rounded w-16"></div>
+                </div>
+              ))}
+            </div>
+          ) : recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className={`h-2 w-2 ${getActivityColor(activity.color)} rounded-full mr-3`}></div>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      {activity.message}
+                      {activity.amount && (
+                        <span className="text-green-600 font-medium ml-2">₹{activity.amount.toLocaleString()}</span>
+                      )}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">{timeAgo(activity.timestamp)}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 dark:text-gray-400">No recent activity found</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 
 
