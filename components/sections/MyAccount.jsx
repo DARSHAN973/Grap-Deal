@@ -1707,56 +1707,82 @@ const MyAccount = () => {
                         <p className="text-gray-600 dark:text-gray-400 mt-4">Loading wishlist...</p>
                       </div>
                     ) : wishlist.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="space-y-4">
                         {wishlist.map((item) => (
                           <motion.div
                             key={item.id}
-                            className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all"
-                            whileHover={{ scale: 1.02 }}
+                            className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all flex items-center gap-4"
+                            whileHover={{ scale: 1.01 }}
                             layout
                           >
-                            <div className="relative">
+                            {/* Product Image */}
+                            <div className="relative flex-shrink-0 w-24 h-24">
                               {item.product.images && item.product.images.length > 0 ? (
                                 <img
                                   src={
-                                    Array.isArray(item.product.images) 
-                                      ? item.product.images[0]
-                                      : typeof item.product.images === 'string'
-                                      ? item.product.images
-                                      : item.product.images[0]?.url || '/placeholder-product.png'
+                                    item.product.images[0]?.url?.startsWith('http') || item.product.images[0]?.url?.startsWith('/')
+                                      ? item.product.images[0].url
+                                      : item.product.images[0]?.url?.startsWith('/uploads/')
+                                      ? item.product.images[0].url
+                                      : `/uploads/products/${item.product.images[0]?.url}`
                                   }
-                                  alt={item.product.name}
-                                  className="w-full h-48 object-cover rounded-lg mb-4"
+                                  alt={item.product.images[0]?.altText || item.product.name}
+                                  className="w-full h-full object-cover rounded-lg"
                                   onError={(e) => {
                                     e.target.src = '/placeholder-product.png';
                                   }}
                                 />
                               ) : (
-                                <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center">
-                                  <span className="text-gray-400">No Image</span>
+                                <div className="w-full h-full bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                  <span className="text-gray-400 text-xs">No Image</span>
                                 </div>
                               )}
-                              <button
-                                onClick={() => handleRemoveFromWishlist(item.product.id)}
-                                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
                             </div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.product.name}</h3>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">{item.product.description}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-lg font-bold text-blue-600">₹{item.product.price}</span>
+                            
+                            {/* Product Details */}
+                            <div className="flex-grow min-w-0">
+                              <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-1 truncate">
+                                {item.product.name}
+                              </h3>
+                              <div className="flex items-center gap-2 mb-1">
+                                {item.product.brand && (
+                                  <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
+                                    {item.product.brand}
+                                  </span>
+                                )}
+                                {item.product.category?.name && (
+                                  <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
+                                    {item.product.category.name}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-1">
+                                {item.product.description || 'No description available'}
+                              </p>
+                              <div className="flex items-center gap-4">
+                                <span className="text-xl font-bold text-blue-600">₹{item.product.price}</span>
+                              </div>
+                            </div>
+                            
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <motion.button
                                 onClick={() => router.push(`/products/${item.product.id}`)}
-                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                               >
-                                View Product
+                                View
                               </motion.button>
+                              <button
+                                onClick={() => handleRemoveFromWishlist(item.product.id)}
+                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                title="Remove from wishlist"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
                             </div>
                           </motion.div>
                         ))}
@@ -1922,31 +1948,170 @@ const MyAccount = () => {
                                 Default Address
                               </div>
                             )}
-                            <div className="space-y-2">
-                              <h3 className="font-semibold text-gray-900 dark:text-white">{address.fullName}</h3>
-                              <p className="text-gray-600 dark:text-gray-400">{address.addressLine1}</p>
-                              {address.addressLine2 && (
-                                <p className="text-gray-600 dark:text-gray-400">{address.addressLine2}</p>
-                              )}
-                              <p className="text-gray-600 dark:text-gray-400">
-                                {address.city}, {address.state} {address.pincode}
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400">{address.phone}</p>
-                            </div>
-                            <div className="flex justify-end space-x-2 mt-4">
-                              <button
-                                onClick={() => setEditingAddress(address)}
-                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteAddress(address.id)}
-                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                              </button>
-                            </div>
+                            
+                            {/* Address Display or Edit Form */}
+                            {editingAddress && editingAddress.id === address.id ? (
+                              /* Inline Edit Form */
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      Full Name
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editingAddress.fullName}
+                                      onChange={(e) => setEditingAddress({...editingAddress, fullName: e.target.value})}
+                                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      Phone Number
+                                    </label>
+                                    <input
+                                      type="tel"
+                                      value={editingAddress.phone}
+                                      onChange={(e) => setEditingAddress({...editingAddress, phone: e.target.value})}
+                                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Address Line 1
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={editingAddress.addressLine1}
+                                    onChange={(e) => setEditingAddress({...editingAddress, addressLine1: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Address Line 2 (Optional)
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={editingAddress.addressLine2 || ''}
+                                    onChange={(e) => setEditingAddress({...editingAddress, addressLine2: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                  />
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      City
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editingAddress.city}
+                                      onChange={(e) => setEditingAddress({...editingAddress, city: e.target.value})}
+                                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      State
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editingAddress.state}
+                                      onChange={(e) => setEditingAddress({...editingAddress, state: e.target.value})}
+                                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      Pincode
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editingAddress.pincode}
+                                      onChange={(e) => setEditingAddress({...editingAddress, pincode: e.target.value})}
+                                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      Landmark
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editingAddress.landmark || ''}
+                                      onChange={(e) => setEditingAddress({...editingAddress, landmark: e.target.value})}
+                                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`defaultAddress-${address.id}`}
+                                    checked={editingAddress.isDefault}
+                                    onChange={(e) => setEditingAddress({...editingAddress, isDefault: e.target.checked})}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                  />
+                                  <label htmlFor={`defaultAddress-${address.id}`} className="text-sm text-gray-700 dark:text-gray-300">
+                                    Set as default address
+                                  </label>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                  <button
+                                    onClick={() => setEditingAddress(null)}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors text-sm"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <motion.button
+                                    onClick={() => handleUpdateAddress(editingAddress.id, editingAddress)}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    Update Address
+                                  </motion.button>
+                                </div>
+                              </div>
+                            ) : (
+                              /* Address Display */
+                              <div>
+                                <div className="space-y-2">
+                                  <h3 className="font-semibold text-gray-900 dark:text-white">{address.fullName}</h3>
+                                  <p className="text-gray-600 dark:text-gray-400">{address.addressLine1}</p>
+                                  {address.addressLine2 && (
+                                    <p className="text-gray-600 dark:text-gray-400">{address.addressLine2}</p>
+                                  )}
+                                  <p className="text-gray-600 dark:text-gray-400">
+                                    {address.city}, {address.state} {address.pincode}
+                                  </p>
+                                  <p className="text-gray-600 dark:text-gray-400">{address.phone}</p>
+                                </div>
+                                <div className="flex justify-end space-x-2 mt-4">
+                                  <button
+                                    onClick={() => setEditingAddress(address)}
+                                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                  >
+                                    <PencilIcon className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteAddress(address.id)}
+                                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                  >
+                                    <TrashIcon className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </motion.div>
                         ))}
                       </div>
@@ -1960,113 +2125,7 @@ const MyAccount = () => {
                       </div>
                     )}
 
-                    {editingAddress && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-                        onClick={() => setEditingAddress(null)}
-                      >
-                        <motion.div
-                          initial={{ scale: 0.9 }}
-                          animate={{ scale: 1 }}
-                          className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Address</h3>
-                          <div className="space-y-4">
-                            <input
-                              type="text"
-                              placeholder="Full Name"
-                              value={editingAddress.fullName}
-                              onChange={(e) => setEditingAddress({...editingAddress, fullName: e.target.value})}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                            <input
-                              type="tel"
-                              placeholder="Phone Number"
-                              value={editingAddress.phone}
-                              onChange={(e) => setEditingAddress({...editingAddress, phone: e.target.value})}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Address Line 1"
-                              value={editingAddress.addressLine1}
-                              onChange={(e) => setEditingAddress({...editingAddress, addressLine1: e.target.value})}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Address Line 2 (Optional)"
-                              value={editingAddress.addressLine2 || ''}
-                              onChange={(e) => setEditingAddress({...editingAddress, addressLine2: e.target.value})}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                            <div className="grid grid-cols-2 gap-4">
-                              <input
-                                type="text"
-                                placeholder="City"
-                                value={editingAddress.city}
-                                onChange={(e) => setEditingAddress({...editingAddress, city: e.target.value})}
-                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
-                              <input
-                                type="text"
-                                placeholder="State"
-                                value={editingAddress.state}
-                                onChange={(e) => setEditingAddress({...editingAddress, state: e.target.value})}
-                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <input
-                                type="text"
-                                placeholder="Pincode"
-                                value={editingAddress.pincode}
-                                onChange={(e) => setEditingAddress({...editingAddress, pincode: e.target.value})}
-                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Landmark (Optional)"
-                                value={editingAddress.landmark || ''}
-                                onChange={(e) => setEditingAddress({...editingAddress, landmark: e.target.value})}
-                                className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                id="editDefaultAddress"
-                                checked={editingAddress.isDefault}
-                                onChange={(e) => setEditingAddress({...editingAddress, isDefault: e.target.checked})}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                              />
-                              <label htmlFor="editDefaultAddress" className="text-sm text-gray-700 dark:text-gray-300">
-                                Set as default address
-                              </label>
-                            </div>
-                          </div>
-                          <div className="flex justify-end space-x-3 mt-6">
-                            <button
-                              onClick={() => setEditingAddress(null)}
-                              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                            >
-                              Cancel
-                            </button>
-                            <motion.button
-                              onClick={() => handleUpdateAddress(editingAddress.id, editingAddress)}
-                              className="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              Update Address
-                            </motion.button>
-                          </div>
-                        </motion.div>
-                      </motion.div>
-                    )}
+
                   </motion.div>
                 )}
 

@@ -23,7 +23,19 @@ export async function GET(request) {
             name: true,
             description: true,
             price: true,
-            images: true
+            brand: true,
+            category: true,
+            images: {
+              select: {
+                url: true,
+                altText: true,
+                isPrimary: true
+              },
+              orderBy: [
+                { isPrimary: 'desc' },
+                { sortOrder: 'asc' }
+              ]
+            }
           }
         }
       },
@@ -94,7 +106,19 @@ export async function POST(request) {
             name: true,
             description: true,
             price: true,
-            images: true
+            brand: true,
+            category: true,
+            images: {
+              select: {
+                url: true,
+                altText: true,
+                isPrimary: true
+              },
+              orderBy: [
+                { isPrimary: 'desc' },
+                { sortOrder: 'asc' }
+              ]
+            }
           }
         }
       }

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Heart, ShoppingCart, Eye, Star } from 'lucide-react';
@@ -25,10 +26,44 @@ const ProductCard = ({
   viewMode = 'grid'
 }) => {
   const [isLiked, setIsLiked] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
   const { addToCart, loading: cartLoading, getItemCount } = useCart();
   
   // Extract images from the images array
   const primaryImage = product.images?.[0]?.url || product.image || '/api/placeholder/300/300';
+
+  // Check wishlist status on mount and listen for updates
+  React.useEffect(() => {
+    const checkWishlistStatus = async () => {
+      try {
+        const response = await fetch('/api/wishlist');
+        if (response.ok) {
+          const data = await response.json();
+          const isInWishlist = data.wishlist?.some(item => {
+            return item.product.id === product.id || item.product.id == product.id || item.productId === product.id;
+          });
+          setIsLiked(isInWishlist || false);
+        }
+      } catch (error) {
+        console.error('Error checking wishlist status:', error);
+      }
+    };
+
+    // Handle wishlist updates from other components
+    const handleWishlistUpdate = (event) => {
+      const { productId, action } = event.detail;
+      if (productId == product.id) {
+        setIsLiked(action === 'add');
+      }
+    };
+
+    checkWishlistStatus();
+    window.addEventListener('wishlist-updated', handleWishlistUpdate);
+
+    return () => {
+      window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+    };
+  }, [product.id]);
 
   // Handle add to cart
   const handleAddToCart = async (e) => {
@@ -50,6 +85,76 @@ const ProductCard = ({
   // Handle navigation to product details
   const handleProductView = () => {
     window.location.href = `/products/${product.id}`;
+  };
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = async (e) => {
+    e.stopPropagation(); // Prevent card click when clicking wishlist button
+    if (wishlistLoading) return;
+    
+    setWishlistLoading(true);
+    try {
+      if (isLiked) {
+        // Remove from wishlist
+        const response = await fetch('/api/wishlist', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId: product.id }),
+        });
+
+        if (response.ok) {
+          setIsLiked(false);
+          // Show success message
+          window.dispatchEvent(new CustomEvent('cart-success', {
+            detail: { message: 'Removed from wishlist' }
+          }));
+          // Dispatch wishlist update event for sync
+          window.dispatchEvent(new CustomEvent('wishlist-updated', {
+            detail: { productId: product.id, action: 'remove' }
+          }));
+        } else {
+          const data = await response.json();
+          window.dispatchEvent(new CustomEvent('cart-error', {
+            detail: { message: data.error || 'Failed to remove from wishlist' }
+          }));
+        }
+      } else {
+        // Add to wishlist
+        const response = await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId: product.id }),
+        });
+
+        if (response.ok) {
+          setIsLiked(true);
+          // Show success message
+          window.dispatchEvent(new CustomEvent('cart-success', {
+            detail: { message: 'Added to wishlist' }
+          }));
+          // Dispatch wishlist update event for sync
+          window.dispatchEvent(new CustomEvent('wishlist-updated', {
+            detail: { productId: product.id, action: 'add' }
+          }));
+        } else {
+          const data = await response.json();
+          window.dispatchEvent(new CustomEvent('cart-error', {
+            detail: { message: data.error || 'Failed to add to wishlist' }
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to update wishlist. Please try again.' }
+      }));
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   // Get current cart count for this product
@@ -200,22 +305,16 @@ const ProductCard = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleProductView();
-              }}
-              aria-label={`Quick view ${product.name}`}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
-            >
-              <Eye className="h-4.5 w-4.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsLiked(!isLiked)}
+              onClick={handleWishlistToggle}
+              disabled={wishlistLoading}
               aria-label={`${isLiked ? 'Remove from' : 'Add to'} wishlist`}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Heart className={`h-4.5 w-4.5 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+              {wishlistLoading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              ) : (
+                <Heart className={`h-4.5 w-4.5 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+              )}
             </button>
           </div>
         </div>

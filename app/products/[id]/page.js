@@ -16,6 +16,7 @@ const ProductDetailsPage = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   
@@ -41,9 +42,40 @@ const ProductDetailsPage = () => {
       }
     };
 
+    const checkWishlistStatus = async () => {
+      if (!productId) return;
+      
+      try {
+        const response = await fetch('/api/wishlist');
+        if (response.ok) {
+          const data = await response.json();
+          const isInWishlist = data.wishlist?.some(item => {
+            return item.product.id === productId || item.product.id === parseInt(productId) || item.productId === productId;
+          });
+          setIsLiked(isInWishlist || false);
+        }
+      } catch (error) {
+        console.error('Error checking wishlist status:', error);
+      }
+    };
+
+    // Handle wishlist updates from other components
+    const handleWishlistUpdate = (event) => {
+      const { productId: updatedProductId, action } = event.detail;
+      if (updatedProductId == productId || updatedProductId == parseInt(productId)) {
+        setIsLiked(action === 'add');
+      }
+    };
+
     if (productId) {
       fetchProduct();
+      checkWishlistStatus();
+      window.addEventListener('wishlist-updated', handleWishlistUpdate);
     }
+
+    return () => {
+      window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+    };
   }, [productId]);
 
   const handleAddToCart = async () => {
@@ -59,6 +91,74 @@ const ProductDetailsPage = () => {
     };
     
     await addToCart(productData, quantity);
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!product || wishlistLoading) return;
+    
+    setWishlistLoading(true);
+    try {
+      if (isLiked) {
+        // Remove from wishlist
+        const response = await fetch('/api/wishlist', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId: product.id }),
+        });
+
+        if (response.ok) {
+          setIsLiked(false);
+          // Show success message
+          window.dispatchEvent(new CustomEvent('cart-success', {
+            detail: { message: 'Removed from wishlist' }
+          }));
+          // Dispatch wishlist update event for sync
+          window.dispatchEvent(new CustomEvent('wishlist-updated', {
+            detail: { productId: product.id, action: 'remove' }
+          }));
+        } else {
+          const data = await response.json();
+          window.dispatchEvent(new CustomEvent('cart-error', {
+            detail: { message: data.error || 'Failed to remove from wishlist' }
+          }));
+        }
+      } else {
+        // Add to wishlist
+        const response = await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId: product.id }),
+        });
+
+        if (response.ok) {
+          setIsLiked(true);
+          // Show success message
+          window.dispatchEvent(new CustomEvent('cart-success', {
+            detail: { message: 'Added to wishlist' }
+          }));
+          // Dispatch wishlist update event for sync
+          window.dispatchEvent(new CustomEvent('wishlist-updated', {
+            detail: { productId: product.id, action: 'add' }
+          }));
+        } else {
+          const data = await response.json();
+          window.dispatchEvent(new CustomEvent('cart-error', {
+            detail: { message: data.error || 'Failed to add to wishlist' }
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Failed to update wishlist. Please try again.' }
+      }));
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   const getImageUrl = (imageUrl) => {
@@ -108,13 +208,16 @@ const ProductDetailsPage = () => {
   };
 
   const handleMouseMove = (e) => {
-    if (!e.currentTarget) return;
+    if (!isZoomed || !e.currentTarget) return;
     
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
-    setZoomPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+    setZoomPosition({ 
+      x: Math.max(0, Math.min(100, x)), 
+      y: Math.max(0, Math.min(100, y)) 
+    });
   };
 
   if (loading) {
@@ -199,7 +302,7 @@ const ProductDetailsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Product Images Slider */}
           <motion.div
-            className="space-y-4 sticky top-24"
+            className="space-y-4 lg:sticky lg:top-24"
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
@@ -269,13 +372,7 @@ const ProductDetailsPage = () => {
                     </motion.div>
                   </div>
 
-                  {/* Zoom Indicator */}
-                  <div className="absolute right-6 top-6 z-20">
-                    <div className="flex items-center gap-2 rounded-full bg-black/50 backdrop-blur-md px-3 py-2 text-xs font-medium text-white shadow-lg">
-                      <Eye className="h-3 w-3" />
-                      <span>{isZoomed ? 'Zoomed' : 'Hover to zoom'}</span>
-                    </div>
-                  </div>
+
 
                   {/* Image Counter */}
                   {product.images && product.images.length > 1 && (
@@ -568,13 +665,20 @@ const ProductDetailsPage = () => {
                 
                 <div className="flex gap-2">
                   <motion.button
-                    onClick={() => setIsLiked(!isLiked)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/60 dark:border-white/20 rounded-xl text-gray-700 dark:text-gray-200 transition-all hover:bg-white/80 dark:hover:bg-white/20 shadow-md hover:shadow-lg"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    onClick={handleWishlistToggle}
+                    disabled={wishlistLoading}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/60 dark:border-white/20 rounded-xl text-gray-700 dark:text-gray-200 transition-all hover:bg-white/80 dark:hover:bg-white/20 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: wishlistLoading ? 1 : 1.02 }}
+                    whileTap={{ scale: wishlistLoading ? 1 : 0.98 }}
                   >
-                    <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                    <span className="text-sm font-medium">{isLiked ? 'Loved' : 'Wishlist'}</span>
+                    {wishlistLoading ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                    ) : (
+                      <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                    )}
+                    <span className="text-sm font-medium">
+                      {wishlistLoading ? 'Updating...' : (isLiked ? 'In Wishlist' : 'Add to Wishlist')}
+                    </span>
                   </motion.button>
                   
                   <motion.button 

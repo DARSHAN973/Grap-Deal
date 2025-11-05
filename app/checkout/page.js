@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Script from 'next/script';
-import { MapPin, User, Phone, Mail, Home, Building, CreditCard, Truck, Clock } from 'lucide-react';
+import { MapPin, User, Phone, Mail, Home, Building, CreditCard, Truck, Clock, Plus as PlusIcon } from 'lucide-react';
 import MagneticButton from '../../components/ui/MagneticButton';
 
 const CheckoutContent = () => {
@@ -22,6 +22,10 @@ const CheckoutContent = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('online');
+  
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   
   const [addressForm, setAddressForm] = useState({
     fullName: '',
@@ -70,6 +74,31 @@ const CheckoutContent = () => {
     }
   }, []);
 
+  const fetchSavedAddresses = useCallback(async () => {
+    try {
+      const response = await fetch('/api/user/address');
+      if (response.ok) {
+        const data = await response.json();
+        setSavedAddresses(data.addresses || []);
+        
+        // Auto-select default address if exists
+        const defaultAddress = data.addresses?.find(addr => addr.isDefault);
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.id);
+        } else if (data.addresses?.length > 0) {
+          // If no default, select the first address
+          setSelectedAddressId(data.addresses[0].id);
+        } else {
+          // No saved addresses, show new address form
+          setShowNewAddressForm(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      setShowNewAddressForm(true);
+    }
+  }, []);
+
   const checkAuthentication = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me');
@@ -83,6 +112,8 @@ const CheckoutContent = () => {
             email: data.user.email || '',
             phone: data.user.phone || ''
           }));
+          // Fetch saved addresses after user is authenticated
+          fetchSavedAddresses();
         } else {
           // User not authenticated, redirect to home with auth prompt
           router.push('/?auth=required');
@@ -97,7 +128,7 @@ const CheckoutContent = () => {
     } finally {
       setAuthLoading(false);
     }
-  }, [router]);
+  }, [router, fetchSavedAddresses]);
 
   useEffect(() => {
     checkAuthentication();
@@ -166,33 +197,60 @@ const CheckoutContent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
+    let addressId = selectedAddressId;
+
+    // If using new address form, validate and save it
+    if (showNewAddressForm || !selectedAddressId) {
+      if (!validateForm()) {
+        return;
+      }
+
+      if (paymentMethod === 'cod') {
+        alert('Cash on Delivery coming soon!');
+        return;
+      }
+
+      setProcessing(true);
+      
+      try {
+        // Save new address to database
+        const addressResponse = await fetch('/api/user/address', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(addressForm)
+        });
+
+        if (!addressResponse.ok) {
+          throw new Error('Failed to save address');
+        }
+
+        const addressData = await addressResponse.json();
+        addressId = addressData.addressId;
+      } catch (error) {
+        console.error('Address save error:', error);
+        alert('Failed to save address. Please try again.');
+        setProcessing(false);
+        return;
+      }
     }
 
     if (paymentMethod === 'cod') {
       alert('Cash on Delivery coming soon!');
+      setProcessing(false);
+      return;
+    }
+
+    if (!addressId) {
+      alert('Please select or add a delivery address');
+      setProcessing(false);
       return;
     }
 
     setProcessing(true);
     
     try {
-      // Save address to database
-      const addressResponse = await fetch('/api/user/address', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(addressForm)
-      });
-
-      if (!addressResponse.ok) {
-        throw new Error('Failed to save address');
-      }
-
-      const { addressId } = await addressResponse.json();
-
       // Create order
       const orderResponse = await fetch('/api/orders', {
         method: 'POST',
@@ -468,8 +526,84 @@ const CheckoutContent = () => {
           >
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Delivery Address</h2>
 
+            {/* Saved Addresses Section */}
+            {savedAddresses.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Select Saved Address</h3>
+                <div className="space-y-3">
+                  {savedAddresses.map((address) => (
+                    <label
+                      key={address.id}
+                      className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                        selectedAddressId === address.id
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="savedAddress"
+                        value={address.id}
+                        checked={selectedAddressId === address.id}
+                        onChange={(e) => {
+                          setSelectedAddressId(e.target.value);
+                          setShowNewAddressForm(false);
+                        }}
+                        className="sr-only"
+                      />
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{address.fullName}</h4>
+                            {address.isDefault && (
+                              <span className="px-2 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 rounded-full">
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">
+                            {address.addressLine1}{address.addressLine2 && `, ${address.addressLine2}`}
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">
+                            {address.city}, {address.state} {address.pincode}
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">{address.phone}</p>
+                        </div>
+                        {selectedAddressId === address.id && (
+                          <div className="text-blue-500">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewAddressForm(true);
+                      setSelectedAddressId(null);
+                    }}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    Add New Address
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* New Address Form - Show if no saved addresses or user wants to add new */}
+              {(showNewAddressForm || savedAddresses.length === 0) && (
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add New Address</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <User className="inline h-4 w-4 mr-1" />
@@ -646,6 +780,9 @@ const CheckoutContent = () => {
                   ))}
                 </div>
               </div>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-6">
                 <MagneticButton
