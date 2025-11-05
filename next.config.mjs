@@ -5,7 +5,14 @@ const nextConfig = {
   },
   images: {
     // Allow loading images from Unsplash used as category placeholders
-    domains: ['images.unsplash.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
   async rewrites() {
     return [

@@ -64,7 +64,7 @@ export async function POST(request) {
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: {
-        status: 'CONFIRMED',
+        status: 'IN_PROCESS',
         paymentStatus: 'COMPLETED',
         razorpayOrderId: razorpay_order_id,
         razorpayPaymentId: razorpay_payment_id,
@@ -73,17 +73,9 @@ export async function POST(request) {
       }
     });
 
-    // Reduce stock for all order items
-    for (const item of order.orderItems) {
-      await prisma.product.update({
-        where: { id: item.productId },
-        data: {
-          stock: {
-            decrement: item.quantity
-          }
-        }
-      });
-    }
+    // Note: Inventory is already reduced during order creation
+    // No need to reduce stock again as it's handled in the order creation API
+    // This prevents double inventory reduction
 
     return NextResponse.json({
       success: true,

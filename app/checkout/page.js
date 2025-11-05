@@ -205,13 +205,9 @@ const CheckoutContent = () => {
         return;
       }
 
-      if (paymentMethod === 'cod') {
-        alert('Cash on Delivery coming soon!');
-        return;
-      }
+      // COD is now enabled - inventory will be managed in order creation
 
       setProcessing(true);
-      
       try {
         // Save new address to database
         const addressResponse = await fetch('/api/user/address', {
@@ -230,20 +226,65 @@ const CheckoutContent = () => {
         addressId = addressData.addressId;
       } catch (error) {
         console.error('Address save error:', error);
-        alert('Failed to save address. Please try again.');
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: 'Failed to save address. Please try again.' }
+        }));
         setProcessing(false);
         return;
       }
     }
 
+    // Handle COD orders
     if (paymentMethod === 'cod') {
-      alert('Cash on Delivery coming soon!');
-      setProcessing(false);
-      return;
+      try {
+        const orderResponse = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            productId,
+            quantity,
+            addressId,
+            paymentMethod: 'cod',
+            totalAmount: product.price * quantity
+          })
+        });
+
+        if (!orderResponse.ok) {
+          throw new Error('Failed to create COD order');
+        }
+
+        const { orderId } = await orderResponse.json();
+        
+        // For COD, mark as confirmed immediately since inventory is already reduced
+        await fetch(`/api/orders/${orderId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: 'IN_PROCESS',
+            paymentStatus: 'PENDING' // Will be paid on delivery
+          })
+        });
+
+        router.push(`/order-success?orderId=${orderId}&type=cod`);
+        return;
+      } catch (error) {
+        console.error('COD order error:', error);
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: 'Failed to place COD order. Please try again.' }
+        }));
+        setProcessing(false);
+        return;
+      }
     }
 
     if (!addressId) {
-      alert('Please select or add a delivery address');
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Please select or add a delivery address' }
+      }));
       setProcessing(false);
       return;
     }
@@ -277,7 +318,9 @@ const CheckoutContent = () => {
       
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Something went wrong. Please try again.');
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Something went wrong. Please try again.' }
+      }));
     } finally {
       setProcessing(false);
     }
@@ -333,6 +376,11 @@ const CheckoutContent = () => {
 
   const verifyPayment = async (paymentResponse, orderId) => {
     try {
+      // Show processing toast
+      window.dispatchEvent(new CustomEvent('cart-success', {
+        detail: { message: 'Verifying payment... Please wait.' }
+      }));
+
       const response = await fetch('/api/payment/verify', {
         method: 'POST',
         headers: {
@@ -345,13 +393,26 @@ const CheckoutContent = () => {
       });
 
       if (response.ok) {
-        // Redirect to success page
-        window.location.href = `/order-success?orderId=${orderId}`;
+        // Show success toast
+        window.dispatchEvent(new CustomEvent('cart-success', {
+          detail: { message: 'Payment successful! Redirecting to order details...' }
+        }));
+        
+        // Redirect after a short delay to let the user see the success message
+        setTimeout(() => {
+          router.push(`/order-success?orderId=${orderId}`);
+        }, 1500);
       } else {
-        alert('Payment verification failed. Please contact support.');
+        const errorData = await response.json();
+        window.dispatchEvent(new CustomEvent('cart-error', {
+          detail: { message: errorData.error || 'Payment verification failed. Please contact support.' }
+        }));
       }
     } catch (error) {
       console.error('Payment verification error:', error);
+      window.dispatchEvent(new CustomEvent('cart-error', {
+        detail: { message: 'Payment verification failed due to network error. Please contact support.' }
+      }));
     }
   };
 

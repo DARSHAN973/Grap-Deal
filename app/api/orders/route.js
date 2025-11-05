@@ -16,35 +16,80 @@ export async function POST(request) {
     const {
       productId,
       quantity,
+      cartItems, // For cart-based orders
       addressId,
       paymentMethod,
       totalAmount
     } = await request.json();
 
-    // Validate required fields
-    if (!productId || !quantity || !addressId || !paymentMethod || !totalAmount) {
+    // Validate required fields - either single product or cart items
+    if ((!productId && !cartItems) || !addressId || !paymentMethod || !totalAmount) {
       return NextResponse.json(
         { success: false, error: 'All required fields must be provided' },
         { status: 400 }
       );
     }
 
-    // Get product details
-    const product = await prisma.product.findUnique({
-      where: { id: productId }
-    });
+    let orderItems = [];
+    
+    if (productId && quantity) {
+      // Single product order
+      const product = await prisma.product.findUnique({
+        where: { id: productId }
+      });
 
-    if (!product) {
-      return NextResponse.json(
-        { success: false, error: 'Product not found' },
-        { status: 404 }
-      );
-    }
+      if (!product) {
+        return NextResponse.json(
+          { success: false, error: 'Product not found' },
+          { status: 404 }
+        );
+      }
 
-    // Check stock
-    if (product.stock < quantity) {
+      // Check stock
+      if (product.stock < quantity) {
+        return NextResponse.json(
+          { success: false, error: 'Insufficient stock' },
+          { status: 400 }
+        );
+      }
+
+      orderItems = [{
+        productId: product.id,
+        quantity: parseInt(quantity),
+        price: parseFloat(product.price),
+        total: parseFloat(product.price) * parseInt(quantity)
+      }];
+    } else if (cartItems && cartItems.length > 0) {
+      // Cart-based order - validate all items and check stock
+      for (const item of cartItems) {
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId }
+        });
+
+        if (!product) {
+          return NextResponse.json(
+            { success: false, error: `Product ${item.productId} not found` },
+            { status: 404 }
+          );
+        }
+
+        if (product.stock < item.quantity) {
+          return NextResponse.json(
+            { success: false, error: `Insufficient stock for ${product.name}` },
+            { status: 400 }
+          );
+        }
+
+        orderItems.push({
+          productId: product.id,
+          quantity: parseInt(item.quantity),
+          price: parseFloat(product.price),
+          total: parseFloat(product.price) * parseInt(item.quantity)
+        });
+      }
+    } else {
       return NextResponse.json(
-        { success: false, error: 'Insufficient stock' },
+        { success: false, error: 'No products specified for order' },
         { status: 400 }
       );
     }
@@ -64,41 +109,88 @@ export async function POST(request) {
       );
     }
 
-    // Create order
-    const order = await prisma.order.create({
-      data: {
-        userId: user.id,
-        status: 'PENDING',
-        totalAmount: parseFloat(totalAmount),
-        paymentMethod: paymentMethod.toUpperCase(),
-        paymentStatus: 'PENDING',
-        shippingAddress: {
-          fullName: address.fullName,
-          phone: address.phone,
-          email: address.email,
-          addressLine1: address.addressLine1,
-          addressLine2: address.addressLine2,
-          city: address.city,
-          state: address.state,
-          pincode: address.pincode,
-          landmark: address.landmark
-        },
-        orderItems: {
-          create: [{
-            productId: product.id,
-            quantity: parseInt(quantity),
-            price: parseFloat(product.price),
-            total: parseFloat(product.price) * parseInt(quantity)
-          }]
-        }
-      },
-      include: {
-        orderItems: {
-          include: {
-            product: true
-          }
+    // Use transaction to ensure inventory is properly managed
+    console.log('Starting order transaction...');
+    const order = await prisma.$transaction(async (tx) => {
+      // Double-check stock availability for all items within transaction
+      console.log('Checking stock for', orderItems.length, 'items');
+      for (const item of orderItems) {
+        const currentProduct = await tx.product.findUnique({
+          where: { id: item.productId }
+        });
+
+        if (!currentProduct || currentProduct.stock < item.quantity) {
+          throw new Error(`Insufficient stock available for product ${currentProduct?.name || item.productId}`);
         }
       }
+
+      // Create order
+      console.log('Creating order...');
+      const newOrder = await tx.order.create({
+        data: {
+          userId: user.id,
+          status: 'PENDING',
+          totalAmount: parseFloat(totalAmount),
+          paymentMethod: paymentMethod.toUpperCase(),
+          paymentStatus: 'PENDING',
+          shippingAddress: {
+            fullName: address.fullName,
+            phone: address.phone,
+            email: address.email,
+            addressLine1: address.addressLine1,
+            addressLine2: address.addressLine2,
+            city: address.city,
+            state: address.state,
+            pincode: address.pincode,
+            landmark: address.landmark
+          },
+          orderItems: {
+            create: orderItems
+          }
+        },
+        include: {
+          orderItems: {
+            include: {
+              product: true
+            }
+          }
+        }
+      });
+
+      // Reserve inventory immediately for all payment methods
+      // For online payments: reserved until payment completion
+      // For COD: reduced immediately as order is confirmed
+      console.log('Updating inventory for', orderItems.length, 'products...');
+      for (const item of orderItems) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity
+            },
+            // Track total orders for analytics
+            orderCount: {
+              increment: 1
+            }
+          }
+        });
+      }
+
+      // If this was a cart order, clear the user's cart
+      if (cartItems && cartItems.length > 0) {
+        console.log('Clearing cart...');
+        await tx.cartItem.deleteMany({
+          where: {
+            cart: {
+              userId: user.id
+            }
+          }
+        });
+      }
+
+      return newOrder;
+    }, {
+      timeout: 15000, // 15 seconds timeout
     });
 
     return NextResponse.json({

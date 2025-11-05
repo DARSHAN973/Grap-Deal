@@ -190,17 +190,13 @@ export async function POST(request) {
           }
 
           // Handle cart item creation/update with proper null variant handling
-          const whereCondition = {
-            cartId_productId_variantId: {
+          // Use findFirst instead of findUnique for null variant handling
+          const existingItem = await tx.cartItem.findFirst({
+            where: {
               cartId: cart.id,
               productId: productId,
               variantId: variantId || null
             }
-          };
-
-          // Check if item already exists
-          const existingItem = await tx.cartItem.findUnique({
-            where: whereCondition
           });
 
           if (existingItem) {

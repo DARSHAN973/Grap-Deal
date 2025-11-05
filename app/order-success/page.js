@@ -99,11 +99,15 @@ function OrderSuccessContent() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    order.status === 'CONFIRMED' 
+                    order.status === 'IN_PROCESS' 
                       ? 'bg-green-100 text-green-800' 
+                      : order.status === 'DELIVERED'
+                      ? 'bg-blue-100 text-blue-800'
                       : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {order.status}
+                    {order.status === 'IN_PROCESS' ? 'Confirmed' : 
+                     order.status === 'DELIVERED' ? 'Delivered' :
+                     order.status === 'CANCELLED' ? 'Cancelled' : 'Pending'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -203,11 +207,35 @@ function OrderSuccessContent() {
             View All Orders
           </MagneticButton>
           <MagneticButton 
+            onClick={() => router.push('/')}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            🏠 Back to Home
+          </MagneticButton>
+          <MagneticButton 
             onClick={() => router.push('/products')}
             className="bg-gray-700 hover:bg-gray-800"
           >
-            Continue Shopping
+            🛍️ Continue Shopping
           </MagneticButton>
+        </motion.div>
+
+        {/* Auto-redirect Notice */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="mt-6 text-center"
+        >
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              🎉 <strong>Thank you for your purchase!</strong> 
+              <br />
+              <span className="text-xs text-blue-600 mt-1">
+                You can continue shopping or check your order status in your account.
+              </span>
+            </p>
+          </div>
         </motion.div>
 
         {/* Payment Method Notice */}
@@ -215,12 +243,12 @@ function OrderSuccessContent() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="mt-8 text-center"
+          className="mt-4 text-center"
         >
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-sm text-yellow-800">
-              <strong>Note:</strong> Currently we only accept online payments. 
-              Cash on Delivery option will be available soon!
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-800">
+              <strong>🚚 Fast Delivery:</strong> We support both online payments and Cash on Delivery (COD). 
+              Your order will be processed within 24 hours!
             </p>
           </div>
         </motion.div>
