@@ -36,7 +36,7 @@ const cartReducer = (state, action) => {
       const { items } = action.payload;
       const safeItems = Array.isArray(items) ? items.filter(item => 
         item && 
-        item.productId && 
+        (item.productId || (item.product && item.product.id)) && 
         typeof item.quantity === 'number' && 
         item.quantity > 0 &&
         (item.price !== null && item.price !== undefined)
@@ -58,12 +58,19 @@ const cartReducer = (state, action) => {
       const newItem = action.payload;
       
       // Filter out any invalid items before processing
-      const validItems = state.items.filter(item => item && item.productId);
+      const validItems = state.items.filter(item => 
+        item && 
+        (item.productId || (item.product && item.product.id))
+      );
       
       const existingItemIndex = validItems.findIndex(
-        item => item && 
-                item.productId === newItem.productId && 
-                item.variantId === newItem.variantId
+        item => {
+          if (!item) return false;
+          const itemProductId = item.productId || (item.product ? item.product.id : null);
+          const newItemProductId = newItem.productId || (newItem.product ? newItem.product.id : null);
+          return itemProductId === newItemProductId && 
+                 item.variantId === newItem.variantId;
+        }
       );
       
       let updatedItems;
@@ -89,7 +96,11 @@ const cartReducer = (state, action) => {
       };
     
     case CART_ACTIONS.REMOVE_ITEM:
-      const filteredItems = state.items.filter(item => item && item.productId && item.id !== action.payload);
+      const filteredItems = state.items.filter(item => 
+        item && 
+        (item.productId || (item.product && item.product.id)) && 
+        item.id !== action.payload
+      );
       return {
         ...state,
         items: filteredItems,
@@ -105,7 +116,11 @@ const cartReducer = (state, action) => {
       const { itemId, quantity } = action.payload;
       const updatedQuantityItems = state.items
         .map(item => item && item.id === itemId ? { ...item, quantity } : item)
-        .filter(item => item && item.productId && item.quantity > 0);
+        .filter(item => 
+          item && 
+          (item.productId || (item.product && item.product.id)) && 
+          item.quantity > 0
+        );
       return {
         ...state,
         items: updatedQuantityItems,
@@ -230,6 +245,11 @@ export const CartProvider = ({ children }) => {
     try {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: true });
       
+      // Validate product data before sending
+      if (!product || !product.id || !product.price) {
+        throw new Error('Invalid product data');
+      }
+      
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: {
@@ -245,7 +265,26 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        dispatch({ type: CART_ACTIONS.ADD_ITEM, payload: data.item });
+        
+        // Create cart item from response or construct it if not provided
+        const cartItem = data.item || {
+          id: `new-${Date.now()}-${Math.random()}`,
+          productId: product.id,
+          variantId,
+          quantity,
+          price: product.price,
+          product: {
+            id: product.id,
+            name: product.name,
+            images: product.images,
+            price: product.price,
+            brand: product.brand,
+            category: product.category,
+          },
+          addedAt: new Date().toISOString(),
+        };
+        
+        dispatch({ type: CART_ACTIONS.ADD_ITEM, payload: cartItem });
         
         // Show success message
         if (typeof window !== 'undefined') {
@@ -287,7 +326,29 @@ export const CartProvider = ({ children }) => {
           window.dispatchEvent(event);
         }
       } else {
-        // API error - fallback to localStorage
+        // Handle API errors with specific messages
+        let errorMessage = 'Failed to add item to cart';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If we can't parse the error response, use default message
+        }
+
+        // For stock or other business logic errors, don't fallback to localStorage
+        if (response.status === 400) {
+          dispatch({ type: CART_ACTIONS.SET_ERROR, payload: errorMessage });
+          
+          if (typeof window !== 'undefined') {
+            const event = new CustomEvent('cart-error', {
+              detail: { message: errorMessage }
+            });
+            window.dispatchEvent(event);
+          }
+          return;
+        }
+        
+        // For server errors, fallback to localStorage
         const fallbackCartItem = {
           id: `fallback-${Date.now()}-${Math.random()}`,
           productId: product.id,
@@ -389,18 +450,34 @@ export const CartProvider = ({ children }) => {
         localStorage.setItem('guestCart', JSON.stringify(updatedItems));
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to remove item from cart');
+        throw new Error(error.error || error.message || 'Failed to remove item from cart');
       }
     } catch (error) {
       console.error('Error removing from cart:', error);
-      dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
       
-      // Show error message
-      if (typeof window !== 'undefined') {
-        const event = new CustomEvent('cart-error', {
-          detail: { message: error.message }
-        });
-        window.dispatchEvent(event);
+      // Try to remove locally as fallback
+      try {
+        const updatedItems = state.items.filter(item => item.id !== itemId);
+        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: updatedItems } });
+        localStorage.setItem('cartFallback', JSON.stringify(updatedItems));
+        
+        // Show fallback success message
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('cart-success', {
+            detail: { message: 'Item removed locally (sync pending)' }
+          });
+          window.dispatchEvent(event);
+        }
+      } catch (fallbackError) {
+        dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
+        
+        // Show error message
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('cart-error', {
+            detail: { message: error.message }
+          });
+          window.dispatchEvent(event);
+        }
       }
     } finally {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: false });
@@ -435,18 +512,36 @@ export const CartProvider = ({ children }) => {
         localStorage.setItem('guestCart', JSON.stringify(updatedItems));
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to update quantity');
+        throw new Error(error.error || error.message || 'Failed to update quantity');
       }
     } catch (error) {
       console.error('Error updating quantity:', error);
-      dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
       
-      // Show error message
-      if (typeof window !== 'undefined') {
-        const event = new CustomEvent('cart-error', {
-          detail: { message: error.message }
-        });
-        window.dispatchEvent(event);
+      // Try to update locally as fallback
+      try {
+        const updatedItems = state.items.map(item =>
+          item.id === itemId ? { ...item, quantity } : item
+        );
+        dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: updatedItems } });
+        localStorage.setItem('cartFallback', JSON.stringify(updatedItems));
+        
+        // Show fallback success message
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('cart-success', {
+            detail: { message: 'Quantity updated locally (sync pending)' }
+          });
+          window.dispatchEvent(event);
+        }
+      } catch (fallbackError) {
+        dispatch({ type: CART_ACTIONS.SET_ERROR, payload: error.message });
+        
+        // Show error message
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('cart-error', {
+            detail: { message: error.message }
+          });
+          window.dispatchEvent(event);
+        }
       }
     } finally {
       dispatch({ type: CART_ACTIONS.SET_LOADING, payload: false });
@@ -505,16 +600,23 @@ export const CartProvider = ({ children }) => {
       return 0;
     }
     
-    // Debug logging to help identify the issue
-    const invalidItems = state.items.filter(item => !item || !item.productId);
-    if (invalidItems.length > 0) {
-      console.warn('Found invalid cart items:', invalidItems);
+    // Filter out any invalid items first
+    const validItems = state.items.filter(item => 
+      item && (item.productId || (item.product && item.product.id))
+    );
+    
+    // If we found invalid items, clean up the state
+    if (validItems.length !== state.items.length) {
+      console.log('Cleaning up invalid cart items...');
+      // Dispatch a cleanup action to remove invalid items
+      dispatch({ type: CART_ACTIONS.SET_CART, payload: { items: validItems } });
     }
     
-    const item = state.items.find(
-      item => item && 
-              item.productId === productId && 
-              item.variantId === variantId
+    const item = validItems.find(
+      item => {
+        const itemProductId = item.productId || (item.product ? item.product.id : null);
+        return itemProductId === productId && item.variantId === variantId;
+      }
     );
     return item && typeof item.quantity === 'number' ? item.quantity : 0;
   };

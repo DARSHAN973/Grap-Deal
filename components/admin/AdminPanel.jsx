@@ -5,6 +5,7 @@ import CategoryManagement from "./CategoryManagement";
 import ProductManagement from "./ProductManagement";
 import OrderManagement from "./OrderManagement";
 import UserManagement from "./UserManagement";
+import BannerManagement from "./BannerManagement";
 import AdminHeader from "./AdminHeader";
 import {
   HomeIcon,
@@ -16,6 +17,7 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
   XMarkIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 
 const AdminPanel = () => {
@@ -24,6 +26,7 @@ const AdminPanel = () => {
 
   const navigation = [
     { id: "dashboard", name: "Dashboard", icon: HomeIcon },
+    { id: "banners", name: "Banner Management", icon: PhotoIcon },
     { id: "users", name: "User Management", icon: UsersIcon },
     { id: "products", name: "Product Management", icon: CubeIcon },
     { id: "categories", name: "Category Management", icon: CubeIcon },
@@ -31,13 +34,15 @@ const AdminPanel = () => {
     { id: "c2c", name: "C2C Management", icon: ArrowsRightLeftIcon },
     { id: "payments", name: "Payment Management", icon: CreditCardIcon },
     { id: "analytics", name: "Analytics & Reports", icon: ChartBarIcon },
-    { id: "settings", name: "Settings", icon: Cog6ToothIcon },
+    // Removed settings tab as requested
   ];
 
   const renderContent = () => {
     switch (activeSection) {
       case "dashboard":
         return <DashboardContent />;
+      case "banners":
+        return <BannerManagement />;
       case "users":
         return <UserManagement />;
       case "products":

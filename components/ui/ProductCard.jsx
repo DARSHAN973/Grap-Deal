@@ -65,6 +65,9 @@ const ProductCard = ({
     };
   }, [product.id]);
 
+  // Calculate current price FIRST before using it
+  const currentPrice = parseFloat(product.price) || 0; // Selling price from admin
+
   // Handle add to cart
   const handleAddToCart = async (e) => {
     e.stopPropagation(); // Prevent card click when clicking cart button
@@ -168,7 +171,6 @@ const ProductCard = ({
   const cartCount = getItemCount(product.id);
   
   // Use EXACT values from database - NO extra calculations
-  const currentPrice = parseFloat(product.price) || 0; // Selling price from admin
   const originalPrice = parseFloat(product.originalPrice) || 0; // Original price from admin
   const discount = parseFloat(product.discount) || 0; // Discount percentage from admin
   

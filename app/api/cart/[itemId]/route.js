@@ -23,9 +23,17 @@ export async function PATCH(request, { params }) {
       }, { status: 401 });
     }
 
-    const { itemId } = await params;
+    const resolvedParams = await params;
+    const { itemId } = resolvedParams;
     const body = await request.json();
     const { quantity } = body;
+
+    if (!itemId) {
+      return NextResponse.json(
+        { success: false, error: 'Item ID is required' },
+        { status: 400 }
+      );
+    }
 
     if (!quantity || quantity <= 0) {
       return NextResponse.json(
@@ -102,11 +110,25 @@ export async function PATCH(request, { params }) {
       });
 
     } catch (dbError) {
-      console.log('Cart database operation failed:', dbError.message);
-      return NextResponse.json({
-        success: false,
-        error: 'Unable to update cart item. Please try again.'
-      }, { status: 500 });
+      console.error('Cart database operation failed:', dbError);
+      
+      // Provide more specific error messages
+      if (dbError.message.includes('timeout')) {
+        return NextResponse.json({
+          success: false,
+          error: 'Database connection timed out. Please try again.'
+        }, { status: 504 });
+      } else if (dbError.code === 'P2025') {
+        return NextResponse.json({
+          success: false,
+          error: 'Cart item not found.'
+        }, { status: 404 });
+      } else {
+        return NextResponse.json({
+          success: false,
+          error: 'Unable to update cart item. Please try again.'
+        }, { status: 500 });
+      }
     }
 
   } catch (error) {
@@ -136,7 +158,8 @@ export async function DELETE(request, { params }) {
       }, { status: 401 });
     }
 
-    const { itemId } = await params;
+    const resolvedParams = await params;
+    const { itemId } = resolvedParams;
 
     try {
       // Test database connection first

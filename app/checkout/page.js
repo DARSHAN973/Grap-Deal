@@ -369,13 +369,24 @@ const CheckoutContent = () => {
         throw new Error(data.error || 'Failed to create payment order');
       }
 
+      // Determine description based on checkout type
+      const getDescription = () => {
+        if (type === 'cart') {
+          return cartItems.length === 1 
+            ? `Purchase of ${cartItems[0].product?.name || 'Product'}`
+            : `Purchase of ${cartItems.length} items`;
+        } else {
+          return product ? `Purchase of ${product.name}` : 'Product Purchase';
+        }
+      };
+
       const options = {
         key: data.key,
         amount: data.amount,
         currency: data.currency,
         order_id: data.orderId,
         name: 'Grap Deal',
-        description: `Purchase of ${product.name}`,
+        description: getDescription(),
         handler: async function (response) {
           // Payment success
           await verifyPayment(response, orderId);
@@ -493,7 +504,16 @@ const CheckoutContent = () => {
 
   // Calculate total amount based on checkout type
   const totalAmount = type === 'cart' 
-    ? cartItems.reduce((sum, item) => sum + (parseFloat(item.price || item.product.price) * item.quantity), 0)
+    ? cartItems.reduce((sum, item) => {
+        if (!item || item.quantity <= 0) return sum;
+        
+        // Safe price extraction with multiple fallbacks
+        const itemPrice = item.price || 
+                         (item.product && item.product.price) || 
+                         0;
+        
+        return sum + (parseFloat(itemPrice) * item.quantity);
+      }, 0)
     : product ? product.price * quantity : 0;
 
   return (
@@ -522,25 +542,30 @@ const CheckoutContent = () => {
             {/* Cart Checkout - Show all cart items */}
             {type === 'cart' && cartItems.length > 0 && (
               <div className="space-y-4 mb-6">
-                {cartItems.map((item, index) => (
-                  <div key={item.id || index} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
-                    <Image 
-                      src={item.product.images?.[0]?.url || item.product.images?.[0] || '/placeholder-product.jpg'} 
-                      alt={item.product.name}
-                      width={60}
-                      height={60}
-                      className="w-15 h-15 object-cover rounded-xl"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{item.product.name}</h3>
-                      <p className="text-gray-600 dark:text-gray-400">Brand: {item.product.brand}</p>
-                      <p className="text-gray-600 dark:text-gray-400">Quantity: {item.quantity}</p>
+                {cartItems.filter(item => item && item.product).map((item, index) => {
+                  const product = item.product;
+                  const itemPrice = item.price || product.price || 0;
+                  
+                  return (
+                    <div key={item.id || index} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
+                      <Image 
+                        src={product.images?.[0]?.url || product.images?.[0] || '/placeholder-product.jpg'} 
+                        alt={product.name || 'Product'}
+                        width={60}
+                        height={60}
+                        className="w-15 h-15 object-cover rounded-xl"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">{product.name || 'Unknown Product'}</h3>
+                        <p className="text-gray-600 dark:text-gray-400">Brand: {product.brand || 'N/A'}</p>
+                        <p className="text-gray-600 dark:text-gray-400">Quantity: {item.quantity}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-blue-600">₹{(parseFloat(itemPrice) * item.quantity).toFixed(2)}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-blue-600">₹{(parseFloat(item.price || item.product.price) * item.quantity).toFixed(2)}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-gray-900 dark:text-white">Total:</span>
