@@ -70,6 +70,12 @@ const ProductCard = ({
     e.stopPropagation(); // Prevent card click when clicking cart button
     if (cartLoading) return;
     
+    // Check stock availability
+    if (product.stock === 0) {
+      alert('This product is currently out of stock');
+      return;
+    }
+    
     const productData = {
       id: product.id,
       name: product.name,
@@ -77,6 +83,7 @@ const ProductCard = ({
       images: product.images,
       brand: product.brand,
       category: product.category,
+      stock: product.stock,
     };
     
     await addToCart(productData, 1);
@@ -357,41 +364,50 @@ const ProductCard = ({
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {/* Hide Buy Now on small screens to make card tappable and save space */}
-          <MagneticButton
-            variant="gradient"
-            size="md"
-            className="hidden sm:flex w-full justify-center rounded-2xl relative"
-            onClick={() => window.location.href = `/checkout?productId=${product.id}&quantity=1&type=buynow`}
-          >
-            <div className="flex items-center gap-2">
-              <span>Buy Now</span>
-            </div>
-          </MagneticButton>
+        {/* Stock Status and Action Buttons */}
+        {product.stock === 0 ? (
+          <div className="flex items-center justify-center py-3 px-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl">
+            <span className="text-red-600 dark:text-red-400 font-semibold text-sm">
+              Not in Stock
+            </span>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {/* Hide Buy Now on small screens to make card tappable and save space */}
+            <MagneticButton
+              variant="gradient"
+              size="md"
+              className="hidden sm:flex w-full justify-center rounded-2xl relative"
+              onClick={() => window.location.href = `/checkout?productId=${product.id}&quantity=1&type=buynow`}
+            >
+              <div className="flex items-center gap-2">
+                <span>Buy Now</span>
+              </div>
+            </MagneticButton>
 
-          {/* Make cart button full width on mobile, compact on sm+ */}
-          <MagneticButton
-            variant="secondary"
-            size="md"
-            className="flex h-12 w-full items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12 relative"
-            whileTap={{ scale: 0.94 }}
-            onClick={handleAddToCart}
-            disabled={cartLoading}
-            aria-label="Quick add to cart"
-          >
-            {cartLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-            ) : (
-              <ShoppingCart className="h-5 w-5" />
-            )}
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                {cartCount}
-              </span>
-            )}
-          </MagneticButton>
-        </div>
+            {/* Make cart button full width on mobile, compact on sm+ */}
+            <MagneticButton
+              variant="secondary"
+              size="md"
+              className="flex h-12 w-full items-center justify-center rounded-2xl border border-gray-300/50 bg-gray-100/80 text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-200/80 hover:text-gray-900 dark:border-white/20 dark:bg-white/10 dark:text-white/80 dark:hover:border-white/40 dark:hover:bg-white/20 dark:hover:text-white sm:w-12 relative disabled:opacity-50 disabled:cursor-not-allowed"
+              whileTap={{ scale: 0.94 }}
+              onClick={handleAddToCart}
+              disabled={cartLoading}
+              aria-label="Quick add to cart"
+            >
+              {cartLoading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+              ) : (
+                <ShoppingCart className="h-5 w-5" />
+              )}
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                  {cartCount}
+                </span>
+              )}
+            </MagneticButton>
+          </div>
+        )}
       </div>
     </motion.article>
   );

@@ -243,11 +243,23 @@ const CheckoutContent = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            productId,
-            quantity,
+            ...(type === 'cart' ? {
+              // Cart checkout
+              cartItems: cartItems.map(item => ({
+                productId: item.productId || item.product.id,
+                quantity: item.quantity,
+                price: parseFloat(item.price || item.product.price)
+              })),
+              totalAmount
+            } : {
+              // Single product checkout
+              productId,
+              quantity,
+              totalAmount
+            }),
             addressId,
             paymentMethod: 'cod',
-            totalAmount: product.price * quantity
+            type: type
           })
         });
 
@@ -299,11 +311,23 @@ const CheckoutContent = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId,
-          quantity,
+          ...(type === 'cart' ? {
+            // Cart checkout
+            cartItems: cartItems.map(item => ({
+              productId: item.productId || item.product.id,
+              quantity: item.quantity,
+              price: parseFloat(item.price || item.product.price)
+            })),
+            totalAmount
+          } : {
+            // Single product checkout
+            productId,
+            quantity,
+            totalAmount
+          }),
           addressId,
           paymentMethod,
-          totalAmount: product.price * quantity
+          type: type
         })
       });
 
@@ -335,7 +359,7 @@ const CheckoutContent = () => {
         },
         body: JSON.stringify({
           orderId,
-          amount: product.price * quantity, // Amount in rupees (not paise)
+          amount: totalAmount, // Amount in rupees (calculated for both cart and single product)
         })
       });
 
@@ -467,25 +491,10 @@ const CheckoutContent = () => {
     );
   }
 
-  if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Product not found
-          </h1>
-          <MagneticButton
-            variant="gradient"
-            onClick={() => window.location.href = '/'}
-          >
-            Go to Home
-          </MagneticButton>
-        </div>
-      </div>
-    );
-  }
-
-  const totalAmount = product.price * quantity;
+  // Calculate total amount based on checkout type
+  const totalAmount = type === 'cart' 
+    ? cartItems.reduce((sum, item) => sum + (parseFloat(item.price || item.product.price) * item.quantity), 0)
+    : product ? product.price * quantity : 0;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-indigo-50/30 to-purple-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-20">
@@ -510,23 +519,57 @@ const CheckoutContent = () => {
           >
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Order Summary</h2>
             
-            <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
-              <Image 
-                src={product.images?.[0]?.url || '/placeholder-product.jpg'} 
-                alt={product.name}
-                width={80}
-                height={80}
-                className="w-20 h-20 object-cover rounded-xl"
-              />
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 dark:text-white">{product.name}</h3>
-                <p className="text-gray-600 dark:text-gray-400">Brand: {product.brand}</p>
-                <p className="text-gray-600 dark:text-gray-400">Quantity: {quantity}</p>
+            {/* Cart Checkout - Show all cart items */}
+            {type === 'cart' && cartItems.length > 0 && (
+              <div className="space-y-4 mb-6">
+                {cartItems.map((item, index) => (
+                  <div key={item.id || index} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
+                    <Image 
+                      src={item.product.images?.[0]?.url || item.product.images?.[0] || '/placeholder-product.jpg'} 
+                      alt={item.product.name}
+                      width={60}
+                      height={60}
+                      className="w-15 h-15 object-cover rounded-xl"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{item.product.name}</h3>
+                      <p className="text-gray-600 dark:text-gray-400">Brand: {item.product.brand}</p>
+                      <p className="text-gray-600 dark:text-gray-400">Quantity: {item.quantity}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-blue-600">₹{(parseFloat(item.price || item.product.price) * item.quantity).toFixed(2)}</p>
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-gray-900 dark:text-white">Total:</span>
+                    <span className="text-2xl font-bold text-blue-600">₹{totalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-blue-600">₹{totalAmount.toFixed(2)}</p>
+            )}
+
+            {/* Single Product Checkout */}
+            {type !== 'cart' && product && (
+              <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
+                <Image 
+                  src={product.images?.[0]?.url || '/placeholder-product.jpg'} 
+                  alt={product.name}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-cover rounded-xl"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{product.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Brand: {product.brand}</p>
+                  <p className="text-gray-600 dark:text-gray-400">Quantity: {quantity}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-blue-600">₹{totalAmount.toFixed(2)}</p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Payment Method Selection */}
             <div className="space-y-4">

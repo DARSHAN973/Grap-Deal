@@ -33,7 +33,11 @@ export async function GET(request) {
           { brand: { contains: search } }
         ]
       }),
-      ...(category && { categoryId: category }),
+      ...(category && {
+        category: {
+          name: { contains: category, mode: 'insensitive' }
+        }
+      }),
       ...(minPrice !== undefined || maxPrice !== undefined) && {
         price: {
           ...(minPrice !== undefined && { gte: minPrice }),

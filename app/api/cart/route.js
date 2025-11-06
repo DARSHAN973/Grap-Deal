@@ -175,6 +175,38 @@ export async function POST(request) {
       );
     }
 
+    // Check product stock availability
+    try {
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        select: { stock: true, name: true }
+      });
+
+      if (!product) {
+        return NextResponse.json(
+          { success: false, error: 'Product not found' },
+          { status: 404 }
+        );
+      }
+
+      if (product.stock === 0) {
+        return NextResponse.json(
+          { success: false, error: `${product.name} is currently out of stock` },
+          { status: 400 }
+        );
+      }
+
+      if (quantity > product.stock) {
+        return NextResponse.json(
+          { success: false, error: `Only ${product.stock} items available for ${product.name}` },
+          { status: 400 }
+        );
+      }
+    } catch (stockCheckError) {
+      console.error('Error checking product stock:', stockCheckError);
+      // Continue with the add to cart process if stock check fails
+    }
+
     try {
       // Use transaction for better performance - no artificial timeout
       await prisma.$transaction(async (tx) => {
@@ -263,6 +295,59 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Error adding to cart:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  } finally {
+    try {
+      await prisma.$disconnect();
+    } catch (disconnectError) {
+      console.log('Prisma disconnect error:', disconnectError.message);
+    }
+  }
+}
+
+// DELETE - Clear entire cart
+export async function DELETE(request) {
+  try {
+    const { user, error } = await verifyAuth();
+    
+    if (!user) {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Please login to clear cart' 
+      }, { status: 401 });
+    }
+
+    try {
+      // Find user's cart
+      const cart = await prisma.cart.findUnique({
+        where: { userId: user.id }
+      });
+
+      if (cart) {
+        // Delete all cart items
+        await prisma.cartItem.deleteMany({
+          where: { cartId: cart.id }
+        });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Cart cleared successfully'
+      });
+
+    } catch (dbError) {
+      console.log('Cart database operation failed:', dbError.message);
+      return NextResponse.json({
+        success: false,
+        error: 'Unable to clear cart. Please try again.'
+      }, { status: 500 });
+    }
+
+  } catch (error) {
+    console.error('Error clearing cart:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

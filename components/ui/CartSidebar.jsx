@@ -38,10 +38,18 @@ const CartSidebar = () => {
     return parseFloat(price) * item.quantity;
   };
 
-  const handleCheckout = () => {
-    console.log('Checkout clicked, items:', items.length);
+  const handleCheckout = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (items.length === 0) {
+      alert('Your cart is empty. Please add some items before checkout.');
+      return;
+    }
+    
+    // Close cart and navigate directly
     closeCart();
-    router.push('/checkout?type=cart');
+    window.location.href = '/checkout?type=cart';
   };
 
   return (
@@ -50,7 +58,7 @@ const CartSidebar = () => {
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -207,14 +215,13 @@ const CartSidebar = () => {
 
                   {/* Action Buttons */}
                   <div className="space-y-3">
-                    <MagneticButton
-                      variant="gradient"
-                      size="lg"
-                      className="w-full justify-center"
+                    <button
+                      type="button"
                       onClick={handleCheckout}
+                      className="w-full py-4 px-6 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
                     >
                       Proceed to Checkout
-                    </MagneticButton>
+                    </button>
                     
                     <button
                       onClick={clearCart}

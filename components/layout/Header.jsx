@@ -824,6 +824,12 @@ const Header = () => {
                       placeholder={isClient ? searchPlaceholders[placeholderIndex] : "Search for products..."}
                       value={searchQuery}
                       onChange={handleSearchChange}
+                      onFocus={() => {
+                        setIsSearchFocused(true);
+                        if (searchQuery && searchResults.length > 0) {
+                          setShowSearchResults(true);
+                        }
+                      }}
                       className="w-full pl-14 pr-6 py-3.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 text-base"
                       autoFocus
                     />
@@ -832,77 +838,93 @@ const Header = () => {
               </div>
 
               {/* Mobile Search Results */}
-              {searchResults.length > 0 && (
+              {(showSearchResults || searchQuery.length > 0) && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                   className="mt-4 max-h-96 overflow-y-auto space-y-2"
                 >
-                  {searchResults.map((result, index) => (
-                    <motion.div
-                      key={`mobile-${result.type}-${result.id}`}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => { handleResultClick(result); toggleMobileSearch(); }}
-                      className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 flex items-center space-x-3"
-                    >
-                      {/* Result Image/Icon */}
-                      <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                        {result.image ? (
-                          <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-6 h-6 text-gray-400">
-                            {result.type === 'product' && <MagnifyingGlassIcon />}
-                            {result.type === 'category' && <div className="w-full h-full bg-gray-300 rounded"></div>}
-                            {result.type === 'service' && <Cog6ToothIcon />}
+                  {searchResults.length > 0 ? (
+                    <>
+                      {searchResults.map((result, index) => (
+                        <motion.div
+                          key={`mobile-${result.type}-${result.id}`}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          onClick={() => { handleResultClick(result); toggleMobileSearch(); }}
+                          className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 flex items-center space-x-3"
+                        >
+                          {/* Result Image/Icon */}
+                          <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                            {result.image ? (
+                              <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-6 h-6 text-gray-400">
+                                {result.type === 'product' && <MagnifyingGlassIcon />}
+                                {result.type === 'category' && <div className="w-full h-full bg-gray-300 rounded"></div>}
+                                {result.type === 'service' && <Cog6ToothIcon />}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                          
+                          {/* Result Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {result.name}
+                              </p>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                result.type === 'product' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                result.type === 'category' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                              }`}>
+                                {result.type}
+                              </span>
+                            </div>
+                            {result.description && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {result.description}
+                              </p>
+                            )}
+                            {result.price && (
+                              <p className="text-xs font-semibold text-gray-900 dark:text-white mt-1">
+                                ₹{result.price.toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
                       
-                      {/* Result Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {result.name}
-                          </p>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            result.type === 'product' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                            result.type === 'category' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                            'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-                          }`}>
-                            {result.type}
-                          </span>
-                        </div>
-                        {result.description && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {result.description}
-                          </p>
-                        )}
-                        {result.price && (
-                          <p className="text-xs font-semibold text-gray-900 dark:text-white mt-1">
-                            ₹{result.price.toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                  
-                  {/* View All Results - Mobile */}
-                  <motion.div
-                    className="border-t border-gray-200 dark:border-gray-700 pt-3"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <button
-                      onClick={(e) => { handleSearchSubmit(e); toggleMobileSearch(); }}
-                      className="w-full p-3 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors duration-200"
-                    >
-                      View all results for "{searchQuery}"
-                    </button>
-                  </motion.div>
+                      {/* View All Results - Mobile */}
+                      <motion.div
+                        className="border-t border-gray-200 dark:border-gray-700 pt-3"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <button
+                          onClick={(e) => { handleSearchSubmit(e); toggleMobileSearch(); }}
+                          className="w-full p-3 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors duration-200"
+                        >
+                          View all results for "{searchQuery}"
+                        </button>
+                      </motion.div>
+                    </>
+                  ) : (
+                    searchQuery.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="p-4 text-center text-gray-500 dark:text-gray-400"
+                      >
+                        <MagnifyingGlassIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No results found for "{searchQuery}"</p>
+                        <p className="text-xs mt-1">Try searching for something else</p>
+                      </motion.div>
+                    )
+                  )}
                 </motion.div>
               )}
             </motion.div>

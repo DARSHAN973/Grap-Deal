@@ -22,6 +22,13 @@ export async function GET(request, { params }) {
           status: 'ACTIVE'
         },
         include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          },
           images: {
             orderBy: { sortOrder: 'asc' },
             select: {

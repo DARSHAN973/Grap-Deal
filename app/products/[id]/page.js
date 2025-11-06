@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Heart, Share2, ArrowLeft, Plus, Minus, ChevronLeft, ChevronRight, Eye, Sparkles } from 'lucide-react';
 import MagneticButton from '../../../components/ui/MagneticButton';
+import SuggestedProducts from '../../../components/ui/SuggestedProducts';
 import { useCart } from '../../../components/providers/CartProvider';
 
 const ProductDetailsPage = () => {
@@ -81,13 +82,25 @@ const ProductDetailsPage = () => {
   const handleAddToCart = async () => {
     if (!product || cartLoading) return;
     
+    // Check stock availability
+    if (product.stock === 0) {
+      alert('This product is currently out of stock');
+      return;
+    }
+    
+    if (quantity > product.stock) {
+      alert(`Only ${product.stock} items available in stock`);
+      return;
+    }
+    
     const productData = {
       id: product.id,
       name: product.name,
       price: parseFloat(product.price),
       images: product.images,
       brand: product.brand,
-      category: product.category,
+      category: product.category?.name || 'General',
+      stock: product.stock,
     };
     
     await addToCart(productData, quantity);
@@ -191,9 +204,19 @@ const ProductDetailsPage = () => {
   };
 
   const updateQuantity = (newQuantity) => {
-    if (newQuantity >= 1 && newQuantity <= (product?.stock || 99)) {
-      setQuantity(newQuantity);
+    if (newQuantity < 1) return;
+    
+    if (product && product.stock === 0) {
+      alert('This product is currently out of stock');
+      return;
     }
+    
+    if (product && newQuantity > product.stock) {
+      alert(`Only ${product.stock} items available in stock`);
+      return;
+    }
+    
+    setQuantity(newQuantity);
   };
 
   // Zoom functionality
@@ -428,7 +451,7 @@ const ProductDetailsPage = () => {
                 </div>
                 <div className="rounded-lg bg-gray-100 dark:bg-gray-800 px-2 py-1">
                   <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                    {product.category}
+                    {product.category?.name || 'General'}
                   </span>
                 </div>
               </motion.div>
@@ -579,41 +602,43 @@ const ProductDetailsPage = () => {
               </motion.div>
             )}
 
-            {/* Quantity Selector */}
-            <motion.div 
-              className="space-y-3 p-4 bg-white/60 dark:bg-white/10 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-white/20"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
-            >
-              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Plus className="h-4 w-4 text-purple-500" />
-                Select Quantity
-              </h3>
-              <div className="flex items-center gap-3">
-                <motion.button
-                  onClick={() => updateQuantity(quantity - 1)}
-                  disabled={quantity <= 1}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Minus className="h-4 w-4" />
-                </motion.button>
-                <div className="flex items-center justify-center min-w-12 h-10 px-3 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-xl shadow-md">
-                  <span className="text-lg font-bold">
-                    {quantity}
-                  </span>
+            {/* Quantity Selector - Only show if in stock */}
+            {product.stock > 0 && (
+              <motion.div 
+                className="space-y-3 p-4 bg-white/60 dark:bg-white/10 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-white/20"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+              >
+                <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Plus className="h-4 w-4 text-purple-500" />
+                  Select Quantity ({product.stock} available)
+                </h3>
+                <div className="flex items-center gap-3">
+                  <motion.button
+                    onClick={() => updateQuantity(quantity - 1)}
+                    disabled={quantity <= 1}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </motion.button>
+                  <div className="flex items-center justify-center min-w-12 h-10 px-3 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-xl shadow-md">
+                    <span className="text-lg font-bold">
+                      {quantity}
+                    </span>
+                  </div>
+                  <motion.button
+                    onClick={() => updateQuantity(quantity + 1)}
+                    disabled={quantity >= product.stock}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </motion.button>
                 </div>
-                <motion.button
-                  onClick={() => updateQuantity(quantity + 1)}
-                  disabled={quantity >= (product.stock || 99)}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 transition-all hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105"
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Plus className="h-4 w-4" />
-                </motion.button>
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
 
             {/* Action Buttons */}
             <motion.div 
@@ -623,45 +648,52 @@ const ProductDetailsPage = () => {
               transition={{ delay: 1.0 }}
             >
               <div className="flex flex-col gap-3">
-                <div className="flex gap-2">
-                  <MagneticButton
-                    variant="gradient"
-                    size="md"
-                    className="flex-1 justify-center py-3 text-sm font-semibold rounded-xl shadow-xl"
-                    onClick={handleAddToCart}
-                    disabled={cartLoading || product.stock === 0}
-                  >
-                    {cartLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                        <span>Adding...</span>
-                      </div>
-                    ) : (
+                {product.stock === 0 ? (
+                  <div className="flex items-center justify-center py-4 px-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
+                    <span className="text-red-600 dark:text-red-400 font-bold text-lg">
+                      Not in Stock
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <MagneticButton
+                      variant="gradient"
+                      size="md"
+                      className="flex-1 justify-center py-3 text-sm font-semibold rounded-xl shadow-xl"
+                      onClick={handleAddToCart}
+                      disabled={cartLoading}
+                    >
+                      {cartLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                          <span>Adding...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <ShoppingCart className="h-4 w-4" />
+                          <span>Add to Cart</span>
+                          {cartCount > 0 && (
+                            <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                              {cartCount}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </MagneticButton>
+
+                    <MagneticButton
+                      variant="outline"
+                      size="md"
+                      className="flex-1 justify-center py-3 text-sm font-semibold rounded-xl shadow-xl bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+                      onClick={() => window.location.href = `/checkout?productId=${product.id}&quantity=${quantity}&type=buy-now`}
+                    >
                       <div className="flex items-center gap-2">
                         <ShoppingCart className="h-4 w-4" />
-                        <span>Add to Cart</span>
-                        {cartCount > 0 && (
-                          <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
-                            {cartCount}
-                          </span>
-                        )}
+                        <span>Buy Now</span>
                       </div>
-                    )}
-                  </MagneticButton>
-
-                  <MagneticButton
-                    variant="outline"
-                    size="md"
-                    className="flex-1 justify-center py-3 text-sm font-semibold rounded-xl shadow-xl bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
-                    onClick={() => window.location.href = `/checkout?productId=${product.id}&quantity=${quantity}&type=buy-now`}
-                    disabled={product.stock === 0}
-                  >
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4" />
-                      <span>Buy Now</span>
-                    </div>
-                  </MagneticButton>
-                </div>
+                    </MagneticButton>
+                  </div>
+                )}
                 
                 <div className="flex gap-2">
                   <motion.button
@@ -694,6 +726,15 @@ const ProductDetailsPage = () => {
           </motion.div>
         </div>
       </div>
+      
+      {/* Suggested Products Section */}
+      {product && product.category && (
+        <SuggestedProducts 
+          currentProductId={product.id} 
+          category={product.category.name}
+          brand={product.brand}
+        />
+      )}
     </div>
   );
 };
